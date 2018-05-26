@@ -7,6 +7,4 @@ Flask Implementation of our frontend
 `pip install -r requirements.txt`
 
 ## Usage
-`python app.py`
-
-Open `127.0.0.1:5000/` on any browser. 
+Please run `python app.py` and open `127.0.0.1:5000/` on any browser. 
