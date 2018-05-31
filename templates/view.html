@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>View · GoDeep by DeepSight AI Labs</title>
-        <link rel="icon" href="favicon.ico" type="image/x-icon"/>
-        <link href="static/css/camera_style.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <link href="static/css/vxgplayer.css" rel="stylesheet" />
-        <script type="text/javascript" src="lib/vxgplayer.js"></script>
-        <script src="lib/highlight.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>    
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        <script src="lib/jquery/dist/jquery.min.js"></script>
-        <script type="text/javascript" src="lib/jquery.blockUI.js"></script>
 
-        <!-- <script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>View · GoDeep by DeepSight AI Labs</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <link href="static/css/camera_style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="static/css/vxgplayer.css" rel="stylesheet" />
+    <script type="text/javascript" src="lib/vxgplayer.js"></script>
+    <script src="lib/highlight.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="lib/jquery.blockUI.js"></script>
+
+    <!-- TODO: Move PHP code to app.py -->
+    <!-- <script>
             var floors = ['Favourites', 'All_Cameras'];
             var cameras = [];
             var alerts = [];
@@ -681,70 +683,73 @@
             }
 
         </script> -->
-    </head>
+</head>
 
-    <body id="main">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12 div_top_view">
-                    <div class="col-md-12 input-group search_div">
+<body id="main">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 div_top_view">
+                <div class="col-md-12 input-group search_div">
 
-                        <div class="col-md-3 col-sm-4 col-xs-4">
-                            <img src="static/img/Deepsight_AI_Labs.png" alt="DeepSight AI Labs" class="img_style img-responsive">
+                    <div class="col-md-3 col-sm-4 col-xs-4">
+                        <img src="static/img/Deepsight_AI_Labs.png" alt="DeepSight AI Labs" class="img_style img-responsive">
+                    </div>
+
+                    <div class="col-md-9 col-sm-8 col-xs-8" style="margin-top: 8px;">
+                        <input id="search_input" type="text" class="form-control search_view" placeholder="Search" name="search">
+
+                        <div class="input-group-btn">
+                            <label class="btn" style="padding:0px !important;border:0px !important;">
+                                <button onclick='onClickSearch()' class="btn btn_search " type="submit">
+                                    <i class="glyphicon glyphicon-search"></i>
+                                </button>
+                            </label>
                         </div>
 
-                        <div class="col-md-9 col-sm-8 col-xs-8" style="margin-top: 8px;">
-                            <input id="search_input" type="text" class="form-control search_view" placeholder="Search" name="search">
-                            
-                            <div class="input-group-btn">
-                                <label class="btn" style="padding:0px !important;border:0px !important;">
-                                    <button onclick='onClickSearch()' class="btn btn_search " type="submit">
-                                        <i class="glyphicon glyphicon-search"></i>
-                                    </button>
-                                </label>
-                            </div>
+                        <select onchange="changeBackgroundImage()" id="select" class="btn_user_list selectpicker" style="width: 100px;">
+                            <option value="">Select</option>
+                            <option value="Bank.jpeg" id="img" style="padding: 5px; width: 100px;">Bank</option>
+                            <option value="Hospital.jpeg" id="img" style="padding: 5px; width: 100px;">Hospital</option>
+                            <option value="Insurance.jpeg" id="img2" style="padding: 5px; width: 100px;">Insurance</option>
+                            <option value="Pixel.jpeg" id="img3" style="padding: 5px; width: 100px;">Pixel</option>
+                            <option value="Retail.jpeg" id="img4" style="padding: 5px; width: 100px;">Retail</option>
+                        </select>
 
-                            <select onchange="changeBackgroundImage()" id="select" class="btn_user_list selectpicker" style="width: 100px;">
-                                <option value="">Select</option>
-                                <option value="Bank.jpeg" id="img" style="padding: 5px; width: 100px;">Bank</option>
-                                <option value="Hospital.jpeg" id="img" style="padding: 5px; width: 100px;">Hospital</option>
-                                <option value="Insurance.jpeg" id="img2" style="padding: 5px; width: 100px;">Insurance</option>
-                                <option value="Pixel.jpeg" id="img3" style="padding: 5px; width: 100px;">Pixel</option>
-                                <option value="Retail.jpeg" id="img4" style="padding: 5px; width: 100px;">Retail</option>
-                            </select>
+                        <button onclick="location.href='home';" class="add_btn float-right btn btn-success button_browse">Home</button>
+                        <button onclick="location.href='add';" class="add_btn float-right btn btn-success button_browse">Add Camera</button>
 
-                            <button onclick="location.href='home';" class="add_btn float-right btn btn-success button_browse">Home</button>
-                            <button onclick="location.href='add';" class="add_btn float-right btn btn-success button_browse">Add Camera</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                        </div>
+    <div id="myModal" class="modal">
+        <img id='fullScreenImage' class='modal_content' src=''>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="table_div col-md-12 div_content_show main">
+                <div class="col-md-2 filter_div checkboxfilter-wrap div_left">
+                    <ul class="maim_ul_view" id="filters"></ul>
+                </div>
+                <div class="content col-md-10 col-sm-12 col-xs-12 div_content_video_outer">
+                    <div class="div_content_video">
+                        <p id="contentTitle" class="videoHead"></p>
+                        <div id="viewVideo"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="myModal" class="modal">
-            <img id='fullScreenImage' class='modal_content' src=''>
+        <div class="container-fluid text-center">
+            <p>GoDeep Version 1.0 by
+                <a class="link-text" href="https://www.deepsightlabs.com">DeepSight AI Labs</a>
+            </p>
+            <p>&copy; <script>document.write(new Date().getFullYear())</script> | All Rights Reserved</p>
         </div>
+    </div>
+</body>
 
-        <div class="container-fluid">
-            <div class="row">
-                <div class="table_div col-md-12 div_content_show main" >
-                    <div class="col-md-2 filter_div checkboxfilter-wrap div_left">
-                        <ul class="maim_ul_view" id="filters"></ul>
-                    </div>
-                    <div class="content col-md-10 col-sm-12 col-xs-12 div_content_video_outer">
-                        <div class="div_content_video">
-                            <p id="contentTitle" class="videoHead"></p>
-                            <div id="viewVideo"></div>
-                        </div>                        
-                    </div>
-                </div>
-            </div>
-
-            <div class="container-fluid text-center">
-                <p>GoDeep Version 1.0 by <a class="link-text" href="https://www.deepsightlabs.com">DeepSight AI Labs</a></p>
-                <p>&copy; 2018 | All Rights Reserved</p>
-            </div>
-        </div>    
-    </body>
 </html>

@@ -1,23 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Add · GoDeep by DeepSight AI Labs</title>
-        <link rel="icon" href="favicon.ico" type="image/x-icon"/>
-        <link href="css/style.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        <script src="lib/jquery/dist/jquery.min.js"></script>
-        <script type="text/javascript" src="lib/jquery.blockUI.js"></script>
-        
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Add · GoDeep by DeepSight AI Labs</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link href="css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
-<!-- <script>
+    <!-- TODO: Move PHP code to app.py -->
+    <!-- <script>
     window.onload = loadInit;
 
     function loadInit() 
@@ -219,67 +215,88 @@
     });
 </script> -->
 
-    </head>
-    <body id="main">
+</head>
+
+<body id="main">
+    <div>
         <div>
-            <div>                
-                <div class="col-md-12 imgs subcthre div_paddinglr">                  
-                    <div  id="header" class="col-md-11 div_main" style="/*height: 590px auto;overflow-y: scroll;*/">
-                        <div class="col-md-12 table-responsive" style="padding-left: 0px;">
-                            <img src="static/img/Deepsight_AI_Labs.png" alt="DeepSight AI Labs" class="img_style img-responsive">
-                          
-                            <select onchange="changeBackgroundImage()" id="select" class="btn_user_list selectpicker" style="width: 100px;">
-                                <option value="">Select</option>
-                                <option value="Bank.jpeg" id="img" style="padding: 5px;width: 100px;">Bank</option>
-                                <option value="Hospital.jpeg" id="img" style="padding: 5px;width: 100px;">Hospital</option>
-                                <option value="Insurance.jpeg" id="img2" style="padding: 5px;width: 100px;">Insurance</option>
-                                <option value="Pixel.jpeg" id="img3" style="padding: 5px;width: 100px;">Pixel</option>
-                                <option value="Retail.jpeg" id="img4" style="padding: 5px;width: 100px;">Retail</option>
-                            </select>
-                            
-                            <button onclick="location.href='home';" class="add_btn float-right btn btn-success button_browse">Home</button>
-                            <button onclick="location.href='view';" class="add_btn float-right btn btn-success button_browse">View Camera</button>    
-                            <button id="register" class="add_btn float-right btn btn-success button_browse">Add Camera</button>
-                        </div>
+            <div class="col-md-12 imgs subcthre div_paddinglr">
+                <div id="header" class="col-md-11 div_main" "/*height: 590px auto;overflow-y: scroll;*/">
+                    <div class="col-md-12 table-responsive" style="padding-left: 0px;">
+                        <img src="static/img/Deepsight_AI_Labs.png" alt="DeepSight AI Labs" class="img_style img-responsive">
 
-                        <div class="col-md-12 table_div table-responsive" style="padding-left: 0px;">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr class="tr_bgc">
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Camera Name</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">RTSP URL</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Email ID List</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">SMS List</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Call List</th>
-                                        
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Hoody</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Masked Face</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Helmet</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Fire</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Intrusion</th>
-                                       
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Intrusion Start Time</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Intrusion End Time</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Floor</th>
+                        <select onchange="changeBackgroundImage()" id="select" class="btn_user_list selectpicker" style="width: 100px;">
+                            <option value="">Select</option>
+                            <option value="Bank.jpeg" id="img" style="padding: 5px;width: 100px;">Bank</option>
+                            <option value="Hospital.jpeg" id="img" style="padding: 5px;width: 100px;">Hospital</option>
+                            <option value="Insurance.jpeg" id="img2" style="padding: 5px;width: 100px;">Insurance</option>
+                            <option value="Pixel.jpeg" id="img3" style="padding: 5px;width: 100px;">Pixel</option>
+                            <option value="Retail.jpeg" id="img4" style="padding: 5px;width: 100px;">Retail</option>
+                        </select>
 
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Sound Alarm</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list">Actions</th>
-                                        <th style="overflow:hidden; white-space:nowrap;" class="th_list"></th>
-                                    </tr>
-                                </thead>
+                        <button onclick="location.href='home';" class="add_btn float-right btn btn-success button_browse">Home</button>
+                        <button onclick="location.href='view';" class="add_btn float-right btn btn-success button_browse">View Camera</button>
+                        <button id="register" onclick="location.href='registeration';" class="add_btn float-right btn btn-success button_browse">Add Camera</button>
+                    </div>
 
-                                <tbody id="tBodyData" style="overflow-y:scroll"></tbody>
-                            </table>                        
-                        </div>
+                    <div class="col-md-12 table_div table-responsive" style="padding-left: 0px;">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr class="tr_bgc">
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Camera Name</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">RTSP URL</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Email ID List</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">SMS List</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Call List</th>
+
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Hoody</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Masked Face</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Helmet</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Fire</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Intrusion</th>
+
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Intrusion Start Time</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Intrusion End Time</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Floor</th>
+
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Sound Alarm</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list">Actions</th>
+                                    <th style="overflow:hidden; white-space:nowrap;" class="th_list"></th>
+                                </tr>
+                            </thead>
+                            <!-- TODO: Replace TEST with actual values -->
+                            <tbody>
+                                <tr>
+                                    <td class="th_list">{{ name }}</td>
+                                    <td class="th_list">{{ rtsp }}</td>
+                                    <td class="th_list">{{ email }}</td>
+                                    <td class="th_list">{{ sms }}</td>
+                                    <td class="th_list">{{ call }}</td>
+                                    <td class="th_list">TEST</td>
+                                    <td class="th_list">TEST</td>
+                                    <td class="th_list">TEST</td>
+                                    <td class="th_list">TEST</td>
+                                    <td class="th_list">TEST</td>
+                                    <td class="th_list">{{ start }}</td>
+                                    <td class="th_list">{{ end }}</td>
+                                    <td class="th_list">{{ floor }}</td>
+                                    <td class="th_list">TEST</td>
+                                    <td class="th_list">Action</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>  
-    </body>
+        </div>
+    </div>
+</body>
 
-    <footer class="container-fluid bg-4 text-center footer">
-        <p>GoDeep Version 1.0 by <a class="link-text" href="https://www.deepsightlabs.com">DeepSight AI Labs</a></p>
-        <p>&copy; 2018 | All Rights Reserved</p> 
-    </footer>
+<footer class="container-fluid bg-4 text-center footer">
+    <p>GoDeep Version 1.0 by
+        <a class="link-text" href="https://www.deepsightlabs.com">DeepSight AI Labs</a>
+    </p>
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> | All Rights Reserved</p>
+</footer>
 
 </html>
