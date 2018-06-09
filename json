@@ -6,4 +6,24 @@ Background Info: {"image": "Retail.jpeg"}
 
 #############################################
 
-Create Camera: {"0": {"camera_name": "DSAL_BLR_02", "email_list": ["suman@deepsightlabs.com"], "sms_list": ["8105668527"], "call_list": ["8105668527"], "rtsp_url": "rtsp://admin:dsal12345@192.168.1.101:554/ ", "http_url": "rtsp://admin:admin@192.168.0.111:554/11/", "floor": "Floor1", "favourite": 1, "object_detect": {"fire": 0, "helmet": 0, "hoody": 0, "burkha": 0, "intrusion": 1}, "intrusion_start_time": "00:00", "intrusion_end_time": "23:59", "sound_alarm": 0}}
+Create Camera: {
+    "0": {
+    "camera_name": "DSAL_BLR_02", 
+    "email_list": ["suman@deepsightlabs.com"], 
+    "sms_list": ["8105668527"], 
+    "call_list": ["8105668527"], 
+    "rtsp_url": "rtsp://admin:dsal12345@192.168.1.101:554/ ", 
+    "http_url": "rtsp://admin:admin@192.168.0.111:554/11/", 
+    "floor": "Floor1", 
+    "favourite": 1, 
+    "object_detect": {
+        "fire": 0, 
+        "helmet": 0, 
+        "hoody": 0, 
+        "burkha": 0, 
+        "intrusion": 1}, 
+        "intrusion_start_time": "00:00", 
+        "intrusion_end_time": "23:59", 
+        "sound_alarm": 0
+        }
+}

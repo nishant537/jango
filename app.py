@@ -13,82 +13,55 @@ license_key_valid = False
 # UPLOAD_FOLDER = '/path/to/license'
 # app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Handle HTTP Requests
-
-############# ALL GET
-
-# @app.route('/getLicense', methods=['GET', 'POST'])
-# def url1():
-#     if request.method == 'GET':
-#         data = requests.get('127.0.0.1:8081/getLicense').content
-#     return data
-
-# @app.route('/getAllCameraInfo', methods=['GET', 'POST'])
-# def url2():
-#     if request.method == 'GET':
-#         data = requests.get('127.0.0.1:8081/getAllCameraInfo').content
-#     return data
-
-# @app.route('/getCameraInfo/', methods=['GET', 'POST'])
-# def url3():
-#     if request.method == 'GET':
-#         data = requests.get('127.0.0.1:8081/getCameraInfo/').content
-#     return data
-# # Join these two, somehow
-# @app.route('/alertInfo', methods=['GET', 'POST'])
-# def url4():
-#     if request.method == 'GET':
-#         data = requests.get('127.0.0.1:8081/alertInfo').content
-#     return data
-
-# @app.route('/getBackground', methods=['GET', 'POST'])
-# def url5():
-#     if request.method == 'GET':
-#         data = requests.get('127.0.0.1:8081/getBackground').content
-#     return data
-
-
-############# ALL POSTS
-
-# @app.route('/licenseUpdate', methods=['GET', 'POST'])
-# def url6():
-#     return data
-
-# @app.route('/editCamera/', methods=['GET', 'POST'])
-# def url8():
-#     return data
-
-# # Join these two?
-
-# @app.route('/deleteCamera/', methods=['GET', 'POST'])
-# def url9():
-#     return data
-
-# @app.route('/sendBackground', methods=['GET', 'POST'])
-# def url10():
-#     return data
-
 # Initialize function
-def initialize_data():
-    license_status = requests.get('http://127.0.0.1:8081/getLicense').content
-    all_camera_info = requests.get('http://127.0.0.1:8081/getAllCameraInfo').content
-    alert_info = requests.get('http://127.0.0.1:8081/alertInfo').content
-    background = requests.get('http://127.0.0.1:8081/getBackground').content
 
-    print 'Initializing Data'
-    print '-----------------------------'
-    print 'License Status: ' + license_status
-    print '-----------------------------'
-    print 'All Camera Info: ' + all_camera_info
-    print '-----------------------------'
-    print 'Alert Info: ' + alert_info
-    print '-----------------------------'
-    print 'Background Info: ' + background
+# def initialize_data():
+#     # HTTP Requests
+#     get_license = requests.get('http://127.0.0.1:8081/getLicense').content
+#     all_camera_info = requests.get('http://127.0.0.1:8081/getAllCameraInfo').content
+#     alert_info = requests.get('http://127.0.0.1:8081/alertInfo').content
+#     background = requests.get('http://127.0.0.1:8081/getBackground').content
+
+#     print 'Initializing Data'
+#     print '-----------------------------'
+#     print '/getLicense: ' + get_license
+#     print '-----------------------------'
+#     print '/getAllCameraInfo: ' + all_camera_info
+#     print '-----------------------------'
+#     print '/alertInfo: ' + alert_info
+#     print '-----------------------------'
+#     print '/getBackground: ' + background
+
+#     print '-----------------------------'
+#     print '-----------------------------'
+
+#     license_payload = json.loads(get_license)
+#     print 'License Payload: ' + license_payload['status']
+    
+#     camera_payload = json.loads(all_camera_info)
+#     print 'Camera Payload: ' + camera_payload
+
+#     background_payload = json.loads(background)
+#     print 'Background Payload: ' + background_payload
+
+
+#     return (license_payload, camera_payload, background_payload)
+
+def get_license():
+    get_license = requests.get('http://127.0.0.1:8081/getLicense').content
+    license_payload = json.loads(get_license)
+    license_status = license_payload['status']
+    license_validity = license_payload['validity']
+    print 'Payload: ' + get_license
+    print 'Status: ' + str(license_payload['status'])
+    print 'Validity: ' + str(license_payload['validity'])
+    return license_status, license_validity
 
 # Decorator - Checking for license first before loading any page
 def license_required(func):
     @wraps(func)
     def license_validity(*args, **kwargs):
+        license_key_valid = get_license()
         if license_key_valid is False:
             return redirect(url_for('landing'))
         return func(*args, **kwargs)
@@ -98,23 +71,55 @@ def license_required(func):
 
 @app.route('/')
 def landing():
-    # Initialize function -Get all the data from Backend first
-    initialize_data()
+    license_status, license_validity = get_license()
 
-    # TODO: Check for license validation - Backend
-    return render_template('landing.html')
+    if str(license_status) == 'True':
+        license_message = 'Valid'
+        print license_message
+    else:
+        license_message = 'Invalid. Please upload a valid license'
+        print license_message
+
+    return render_template('landing.html', message = license_message, validity = license_validity)
 
 @app.route('/home')
+@license_required
 def home():
     return render_template('home.html')
 
 @app.route('/list')
+@license_required
 def list_view():
-    return render_template('list.html')
+
+    all_camera_info = requests.get('http://127.0.0.1:8081/getAllCameraInfo').content
+    camera_payload = json.loads(all_camera_info)
+    data = camera_payload['0']
+    print 'DATA: ' + str(data)
+    
+
+    floor = data['floor']
+    favourite = data['favourite']
+    name = data['camera_name']
+    sms = data['sms_list']['']
+    email = data['email_list']['']
+    fire = data['object_detect']['fire']
+    helmet = data['object_detect']['helmet']
+    hoody = data['object_detect']['hoody']
+    burkha = data['object_detect']['burkha']
+    intrusion = data['object_detect']['intrusion']
+    start_time = data['intrusion_start_time']
+    end_time = data['intrusion_end_time']
+    sound_alarm = data['sound_alarm']
+    rtsp_url = data['rtsp_url']
+    http_url = data['http_url']
+    call_list = data['call_list']['']
+
+    return render_template('list.html', floor = floor, favourite = favourite, name = name, sms = sms, email = email, fire = fire, helmet = helmet, hoody = hoody, burkha = burkha, intrusion = intrusion, start_time = start_time, end_time = end_time, sound_alarm = sound_alarm, rtsp_url = rtsp_url, http_url = http_url, call_list = call_list )
 
 # Data Handling from GUI
 
 @app.route('/licenseUpload', methods=['GET', 'POST'])
+@license_required
 def license():
     # Upload license
     if request.method == 'POST':
@@ -131,6 +136,7 @@ def license():
     return redirect(url_for('home'))
 
 @app.route('/createCamera', methods=['GET', 'POST'])
+@license_required
 def test():
     print 'CREATING CAMERA'
     name = request.form['camera_name']
