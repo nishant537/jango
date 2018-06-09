@@ -70,19 +70,16 @@ license_key_valid = False
 
 # Initialize function
 def initialize_data():
-    license_status = requests.get('127.0.0.1:8081/getLicense').content
-    all_camera_info = requests.get('127.0.0.1:8081/getAllCameraInfo').content
-    camera_info = requests.get('127.0.0.1:8081/getCameraInfo/').content
-    alert_info = requests.get('127.0.0.1:8081/alertInfo').content
-    background = requests.get('127.0.0.1:8081/getBackground').content
+    license_status = requests.get('http://127.0.0.1:8081/getLicense').content
+    all_camera_info = requests.get('http://127.0.0.1:8081/getAllCameraInfo').content
+    alert_info = requests.get('http://127.0.0.1:8081/alertInfo').content
+    background = requests.get('http://127.0.0.1:8081/getBackground').content
 
     print 'Initializing Data'
     print '-----------------------------'
     print 'License Status: ' + license_status
     print '-----------------------------'
     print 'All Camera Info: ' + all_camera_info
-    print '-----------------------------'
-    print 'Camera Info: ' + camera_info
     print '-----------------------------'
     print 'Alert Info: ' + alert_info
     print '-----------------------------'
