@@ -96,12 +96,14 @@ def list_view():
     data = camera_payload['0']
     print 'DATA: ' + str(data)
     
-
+    # Need to sort these. Not by 0s 
+    email = data['email_list'][0]
+    call_list = data['call_list'][0]
+    sms = data['sms_list'][0]
+    
     floor = data['floor']
     favourite = data['favourite']
     name = data['camera_name']
-    sms = data['sms_list']['']
-    email = data['email_list']['']
     fire = data['object_detect']['fire']
     helmet = data['object_detect']['helmet']
     hoody = data['object_detect']['hoody']
@@ -112,7 +114,6 @@ def list_view():
     sound_alarm = data['sound_alarm']
     rtsp_url = data['rtsp_url']
     http_url = data['http_url']
-    call_list = data['call_list']['']
 
     return render_template('list.html', floor = floor, favourite = favourite, name = name, sms = sms, email = email, fire = fire, helmet = helmet, hoody = hoody, burkha = burkha, intrusion = intrusion, start_time = start_time, end_time = end_time, sound_alarm = sound_alarm, rtsp_url = rtsp_url, http_url = http_url, call_list = call_list )
 
