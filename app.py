@@ -54,10 +54,6 @@ license_key_valid = False
 # def url6():
 #     return data
 
-# @app.route('/createCamera', methods=['GET', 'POST'])
-# def url7():
-#     return data
-
 # @app.route('/editCamera/', methods=['GET', 'POST'])
 # def url8():
 #     return data
@@ -72,6 +68,26 @@ license_key_valid = False
 # def url10():
 #     return data
 
+# Initialize function
+def initialize_data():
+    license_status = requests.get('127.0.0.1:8081/getLicense').content
+    all_camera_info = requests.get('127.0.0.1:8081/getAllCameraInfo').content
+    camera_info = requests.get('127.0.0.1:8081/getCameraInfo/').content
+    alert_info = requests.get('127.0.0.1:8081/alertInfo').content
+    background = requests.get('127.0.0.1:8081/getBackground').content
+
+    print 'Initializing Data'
+    print '-----------------------------'
+    print 'License Status: ' + license_status
+    print '-----------------------------'
+    print 'All Camera Info: ' + all_camera_info
+    print '-----------------------------'
+    print 'Camera Info: ' + camera_info
+    print '-----------------------------'
+    print 'Alert Info: ' + alert_info
+    print '-----------------------------'
+    print 'Background Info: ' + background
+
 # Decorator - Checking for license first before loading any page
 def license_required(func):
     @wraps(func)
@@ -82,9 +98,11 @@ def license_required(func):
     return license_validity
 
 # Flask Routing
+
 @app.route('/')
 def landing():
-    # TODO: Initialize function - Get all the data from Backend first
+    # Initialize function -Get all the data from Backend first
+    initialize_data()
 
     # TODO: Check for license validation - Backend
     return render_template('landing.html')
@@ -113,32 +131,32 @@ def license():
         # f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         
     # TODO: Check license validity - Backend
-    return render_template('home.html')
-  
-################## TODO: If valid license, then route the following
+    return redirect(url_for('home'))
 
-@app.route('/data', methods=['GET', 'POST'])
-@license_required
-def data():
-    # Data retrieved from Registeration form
-    camera_name = request.form['cameraname']
-    floor = request.form['floor']
-    rtsp_url = request.form['rtspurl']
-    email_list = request.form['emaillist']
-    http_url = request.form['httpurl']
-    sms_list = request.form['smslist']
-    time_start = request.form['timeStart']
-    call_list = request.form['calllist']
-    time_end = request.form['timeEnd']
-    # favourite = request.form['favourite']
-    # sound_alarm = request.form['soundalarm']
+@app.route('/createCamera', methods=['GET', 'POST'])
+def test():
+    print 'CREATING CAMERA'
+    name = request.form['camera_name']
+    floor_number = request.form['floor']
+    main_url = request.form['main_stream_url']
+    email = request.form['email_id_list']
+    sub_url = request.form['sub_stream_url']
+    sms = request.form['sms_list']
+    call = request.form['call_list']
+    start_time = request.form['intrusion_start_time']
+    end_time = request.form['intrusion_end_time']
 
-    # TODO: Need to put data into database - Backend
+    print 'Camera Name: ' + name
+    print 'Floor: ' + floor_number
+    print 'Main Stream URL: ' + main_url
+    print 'Email List: ' + email
+    print 'Sub Stream URL: ' + sub_url
+    print 'SMS List: ' + sms
+    print 'Start Time: ' + start_time
+    print 'Call List: ' + call
+    print 'End Time: ' + end_time
 
-    print 'DATA: ' + camera_name + '\n' + floor + '\n' + rtsp_url + '\n' + email_list + '\n' + http_url + '\n' + sms_list + '\n' + time_start + '\n' + call_list + '\n' + time_end
-    
-    # Temporarily sending form data to Template (Just to test)
-    return render_template('add.html', name = camera_name, rtsp = rtsp_url, email = email_list, sms = sms_list, call = call_list, start = time_start, end = time_end, floor = floor)
+    return redirect(url_for('home'))
 
 if __name__ == "__main__":
     # Running Flask
