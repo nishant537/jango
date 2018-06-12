@@ -52,20 +52,17 @@ def get_license():
     license_payload = json.loads(get_license)
     license_status = license_payload['status']
     license_validity = license_payload['validity']
-    print 'Payload: ' + get_license
-    print 'Status: ' + str(license_payload['status'])
-    print 'Validity: ' + str(license_payload['validity'])
     return license_status, license_validity
 
 # Decorator - Checking for license first before loading any page
 def license_required(func):
     @wraps(func)
-    def license_validity(*args, **kwargs):
-        license_key_valid = get_license()
-        if license_key_valid is False:
+    def valid_license(*args, **kwargs):
+        license_status_valid, license_key_valid  = get_license()
+        if license_status_valid == 'false':
             return redirect(url_for('landing'))
         return func(*args, **kwargs)
-    return license_validity
+    return valid_license
 
 # Flask Routing
 
@@ -73,12 +70,10 @@ def license_required(func):
 def landing():
     license_status, license_validity = get_license()
 
-    if str(license_status) == 'True':
+    if str(license_status) == 'true':
         license_message = 'Valid'
-        print license_message
     else:
         license_message = 'Invalid. Please upload a valid license'
-        print license_message
 
     return render_template('landing.html', message = license_message, validity = license_validity)
 
