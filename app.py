@@ -22,6 +22,12 @@ def get_background():
     background_img = background_payload['image']
     return background_img
 
+# Get Camera info from backend
+def get_camera_info():
+    all_camera_info = requests.get('http://127.0.0.1:8081/getAllCameraInfo').content
+    camera_info = json.loads(all_camera_info)
+    return camera_info
+
 # Decorator - Checking for license first before loading any page
 def license_required(func):
     @wraps(func)
@@ -51,6 +57,10 @@ def landing():
 @license_required
 def home():
     img = get_background()
+    camera_payload = get_camera_info()
+
+    print 'Payload: ' + str(camera_payload)
+
     return render_template('home.html', image = img)
 
 # Route list
@@ -58,8 +68,7 @@ def home():
 @license_required
 def list_view():
     img = get_background()
-    all_camera_info = requests.get('http://127.0.0.1:8081/getAllCameraInfo').content
-    camera_payload = json.loads(all_camera_info)
+    camera_payload = get_camera_info()
 
     # Iterate though the payload. Not 0s
     data = camera_payload['0']
