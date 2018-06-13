@@ -34,7 +34,7 @@ def license_required(func):
     def valid_license(*args, **kwargs):
         # In case we need the validity number too
         license_status_valid, license_key_valid  = get_license()
-        if license_status_valid == 'false':
+        if license_status_valid != 'True':
             return redirect(url_for('landing'))
         return func(*args, **kwargs)
     return valid_license
@@ -46,7 +46,7 @@ def license_required(func):
 def landing():
     img = get_background()
     license_status, license_validity = get_license()
-    if str(license_status) == 'true':
+    if str(license_status) == 'True':
         license_message = 'Valid'
     else:
         license_message = 'Invalid. Please upload a valid license'
@@ -58,10 +58,13 @@ def landing():
 def home():
     img = get_background()
     camera_payload = get_camera_info()
+    camera_names_list = []
+    floors_list = []
 
-    print 'Payload: ' + str(camera_payload)
-
-    return render_template('home.html', image = img)
+    for i in range(0, len(camera_payload)):
+        camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
+        floors_list.append(str(camera_payload[str(i)]['floor']))
+    return render_template('home.html', image = img, camera = camera_names_list, floor = floors_list)
 
 # Route list
 @app.route('/list')
@@ -71,11 +74,13 @@ def list_view():
     camera_payload = get_camera_info()
 
     # Iterate though the payload. Not 0s
+
     data = camera_payload['0']
-    print 'DATA: ' + str(data)
+    print 'List: ' + str(data)
 
     # Need to append these values to a list and run a for-loop in Jinja -- To support list of multiple cameras
     # Need to sort these. Not by 0s 
+
     email = data['email_list'][0]
     call_list = data['call_list'][0]
     sms = data['sms_list'][0]
@@ -93,6 +98,7 @@ def list_view():
     sound_alarm = data['sound_alarm']
     rtsp_url = data['rtsp_url']
     http_url = data['http_url']
+
     return render_template('list.html', image = img, floor = floor, favourite = favourite, name = name, sms = sms, email = email, fire = fire, helmet = helmet, hoody = hoody, burkha = burkha, intrusion = intrusion, start_time = start_time, end_time = end_time, sound_alarm = sound_alarm, rtsp_url = rtsp_url, http_url = http_url, call_list = call_list )
 
 #### Data Handling from GUI
@@ -154,7 +160,6 @@ def test():
     print 'End Time: ' + end_time
     print 'Favourite: ' + str(favourite[0])
     print 'Objects: ' + str(object_detection)
-
     #TODO: Send data to backend
     return redirect(url_for('home'))
 

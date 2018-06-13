@@ -80,16 +80,13 @@
                                         All
                                     </a>
                                 </li>
+                                {% for floors in floor %}
                                 <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#floor1" role="tablist">
-                                        Floor 1
+                                    <a class="nav-link" data-toggle="tab" href="#{{floors}}" role="tablist">
+                                        {{floors}}
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#floor2" role="tablist">
-                                        Floor 2
-                                    </a>
-                                </li>
+                                {% endfor %}
                             </ul>
                         </div>
                         <div class="tab-content gallery">
@@ -122,6 +119,7 @@
                             </div>
                             <div class="tab-pane" id="all" role="tabpanel">
                                 <div class="row">
+                                    {% for names in camera %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
                                             <div class="card-image">
@@ -129,7 +127,7 @@
                                             </div>
                                             <div class="card-body">
                                                 <a href="pablo">
-                                                    <h4 class="card-title">Camera 1</h4>
+                                                    <h4 class="card-title">{{names}}</h4>
                                                 </a>
                                                 <div class="card-footer">
                                                     <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-twitter">
@@ -145,49 +143,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="card card-profile">
-                                            <div class="card-image">
-                                                <img class="img rounded" src="/static/img/1.jpg">
-                                            </div>
-                                            <div class="card-body">
-                                                <a href="pablo">
-                                                    <h4 class="card-title">Camera 2</h4>
-                                                </a>
-                                                <div class="card-footer">
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                        <i class="fa fa-play"></i>
-                                                    </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-instagram">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="card card-profile">
-                                            <div class="card-image">
-                                                <img class="img rounded" src="/static/img/1.jpg">
-                                            </div>
-                                            <div class="card-body">
-                                                <a href="pablo">
-                                                    <h4 class="card-title">Camera 3</h4>
-                                                </a>
-                                                <div class="card-footer">
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                        <i class="fa fa-play"></i>
-                                                    </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-instagram">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
-                            <div class="tab-pane" id="floor1" role="tabpanel">
+                            <div class="tab-pane" id="{{floors}}" role="tabpanel">
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="card card-profile">
@@ -202,50 +161,6 @@
                                                     <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                        <i class="fa fa-play"></i>
-                                                    </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-instagram">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tab-pane" id="floor2" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="card card-profile">
-                                            <div class="card-image">
-                                                <img class="img rounded" src="/static/img/1.jpg">
-                                            </div>
-                                            <div class="card-body">
-                                                <a href="pablo">
-                                                    <h4 class="card-title">Camera 2</h4>
-                                                </a>
-                                                <div class="card-footer">
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                        <i class="fa fa-play"></i>
-                                                    </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-instagram">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="card card-profile">
-                                            <div class="card-image">
-                                                <img class="img rounded" src="/static/img/1.jpg">
-                                            </div>
-                                            <div class="card-body">
-                                                <a href="pablo">
-                                                    <h4 class="card-title">Camera 3</h4>
-                                                </a>
-                                                <div class="card-footer">
                                                     <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
