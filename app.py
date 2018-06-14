@@ -73,33 +73,62 @@ def list_view():
     img = get_background()
     camera_payload = get_camera_info()
 
-    # Iterate though the payload. Not 0s
+    camera_names_list = []
+    floors_list = []
+    favourites_list = []
+    start_time_list = []
+    end_time_list = []
+    sound_alarm_list = []
+    rtsp_url_list = []
+    http_url_list = []
+    hoody_list =[]
+    masked_face_list =[]
+    intrusion_list =[]
+    fire_list =[]
+    helmet_list =[]
+    email_list = []
+    sms_list = []
+    call_list = []
 
-    data = camera_payload['0']
-    print 'List: ' + str(data)
+    for i in range(0, len(camera_payload)):
+        for j in range(0, len(camera_payload[str(i)]['email_list'])):
+            email_list.append(str(camera_payload[str(i)]['email_list'][j]))
 
-    # Need to append these values to a list and run a for-loop in Jinja -- To support list of multiple cameras
-    # Need to sort these. Not by 0s 
+        for k in range(0, len(camera_payload[str(i)]['sms_list'])):
+            sms_list.append(str(camera_payload[str(i)]['sms_list'][k]))
 
-    email = data['email_list'][0]
-    call_list = data['call_list'][0]
-    sms = data['sms_list'][0]
-    
-    floor = data['floor']
-    favourite = data['favourite']
-    name = data['camera_name']
-    fire = data['object_detect']['fire']
-    helmet = data['object_detect']['helmet']
-    hoody = data['object_detect']['hoody']
-    burkha = data['object_detect']['burkha']
-    intrusion = data['object_detect']['intrusion']
-    start_time = data['intrusion_start_time']
-    end_time = data['intrusion_end_time']
-    sound_alarm = data['sound_alarm']
-    rtsp_url = data['rtsp_url']
-    http_url = data['http_url']
+        for l in range(0, len(camera_payload[str(i)]['call_list'])):
+            call_list.append(str(camera_payload[str(i)]['call_list'][l]))
 
-    return render_template('list.html', image = img, floor = floor, favourite = favourite, name = name, sms = sms, email = email, fire = fire, helmet = helmet, hoody = hoody, burkha = burkha, intrusion = intrusion, start_time = start_time, end_time = end_time, sound_alarm = sound_alarm, rtsp_url = rtsp_url, http_url = http_url, call_list = call_list )
+        camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
+        floors_list.append(str(camera_payload[str(i)]['floor']))
+        favourites_list.append(str(camera_payload[str(i)]['favourite']))
+        start_time_list.append(str(camera_payload[str(i)]['intrusion_start_time']))
+        end_time_list.append(str(camera_payload[str(i)]['intrusion_end_time']))
+        sound_alarm_list.append(str(camera_payload[str(i)]['sound_alarm']))
+        rtsp_url_list.append(str(camera_payload[str(i)]['rtsp_url']))
+        http_url_list.append(str(camera_payload[str(i)]['http_url']))
+        hoody_list.append(str(camera_payload[str(i)]['object_detect']['hoody']))
+        masked_face_list.append(str(camera_payload[str(i)]['object_detect']['burkha']))
+        intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
+        fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
+        helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
+
+    return render_template('list.html', image = img, data = zip(
+        camera_names_list,
+        rtsp_url_list,
+        email_list,
+        sms_list,
+        call_list,
+        hoody_list,
+        masked_face_list,
+        helmet_list,
+        fire_list,
+        intrusion_list,
+        start_time_list,
+        end_time_list,
+        floors_list,
+        sound_alarm_list))
 
 #### Data Handling from GUI
 
