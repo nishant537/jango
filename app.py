@@ -154,7 +154,6 @@ def list_view():
 @app.route('/<url>/background/<background_image>')
 @license_required
 def background_image(url, background_image):
-    #TODO: Need to send into backend, make get_background call again.
     if background_image == 'retail':
         img = 'Retail.jpeg'
     if background_image == 'hospital':
@@ -163,8 +162,9 @@ def background_image(url, background_image):
         img = 'Insurance.jpeg'
     if background_image == 'pixel':
         img = 'Pixel.jpeg'
-    return render_template('list.html', image = img)
-
+    #TODO: Need to send into backend, make get_background call again.
+    return redirect(url_for('home'))
+    
 # Handle license upload 
 @app.route('/licenseUpload', methods=['GET', 'POST'])
 @license_required
