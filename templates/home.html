@@ -80,18 +80,19 @@
                                         All
                                     </a>
                                 </li>
-                                {% for floors in floor %}
+                                <!-- {% for floors in camera_floor %}
                                 <li class="nav-item">
                                     <a class="nav-link" data-toggle="tab" href="#{{floors}}" role="tablist">
                                         {{floors}}
                                     </a>
                                 </li>
-                                {% endfor %}
+                                {% endfor %} -->
                             </ul>
                         </div>
                         <div class="tab-content gallery">
                             <div class="tab-pane active" id="favorite" role="tabpanel">
                                 <div class="row">
+                                    {% for name in favourites %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
                                             <div class="card-image">
@@ -99,44 +100,16 @@
                                             </div>
                                             <div class="card-body">
                                                 <a href="pablo">
-                                                    <h4 class="card-title">Camera 1</h4>
+                                                    <h4 class="card-title">{{name}}</h4>
                                                 </a>
                                                 <div class="card-footer">
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-instagram">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tab-pane" id="all" role="tabpanel">
-                                <div class="row">
-                                    {% for names in camera %}
-                                    <div class="col-md-4">
-                                        <div class="card card-profile">
-                                            <div class="card-image">
-                                                <img class="img rounded" src="/static/img/1.jpg">
-                                            </div>
-                                            <div class="card-body">
-                                                <a href="pablo">
-                                                    <h4 class="card-title">{{names}}</h4>
-                                                </a>
-                                                <div class="card-footer">
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-twitter">
-                                                        <i class="fa fa-star"></i>
-                                                    </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                        <i class="fa fa-play"></i>
-                                                    </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-instagram">
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-instagram">
                                                         <i class="fa fa-pencil"></i>
                                                     </a>
                                                 </div>
@@ -146,8 +119,9 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                            <div class="tab-pane" id="{{floors}}" role="tabpanel">
+                            <div class="tab-pane" id="all" role="tabpanel">
                                 <div class="row">
+                                    {% for camera_name in camera %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
                                             <div class="card-image">
@@ -155,24 +129,61 @@
                                             </div>
                                             <div class="card-body">
                                                 <a href="pablo">
-                                                    <h4 class="card-title">Camera 1</h4>
+                                                    <h4 class="card-title">{{camera_name}}</h4>
                                                 </a>
                                                 <div class="card-footer">
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    {% if camera_name in favourites %}
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
+                                                    {% endif %}
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
-                                                    <a href="#pablo" class="btn btn-icon btn-neutral btn-lg btn-instagram">
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-instagram">
                                                         <i class="fa fa-pencil"></i>
                                                     </a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                    {% endfor %}
                                 </div>
                             </div>
+                            <!-- When supporting multiple floors, enable this -->
+                            <!-- {% for floors in camera_floor %}
+                            <div class="tab-pane" id="{{floors}}" role="tabpanel">
+                                <div class="row">
+                                    {% for camera_name in camera_floor %}
+                                    <div class="col-md-4">
+                                        <div class="card card-profile">
+                                            <div class="card-image">
+                                                <img class="img rounded" src="/static/img/1.jpg">
+                                            </div>
+                                            <div class="card-body">
+                                                <a href="pablo">
+                                                    <h4 class="card-title">{{camera_name}}</h4>
+                                                </a>
+                                                <div class="card-footer">
+                                                    {% if camera_name in favourites %}
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                        <i class="fa fa-star"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
+                                                        <i class="fa fa-play"></i>
+                                                    </a>
+                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-instagram">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %} -->
                         </div>
                     </div>
                 </div>
@@ -280,13 +291,6 @@
 <script src="/static/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
 <script src="/static/js/core/popper.min.js" type="text/javascript"></script>
 <script src="/static/js/core/bootstrap.min.js" type="text/javascript"></script>
-<script src="/static/js/plugins/moment.min.js"></script>
-<script src="/static/js/plugins/bootstrap-switch.js"></script>
-<script src="/static/js/plugins/bootstrap-tagsinput.js"></script>
 <script src="/static/js/plugins/bootstrap-selectpicker.js" type="text/javascript"></script>
 <script src="/static/js/plugins/jasny-bootstrap.min.js"></script>
-<script src="/static/js/plugins/nouislider.min.js" type="text/javascript"></script>
-<script src="/static/js/plugins/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
-<script src="/static/js/main.js" type="text/javascript"></script>
-
 </html>

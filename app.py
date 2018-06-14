@@ -59,12 +59,30 @@ def home():
     img = get_background()
     camera_payload = get_camera_info()
     camera_names_list = []
+    favourites_list = []
     floors_list = []
+    unique_floors = []
+    cameras_in_floor_dict = {}
 
-    for i in range(0, len(camera_payload)):
+    for i in range(0, len(camera_payload)):        
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
+        if str(camera_payload[str(i)]['favourite']) == '1':
+            favourites_list.append(str(camera_payload[str(i)]['camera_name']))
+
+    for i in range(0, len(camera_payload)):   
         floors_list.append(str(camera_payload[str(i)]['floor']))
-    return render_template('home.html', image = img, camera = camera_names_list, floor = floors_list)
+        unique_floors = set(floors_list)
+        unique_floors = list(unique_floors)
+
+    for i in unique_floors:
+        for k in range(0, len(camera_payload)):
+            if str(camera_payload[str(k)]['floor']) == i:
+                cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
+
+    print 'Favourites: ' + str(favourites_list)
+    print 'Dictionary: ' + str(cameras_in_floor_dict)
+    
+    return render_template('home.html', image = img, camera = camera_names_list, favourites = favourites_list, floor = unique_floors, camera_floor = cameras_in_floor_dict)
 
 # Route list
 @app.route('/list')
