@@ -66,14 +66,15 @@ def home():
 
     for i in range(0, len(camera_payload)):        
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
-        if str(camera_payload[str(i)]['favourite']) == '1':
-            favourites_list.append(str(camera_payload[str(i)]['camera_name']))
-
-    for i in range(0, len(camera_payload)):   
         floors_list.append(str(camera_payload[str(i)]['floor']))
         unique_floors = set(floors_list)
         unique_floors = list(unique_floors)
 
+        # Adding all Cameras which are favourite to a list
+        if str(camera_payload[str(i)]['favourite']) == '1':
+            favourites_list.append(str(camera_payload[str(i)]['camera_name']))
+            
+    # Sorting all cameras based on the floor - Storing in a dictionary to make it easier for Jinja Templating
     for i in unique_floors:
         for k in range(0, len(camera_payload)):
             if str(camera_payload[str(k)]['floor']) == i:
