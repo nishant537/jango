@@ -185,7 +185,7 @@ def test():
     print 'Adding Camera'
     #TODO: Switch to Flask-WTF (Form and Data Handling)
     name = request.form['camera_name']
-    floor_number = request.form['floor']
+    floor = request.form['floor']
     main_url = request.form['main_stream_url']
     email = request.form['email_id_list']
     sub_url = request.form['sub_stream_url']
@@ -197,7 +197,7 @@ def test():
     object_detection = request.form.getlist('object_detection')
 
     print 'Camera Name: ' + name
-    print 'Floor: ' + floor_number
+    print 'Floor: ' + floor
     print 'Main Stream URL: ' + main_url
     print 'Email List: ' + email
     print 'Sub Stream URL: ' + sub_url
@@ -207,7 +207,9 @@ def test():
     print 'End Time: ' + end_time
     print 'Favourite: ' + str(favourite[0])
     print 'Objects: ' + str(object_detection)
+
     #TODO: Send data to backend
+    # new_camera = {"0": {"camera_name": name, "email_list": email, "sms_list": sms, "call_list": call, "rtsp_url": main_url, "http_url": sub_url, "floor": floor_number, "favourite": favourite, "object_detect": object_detection, "intrusion_start_time": start_time, "intrusion_end_time": end_time, "sound_alarm": 0}
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
