@@ -156,13 +156,19 @@ def list_view():
 def background_image(url, background_image):
     if background_image == 'retail':
         img = 'Retail.jpeg'
+    if background_image == 'bank':
+        img = 'Bank.jpeg'
     if background_image == 'hospital':
         img = 'Hospital.jpeg'
     if background_image == 'insurance':
         img = 'Insurance.jpeg'
     if background_image == 'pixel':
         img = 'Pixel.jpeg'
-    #TODO: Need to send into backend, make get_background call again.
+
+    # Making a POST to the Backend - Background information
+    background_info = {"image": img}
+    post_background_info = requests.post(url = 'http://127.0.0.1:8081/sendBackground', data = background_info)
+
     return redirect(url_for('home'))
     
 # Handle license upload 
@@ -208,8 +214,12 @@ def test():
     print 'Favourite: ' + str(favourite[0])
     print 'Objects: ' + str(object_detection)
 
-    #TODO: Send data to backend
-    # new_camera = {"0": {"camera_name": name, "email_list": email, "sms_list": sms, "call_list": call, "rtsp_url": main_url, "http_url": sub_url, "floor": floor_number, "favourite": favourite, "object_detect": object_detection, "intrusion_start_time": start_time, "intrusion_end_time": end_time, "sound_alarm": 0}
+    # One of these two should be one - should verify
+    # # new_camera = {"camera_name": name, "email_list": email, "sms_list": sms, "call_list": call, "rtsp_url": main_url, "http_url": sub_url, "floor": floor, "favourite": favourite, "object_detect": object_detection, "intrusion_start_time": start_time, "intrusion_end_time": end_time, "sound_alarm": 0}
+    new_camera = {"0": {"camera_name": name, "email_list": email, "sms_list": sms, "call_list": call, "rtsp_url": main_url, "http_url": sub_url, "floor": floor, "favourite": favourite, "object_detect": object_detection, "intrusion_start_time": start_time, "intrusion_end_time": end_time, "sound_alarm": 0}}
+    
+    # Making a POST to the Backend - New Camera
+    post_new_camera_info = requests.post(url = 'http://127.0.0.1:8081/createCamera', data = new_camera)
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
