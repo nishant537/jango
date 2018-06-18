@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from functools import wraps
 from werkzeug.utils import secure_filename
+from collections import OrderedDict
 import requests
 import json
 
@@ -83,7 +84,7 @@ def home():
     print 'Favourites: ' + str(favourites_list)
     print 'Dictionary: ' + str(cameras_in_floor_dict)
     
-    return render_template('home.html', image = img, camera = camera_names_list, favourites = favourites_list, floor = unique_floors, camera_floor = cameras_in_floor_dict)
+    return render_template('home.html', image = img, camera = camera_names_list, favourites = favourites_list, unique_floors = unique_floors, camera_floor = cameras_in_floor_dict)
 
 # Route list
 @app.route('/list')
@@ -109,6 +110,8 @@ def list_view():
     sms_list = []
     call_list = []
 
+    # Adding form data to lists - Lists are easier for Jinja Templating
+
     for i in range(0, len(camera_payload)):
         for j in range(0, len(camera_payload[str(i)]['email_list'])):
             email_list.append(str(camera_payload[str(i)]['email_list'][j]))
@@ -133,7 +136,8 @@ def list_view():
         fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
         helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
-    return render_template('list.html', image = img, data = zip(
+    return render_template('list.html', image = img,
+    data = zip(
         camera_names_list,
         rtsp_url_list,
         email_list,
@@ -152,9 +156,9 @@ def list_view():
 #### Data Handling from GUI
 
 # Send background information to backend
-@app.route('/<url>/background/<background_image>')
+@app.route('/background/<background_image>')
 @license_required
-def background_image(url, background_image):
+def background_image(background_image):
     if background_image == 'retail':
         img = 'Retail.jpeg'
     if background_image == 'bank':
@@ -166,9 +170,12 @@ def background_image(url, background_image):
     if background_image == 'pixel':
         img = 'Pixel.jpeg'
 
+    #TODO: Need to find better background images
+
     # Making a POST to the Backend - Background information
-    background_info = {"image": img}
-    post_background_info = requests.post(url = 'http://127.0.0.1:8081/sendBackground', data = background_info)
+    background_dict = OrderedDict()
+    background_dict["image"] = img
+    post_background_info = requests.post(url = 'http://127.0.0.1:8081/sendBackground', data = background_dict)
 
     return redirect(url_for('home'))
     
@@ -188,39 +195,51 @@ def license():
 # Add Camera - Get form info
 @app.route('/addCamera', methods=['GET', 'POST'])
 @license_required
-def test():
+def add_camera():
     print 'Adding Camera'
     #TODO: Switch to Flask-WTF (Form and Data Handling)
-    name = request.form['camera_name']
-    floor = request.form['floor']
-    main_url = request.form['main_stream_url']
-    email = request.form['email_id_list']
-    sub_url = request.form['sub_stream_url']
-    sms = request.form['sms_list']
-    call = request.form['call_list']
-    start_time = request.form['intrusion_start_time']
-    end_time = request.form['intrusion_end_time']
-    favourite = request.form.getlist('favourite')
-    object_detection = request.form.getlist('object_detection')
 
-    print 'Camera Name: ' + name
-    print 'Floor: ' + floor
-    print 'Main Stream URL: ' + main_url
-    print 'Email List: ' + email
-    print 'Sub Stream URL: ' + sub_url
-    print 'SMS List: ' + sms
-    print 'Start Time: ' + start_time
-    print 'Call List: ' + call
-    print 'End Time: ' + end_time
-    print 'Favourite: ' + str(favourite[0])
-    print 'Objects: ' + str(object_detection)
+    if request.method == 'POST':
+        name = request.form['camera_name']
+        floor = request.form['floor']
+        main_url = request.form['main_stream_url']
+        email = request.form['email_id_list']
+        sub_url = request.form['sub_stream_url']
+        sms = request.form['sms_list']
+        call = request.form['call_list']
+        start_time = request.form['intrusion_start_time']
+        end_time = request.form['intrusion_end_time']
+        favourite = request.form.getlist('favourite')
+        sound_alarm = request.form.getlist('sound_alarm')
+        object_detection = request.form.getlist('object_detection')
 
-    # One of these two should be one - should verify
-    # # new_camera = {"camera_name": name, "email_list": email, "sms_list": sms, "call_list": call, "rtsp_url": main_url, "http_url": sub_url, "floor": floor, "favourite": favourite, "object_detect": object_detection, "intrusion_start_time": start_time, "intrusion_end_time": end_time, "sound_alarm": 0}
-    new_camera = {"0": {"camera_name": name, "email_list": email, "sms_list": sms, "call_list": call, "rtsp_url": main_url, "http_url": sub_url, "floor": floor, "favourite": favourite, "object_detect": object_detection, "intrusion_start_time": start_time, "intrusion_end_time": end_time, "sound_alarm": 0}}
-    
-    # Making a POST to the Backend - New Camera
-    post_new_camera_info = requests.post(url = 'http://127.0.0.1:8081/createCamera', data = new_camera)
+        print 'Camera Name: ' + name
+        print 'Floor: ' + floor
+        print 'Main Stream URL: ' + main_url
+        print 'Email List: ' + email
+        print 'Sub Stream URL: ' + sub_url
+        print 'SMS List: ' + sms
+        print 'Start Time: ' + start_time
+        print 'Call List: ' + call
+        print 'End Time: ' + end_time
+        print 'Favourite: ' + str(favourite)
+        print 'Objects: ' + str(object_detection)
+
+        camera_dict = OrderedDict()
+        camera_dict["camera_name"] = name
+        camera_dict["email_list"] = email
+        camera_dict["sms_list"] = sms
+        camera_dict["call_list"] = call
+        camera_dict["rtsp_url"] = main_url
+        camera_dict["http_url"] = sub_url
+        camera_dict["floor"] = floor
+        camera_dict["object_detect"] = object_detection
+        camera_dict["intrusion_start_time"] = start_time
+        camera_dict["intrusion_end_time"] = end_time
+        camera_dict["sound_alarm"] = sound_alarm
+
+        # Making a POST to the Backend - New Camera
+        post_new_camera_info = requests.post(url = 'http://127.0.0.1:8081/createCamera', data = camera_dict)
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
