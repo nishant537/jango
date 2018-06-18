@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>DeepSight Labs</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'
+    />
+    <!-- Fonts and icons -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat: 400,700,200" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
+    <!-- CSS Files -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/static/css/main.css" rel="stylesheet" />
+</head>
+
+<body class="signup-page">
+    <nav class="navbar navbar-expand-lg bg-white navbar-absolute navbar-transparent">
+        <div class="container">
+            <div class="navbar-translate">
+                <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight Labs" data-placement="bottom" target="_blank">
+                    GoDeep Platform
+                </a>
+            </div>
+        </div>
+    </nav>
+    <div class="page-header section-image">
+        <div class="page-header-image" style="background-image: url('/static/img/{{ image }}') ;"></div>
+        <div class="content-center">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 ml-auto mr-auto">
+                        <div class="card card-signup">
+                            <div class="card-body">
+                                <h4 class="card-title text-center">Edit {{ current_name }}</h4>
+                                <form class="form" method="POST" action="/addCamera">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 form-group">
+                                                <input value="{{ current_name }}" id="camera_name" name="camera_name" type="text" class="form-control" placeholder="Camera Name" required>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <input value="{{ current_floor }}" id="floor" name="floor" type="text" class="form-control" placeholder="Floor" required>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 form-group">
+                                                <input value="{{ current_rtsp }}" id="main_stream_url" name="main_stream_url" type="text" class="form-control" placeholder="Main Stream URL" required>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <input value="{{ current_http }}" id="sub_stream_url" name="sub_stream_url" type="text" class="form-control" placeholder="Sub Stream URL" required>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 form-group">
+                                                <input value="{{ current_email }}" id="email_id_list" name="email_id_list" type="email" class="form-control" placeholder="Email ID List" required>
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <input value="{{ current_sms }}" id="sms_list" name="sms_list" type="text" class="form-control" placeholder="SMS List" required>
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <input value="{{ current_call }}" id="call_list" name="call_list" type="text" class="form-control" placeholder="Call List" required>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 form-group">
+                                                <input value="{{ current_start_time }}" id="intrusion_start_time" name="intrusion_start_time" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" type="text" class="form-control"
+                                                    placeholder="Intrusion Start Time (24hrs HH:MM)" required>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <input value="{{ current_end_time }}" id="intrusion_end_time" name="intrusion_end_time" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" type="text" class="form-control"
+                                                    placeholder="Intrusion End Time (24hrs HH:MM)" required>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 btn-group bootstrap-select show-tick">
+                                                <select class="selectpicker" name="object_detection" id="object_detection" data-style="btn btn-default btn-round" multiple=""
+                                                    title="Object Detection" required>
+                                                    <option value="hoody">Hoody</option>
+                                                    <option value="masked_face">Masked Face</option>
+                                                    <option value="helmet">Helmet</option>
+                                                    <option value="fire">Fire</option>
+                                                    <option value="intrusion">Intrusion</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-check">
+                                                <label class="form-check-label">
+                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox">
+                                                    <span class="form-check-sign"></span>
+                                                    Sound Alarm
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-check">
+                                                <label class="form-check-label">
+                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox">
+                                                    <span class="form-check-sign"></span>
+                                                    Favourite
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <a href="/home" class="btn btn-default">Close</a>
+                                        <button type="submit" class="btn btn-primary">Add</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="container">
+            <nav>
+                <ul>
+                    <li>
+                        <a href="https://deepsightlabs.com">
+                            DeepSight Labs
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="copyright">
+                &copy;
+                <script>
+                    document.write(new Date().getFullYear())
+                </script>,
+                <a href="http://www.deepsightlabs.com" target="_blank">DeepSight Labs</a>.
+            </div>
+        </div>
+    </footer>
+</body>
+<!-- Core JS Files -->
+<script src="/static/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
+<script src="/static/js/core/popper.min.js" type="text/javascript"></script>
+<script src="/static/js/core/bootstrap.min.js" type="text/javascript"></script>
+<script src="/static/js/plugins/bootstrap-selectpicker.js" type="text/javascript"></script>
+<script src="/static/js/plugins/jasny-bootstrap.min.js"></script>
+
+</html>
