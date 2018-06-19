@@ -66,14 +66,12 @@ def add_camera_page():
 def edit_camera_page(camera_id):
     img = get_background()
     camera_payload = get_camera_info()
-    current_email = []
-    current_sms = []
-    current_call = []
+    current_email, current_sms, current_call = ([] for i in range(3))
 
+    # Pre-load camera info into the form  
     for i in range(0, len(camera_payload)):
 
         if camera_id == camera_payload[str(i)]['camera_id']:
-
             for j in range(0, len(camera_payload[str(i)]['email_list'])):
                 current_email.append(str(camera_payload[str(i)]['email_list'][j]))
                 current_email = ''.join(current_email)
@@ -93,16 +91,7 @@ def edit_camera_page(camera_id):
             current_rtsp = camera_payload[str(i)]['rtsp_url']
             current_http = camera_payload[str(i)]['http_url']
 
-    return render_template('edit.html', image = img, 
-    current_name = current_name, 
-    current_floor = current_floor,
-    current_rtsp = current_rtsp,
-    current_http = current_http,
-    current_email = current_email,
-    current_sms = current_sms,
-    current_call = current_call,
-    current_start_time = current_start_time,
-    current_end_time = current_end_time)
+    return render_template('edit.html', image = img, current_name = current_name, current_floor = current_floor,current_rtsp = current_rtsp,current_http = current_http,current_email = current_email,current_sms = current_sms,current_call = current_call,current_start_time = current_start_time,current_end_time = current_end_time)
 
 # Route home page
 @app.route('/home')
@@ -110,10 +99,7 @@ def edit_camera_page(camera_id):
 def home_page():
     img = get_background()
     camera_payload = get_camera_info()
-    camera_names_list = []
-    favourites_list = []
-    floors_list = []
-    unique_floors = []
+    camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
     cameras_in_floor_dict = {}
 
     for i in range(0, len(camera_payload)):        
@@ -143,27 +129,9 @@ def home_page():
 def list_page():
     img = get_background()
     camera_payload = get_camera_info()
-
-    camera_names_list = []
-    camera_id_list = []
-    floors_list = []
-    favourites_list = []
-    start_time_list = []
-    end_time_list = []
-    sound_alarm_list = []
-    rtsp_url_list = []
-    http_url_list = []
-    hoody_list =[]
-    masked_face_list =[]
-    intrusion_list =[]
-    fire_list =[]
-    helmet_list =[]
-    email_list = []
-    sms_list = []
-    call_list = []
+    camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, http_url_list, hoody_list, masked_face_list, intrusion_list, fire_list, helmet_list, email_list, sms_list, call_list = ([] for i in range(17))
 
     # Adding form data to lists - Lists are easier for Jinja Templating
-
     for i in range(0, len(camera_payload)):
         for j in range(0, len(camera_payload[str(i)]['email_list'])):
             email_list.append(str(camera_payload[str(i)]['email_list'][j]))
@@ -190,22 +158,7 @@ def list_page():
         helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
     return render_template('list.html', image = img,
-    data = zip(
-        camera_id_list,
-        camera_names_list,
-        rtsp_url_list,
-        email_list,
-        sms_list,
-        call_list,
-        hoody_list,
-        masked_face_list,
-        helmet_list,
-        fire_list,
-        intrusion_list,
-        start_time_list,
-        end_time_list,
-        floors_list,
-        sound_alarm_list))
+    data = zip(camera_id_list, camera_names_list, rtsp_url_list, email_list, sms_list, call_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 #### Data Handling from GUI
 
@@ -249,7 +202,6 @@ def license():
 @app.route('/addCamera', methods=['GET', 'POST'])
 @license_required
 def add_camera():
-
     # Get new camera data from form
     if request.method == 'POST':
         name = request.form['camera_name']
@@ -265,6 +217,36 @@ def add_camera():
         sound_alarm = request.form.getlist('sound_alarm')
         object_detection = request.form.getlist('object_detection')
 
+        object_hoody = 0
+        object_masked_face = 0
+        object_helmet = 0
+        object_fire = 0
+        object_intrusion = 0
+        favourite_value = 0
+        sound_alarm_value = 0
+
+        if favourite:
+            favourite_value = 1
+
+        if sound_alarm:
+            sound_alarm_value = 1
+
+        for i in range(0,len(object_detection)):
+            if object_detection[i] == 'hoody':
+                object_hoody = 1
+
+            if object_detection[i] == 'masked_face':
+                object_masked_face = 1
+
+            if object_detection[i] == 'helmet':
+                object_helmet = 1
+
+            if object_detection[i] == 'fire':
+                object_fire = 1
+
+            if object_detection[i] == 'intrusion':
+                object_intrusion = 1
+
         print 'Adding Camera'
         print 'New Camera Name: ' + name
         print 'New Floor: ' + floor
@@ -272,11 +254,17 @@ def add_camera():
         print 'New Email List: ' + email
         print 'New Sub Stream URL: ' + sub_url
         print 'New SMS List: ' + sms
-        print 'New Start Time: ' + start_time
         print 'New Call List: ' + call
+        print 'New Start Time: ' + start_time
         print 'New End Time: ' + end_time
-        print 'New Favourite: ' + str(favourite)
         print 'New Objects: ' + str(object_detection)
+        print 'New Object Hoodie: ' + str(object_hoody)
+        print 'New Object Masked Face: ' + str(object_masked_face)
+        print 'New Object Helmet: ' + str(object_helmet)
+        print 'New Object Fire: ' + str(object_fire)
+        print 'New Object Intrusion: ' + str(object_intrusion)
+        print 'New Favourite: ' + str(favourite_value)
+        print 'New Sound Alarm: ' + str(sound_alarm_value)
 
         new_camera_dict = OrderedDict()
         new_camera_dict["camera_name"] = name
@@ -315,6 +303,36 @@ def edit_camera():
         sound_alarm = request.form.getlist('sound_alarm')
         object_detection = request.form.getlist('object_detection')
 
+        object_hoody = 0
+        object_masked_face = 0
+        object_helmet = 0
+        object_fire = 0
+        object_intrusion = 0
+        favourite_value = 0
+        sound_alarm_value = 0
+
+        if favourite:
+            favourite_value = 1
+
+        if sound_alarm:
+            sound_alarm_value = 1
+
+        for i in range(0,len(object_detection)):
+            if object_detection[i] == 'hoody':
+                object_hoody = 1
+
+            if object_detection[i] == 'masked_face':
+                object_masked_face = 1
+
+            if object_detection[i] == 'helmet':
+                object_helmet = 1
+
+            if object_detection[i] == 'fire':
+                object_fire = 1
+
+            if object_detection[i] == 'intrusion':
+                object_intrusion = 1
+
         print 'Editing Camera'
         print 'Edited Camera Name: ' + name
         print 'Edited Floor: ' + floor
@@ -322,11 +340,17 @@ def edit_camera():
         print 'Edited Email List: ' + email
         print 'Edited Sub Stream URL: ' + sub_url
         print 'Edited SMS List: ' + sms
-        print 'Edited Start Time: ' + start_time
         print 'Edited Call List: ' + call
+        print 'Edited Start Time: ' + start_time
         print 'Edited End Time: ' + end_time
-        print 'Edited Favourite: ' + str(favourite)
         print 'Edited Objects: ' + str(object_detection)
+        print 'Edited Object Hoodie: ' + str(object_hoody)
+        print 'Edited Object Masked Face: ' + str(object_masked_face)
+        print 'Edited Object Helmet: ' + str(object_helmet)
+        print 'Edited Object Fire: ' + str(object_fire)
+        print 'Edited Object Intrusion: ' + str(object_intrusion)
+        print 'Edited Favourite: ' + str(favourite_value)
+        print 'Edited Sound Alarm: ' + str(sound_alarm_value)
 
         edited_camera_dict = OrderedDict()
         edited_camera_dict["camera_name"] = name
