@@ -35,7 +35,7 @@ def license_required(func):
     def valid_license(*args, **kwargs):
         # In case we need the validity number too
         license_status_valid, license_key_valid  = get_license()
-        if license_status_valid != 'True':
+        if str(license_status_valid).lower() != 'true':
             return redirect(url_for('landing'))
         return func(*args, **kwargs)
     return valid_license
@@ -47,7 +47,7 @@ def license_required(func):
 def landing():
     img = get_background()
     license_status, license_validity = get_license()
-    if str(license_status) == 'True':
+    if str(license_status).lower() == 'true':
         license_message = 'Valid'
     else:
         license_message = 'Invalid. Please upload a valid license'
@@ -102,7 +102,7 @@ def home_page():
     camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
     cameras_in_floor_dict = {}
 
-    for i in range(0, len(camera_payload)):        
+    for i in range(0, len(camera_payload)):
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         floors_list.append(str(camera_payload[str(i)]['floor']))
         unique_floors = set(floors_list)
