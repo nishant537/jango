@@ -72,7 +72,6 @@ def edit_camera_page(camera_id):
     current_call = ''
 
     for i in camera_payload:
-        print 'i: ' + str(i)
         if camera_id == i:
             for j in range(0, len(camera_payload[str(i)]['email_list'])):
                 current_email_list.append(camera_payload[str(i)]['email_list'][j])
@@ -244,37 +243,21 @@ def add_camera():
         for i in range(0,len(object_detection)):
             if object_detection[i] == 'hoody':
                 object_hoody = 1
-
             if object_detection[i] == 'masked_face':
                 object_masked_face = 1
-
             if object_detection[i] == 'helmet':
                 object_helmet = 1
-
             if object_detection[i] == 'fire':
                 object_fire = 1
-
             if object_detection[i] == 'intrusion':
                 object_intrusion = 1
 
-        print 'Adding Camera'
-        print 'New Camera Name: ' + name
-        print 'New Floor: ' + floor
-        print 'New Main Stream URL: ' + main_url
-        print 'New Email List: ' + email
-        print 'New Sub Stream URL: ' + sub_url
-        print 'New SMS List: ' + sms
-        print 'New Call List: ' + call
-        print 'New Start Time: ' + start_time
-        print 'New End Time: ' + end_time
-        print 'New Objects: ' + str(object_detection)
-        print 'New Object Hoodie: ' + str(object_hoody)
-        print 'New Object Masked Face: ' + str(object_masked_face)
-        print 'New Object Helmet: ' + str(object_helmet)
-        print 'New Object Fire: ' + str(object_fire)
-        print 'New Object Intrusion: ' + str(object_intrusion)
-        print 'New Favourite: ' + str(favourite_value)
-        print 'New Sound Alarm: ' + str(sound_alarm_value)
+        object_detection_dict = OrderedDict()
+        object_detection_dict["hoody"] = object_hoody
+        object_detection_dict["burkha"] = object_masked_face
+        object_detection_dict["helmet"] = object_helmet
+        object_detection_dict["fire"] = object_fire
+        object_detection_dict["intrusion"] = object_intrusion
 
         new_camera_dict = OrderedDict()
         new_camera_dict["camera_name"] = name
@@ -283,11 +266,12 @@ def add_camera():
         new_camera_dict["call_list"] = call
         new_camera_dict["rtsp_url"] = main_url
         new_camera_dict["http_url"] = sub_url
-        new_camera_dict["floor"] = floor
-        new_camera_dict["object_detect"] = object_detection
+        new_camera_dict["object_detect"] = object_detection_dict
         new_camera_dict["intrusion_start_time"] = start_time
         new_camera_dict["intrusion_end_time"] = end_time
+        new_camera_dict["floor"] = floor
         new_camera_dict["sound_alarm"] = sound_alarm
+        new_camera_dict["favourite"] = favourite_value
 
         # Making a POST to the Backend - New Camera
         post_new_camera_info = requests.post(url = 'http://127.0.0.1:8081/createCamera', data = new_camera_dict)
@@ -330,37 +314,21 @@ def edit_camera():
         for i in range(0,len(object_detection)):
             if object_detection[i] == 'hoody':
                 object_hoody = 1
-
             if object_detection[i] == 'masked_face':
                 object_masked_face = 1
-
             if object_detection[i] == 'helmet':
                 object_helmet = 1
-
             if object_detection[i] == 'fire':
                 object_fire = 1
-
             if object_detection[i] == 'intrusion':
                 object_intrusion = 1
 
-        print 'Editing Camera'
-        print 'Edited Camera Name: ' + name
-        print 'Edited Floor: ' + floor
-        print 'Edited Main Stream URL: ' + main_url
-        print 'Edited Email List: ' + email
-        print 'Edited Sub Stream URL: ' + sub_url
-        print 'Edited SMS List: ' + sms
-        print 'Edited Call List: ' + call
-        print 'Edited Start Time: ' + start_time
-        print 'Edited End Time: ' + end_time
-        print 'Edited Objects: ' + str(object_detection)
-        print 'Edited Object Hoodie: ' + str(object_hoody)
-        print 'Edited Object Masked Face: ' + str(object_masked_face)
-        print 'Edited Object Helmet: ' + str(object_helmet)
-        print 'Edited Object Fire: ' + str(object_fire)
-        print 'Edited Object Intrusion: ' + str(object_intrusion)
-        print 'Edited Favourite: ' + str(favourite_value)
-        print 'Edited Sound Alarm: ' + str(sound_alarm_value)
+        object_detection_dict = OrderedDict()
+        object_detection_dict["hoody"] = object_hoody
+        object_detection_dict["burkha"] = object_masked_face
+        object_detection_dict["helmet"] = object_helmet
+        object_detection_dict["fire"] = object_fire
+        object_detection_dict["intrusion"] = object_intrusion
 
         edited_camera_dict = OrderedDict()
         edited_camera_dict["camera_name"] = name
@@ -369,11 +337,12 @@ def edit_camera():
         edited_camera_dict["call_list"] = call
         edited_camera_dict["rtsp_url"] = main_url
         edited_camera_dict["http_url"] = sub_url
-        edited_camera_dict["floor"] = floor
-        edited_camera_dict["object_detect"] = object_detection
+        edited_camera_dict["object_detect"] = object_detection_dict
         edited_camera_dict["intrusion_start_time"] = start_time
         edited_camera_dict["intrusion_end_time"] = end_time
+        edited_camera_dict["floor"] = floor
         edited_camera_dict["sound_alarm"] = sound_alarm
+        edited_camera_dict["favourite"] = favourite_value
 
         # Making a POST to the Backend - Edited Camera
         post_edited_camera_info = requests.post(url = 'http://127.0.0.1:8081/createCamera', data = edited_camera_dict)
