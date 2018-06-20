@@ -122,8 +122,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for id, name, rtsp_url, email, sms, call_list, hoody, masked_face, helmet, fire, intrusion, start_time, end_time, floor, sound_alarm
-                                    in data %}
+                                    {% for id, name, rtsp_url, hoody, masked_face, helmet, fire, intrusion, start_time, end_time, floor, sound_alarm in data
+                                    %}
                                     <tr>
                                         <td class="text-center">
                                             {{ name }}
@@ -132,13 +132,16 @@
                                             {{ rtsp_url }}
                                         </td>
                                         <td class="text-center">
-                                            {{ email }}
+                                            {% if id in email_list %} {% for key1, value1 in email_list.iteritems() if id in key1 %} {{ value1 }} {% endfor %} {% else
+                                            %} None {% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {{ sms }}
+                                            {% if id in sms_list %} {% for key2, value2 in sms_list.iteritems() if id in key2 %} {{ value2 }} {% endfor %} {% else %}
+                                            None {% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {{ call_list }}
+                                            {% if id in call_list %} {% for key3, value3 in call_list.iteritems() if id in key3 %} {{ value3 }} {% endfor %} {% else
+                                            %} None {% endif %}
                                         </td>
                                         <td class="text-center">
                                             {{ hoody }}
@@ -168,8 +171,7 @@
                                             {{ sound_alarm }}
                                         </td>
                                         <td class="text-center">
-                                            <a class="btn btn-success btn-icon btn-sm" data-original-title="Edit" title="Edit"
-                                                href="/edit/{{ id }}">
+                                            <a class="btn btn-success btn-icon btn-sm" data-original-title="Edit" title="Edit" href="/edit/{{id}}">
                                                 <i class="fa fa-pencil"></i>
                                             </a>
                                             <a class="btn btn-danger btn-icon btn-sm" data-original-title="Delete" title="Delete" href="/deleteCamera">

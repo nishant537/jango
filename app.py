@@ -66,23 +66,26 @@ def add_camera_page():
 def edit_camera_page(camera_id):
     img = get_background()
     camera_payload = get_camera_info()
-    current_email, current_sms, current_call = ([] for i in range(3))
+    current_email_list, current_sms_list, current_call_list = ([] for i in range(3))
+    current_email = ''
+    current_sms = ''
+    current_call = ''
 
-    # Pre-load camera info into the form  
-    for i in range(0, len(camera_payload)):
-
-        if camera_id == camera_payload[str(i)]['camera_id']:
+    for i in camera_payload:
+        print 'i: ' + str(i)
+        if camera_id == i:
             for j in range(0, len(camera_payload[str(i)]['email_list'])):
-                current_email.append(str(camera_payload[str(i)]['email_list'][j]))
-                current_email = ''.join(current_email)
+                current_email_list.append(camera_payload[str(i)]['email_list'][j])
+                current_email = ', '.join(current_email_list)
 
             for k in range(0, len(camera_payload[str(i)]['sms_list'])):
-                current_sms.append(str(camera_payload[str(i)]['sms_list'][k]))
-                current_sms = ''.join(current_sms)
+                print 'Running? ' + str(k)
+                current_sms_list.append(camera_payload[str(i)]['sms_list'][k])
+                current_sms = ', '.join(current_sms_list)
 
             for l in range(0, len(camera_payload[str(i)]['call_list'])):
-                current_call.append(str(camera_payload[str(i)]['call_list'][l]))
-                current_call = ''.join(current_call)
+                current_call_list.append(camera_payload[str(i)]['call_list'][l])
+                current_call = ', '.join(current_call_list)
 
             current_name = camera_payload[str(i)]['camera_name']
             current_floor = camera_payload[str(i)]['floor']
@@ -91,7 +94,7 @@ def edit_camera_page(camera_id):
             current_rtsp = camera_payload[str(i)]['rtsp_url']
             current_http = camera_payload[str(i)]['http_url']
 
-    return render_template('edit.html', image = img, current_name = current_name, current_floor = current_floor,current_rtsp = current_rtsp,current_http = current_http,current_email = current_email,current_sms = current_sms,current_call = current_call,current_start_time = current_start_time,current_end_time = current_end_time)
+    return render_template('edit.html', image = img, current_name = current_name, current_floor = current_floor,current_rtsp = current_rtsp, current_http = current_http, current_email = current_email, current_sms = current_sms, current_call = current_call, current_start_time = current_start_time, current_end_time = current_end_time)
 
 # Route home page
 @app.route('/home')
@@ -129,19 +132,23 @@ def home_page():
 def list_page():
     img = get_background()
     camera_payload = get_camera_info()
-    camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, http_url_list, hoody_list, masked_face_list, intrusion_list, fire_list, helmet_list, email_list, sms_list, call_list = ([] for i in range(17))
+    camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, http_url_list, hoody_list, masked_face_list, intrusion_list, fire_list, helmet_list = ([] for i in range(14))
+    email_dict = {}
+    sms_dict = {}
+    call_dict = {}
 
     # Adding form data to lists - Lists are easier for Jinja Templating
     for i in camera_payload:
         for j in range(0, len(camera_payload[str(i)]['email_list'])):
-            email_list.append(str(camera_payload[str(i)]['email_list'][j]))
+            email_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['email_list'][j]))
 
         for k in range(0, len(camera_payload[str(i)]['sms_list'])):
-            sms_list.append(str(camera_payload[str(i)]['sms_list'][k]))
+            sms_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['sms_list'][k]))
 
         for l in range(0, len(camera_payload[str(i)]['call_list'])):
-            call_list.append(str(camera_payload[str(i)]['call_list'][l]))
+            call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
 
+    for i in camera_payload:
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
         floors_list.append(str(camera_payload[str(i)]['floor']))
@@ -157,11 +164,11 @@ def list_page():
         fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
         helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
-    print 'email_list' + str(email_list)
-    print 'sms_list' + str(sms_list)
-    print 'call_list' + str(call_list)
     return render_template('list.html', image = img,
-    data = zip(camera_id_list, camera_names_list, rtsp_url_list, email_list, sms_list, call_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+    email_list = email_dict,
+    sms_list = sms_dict,
+    call_list = call_dict,
+    data = zip(camera_id_list, camera_names_list, rtsp_url_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 #### Data Handling from GUI
 
