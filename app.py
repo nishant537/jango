@@ -78,7 +78,6 @@ def edit_camera_page(camera_id):
                 current_email = ', '.join(current_email_list)
 
             for k in range(0, len(camera_payload[str(i)]['sms_list'])):
-                print 'Running? ' + str(k)
                 current_sms_list.append(camera_payload[str(i)]['sms_list'][k])
                 current_sms = ', '.join(current_sms_list)
 
@@ -350,4 +349,5 @@ def edit_camera():
 
 if __name__ == "__main__":
     # Running Flask
+    # To access globally - WSGI Server
     app.run(host='127.0.0.1', debug=True)
