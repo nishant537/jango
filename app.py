@@ -102,7 +102,7 @@ def home_page():
     camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
     cameras_in_floor_dict = {}
 
-    for i in range(0, len(camera_payload)):
+    for i in camera_payload:
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         floors_list.append(str(camera_payload[str(i)]['floor']))
         unique_floors = set(floors_list)
@@ -114,7 +114,7 @@ def home_page():
             
     # Sorting all cameras based on the floor - Storing in a dictionary to make it easier for Jinja Templating
     for i in unique_floors:
-        for k in range(0, len(camera_payload)):
+        for k in camera_payload:
             if str(camera_payload[str(k)]['floor']) == i:
                 cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
 
@@ -132,7 +132,7 @@ def list_page():
     camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, http_url_list, hoody_list, masked_face_list, intrusion_list, fire_list, helmet_list, email_list, sms_list, call_list = ([] for i in range(17))
 
     # Adding form data to lists - Lists are easier for Jinja Templating
-    for i in range(0, len(camera_payload)):
+    for i in camera_payload:
         for j in range(0, len(camera_payload[str(i)]['email_list'])):
             email_list.append(str(camera_payload[str(i)]['email_list'][j]))
 
@@ -157,6 +157,9 @@ def list_page():
         fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
         helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
+    print 'email_list' + str(email_list)
+    print 'sms_list' + str(sms_list)
+    print 'call_list' + str(call_list)
     return render_template('list.html', image = img,
     data = zip(camera_id_list, camera_names_list, rtsp_url_list, email_list, sms_list, call_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
