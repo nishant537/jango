@@ -88,6 +88,7 @@ def edit_camera_page(camera_id):
     current_sms = ''
     current_call = ''
 
+    # Match camera_id from camera_payload and load it's details.
     for i in camera_payload:
         if camera_id == i:
             for j in range(0, len(camera_payload[str(i)]['email_list'])):
@@ -123,12 +124,15 @@ def home_page():
     alert_camera_name = ''
     alert_camera_message = ''
 
+    # Creating an alert and playing alarm
     if alert_payload:
         (alert_id, alert_message), = alert_payload.items()
         if alert_id in camera_payload:
             alert_camera_name = camera_payload[str(alert_id)]['camera_name']
             alert_camera_message = alert_message[0]
-            mixer.music.play()
+            alert_sound = camera_payload[str(alert_id)]['sound_alarm']
+            if alert_sound == 1:
+                mixer.music.play()
          
     for i in camera_payload:
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
@@ -173,7 +177,6 @@ def list_page():
         for l in range(0, len(camera_payload[str(i)]['call_list'])):
             call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
 
-    for i in camera_payload:
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
         floors_list.append(str(camera_payload[str(i)]['floor']))
@@ -215,6 +218,7 @@ def search_page():
     sms_dict = {}
     call_dict = {}
 
+    # Searching through all camera names
     if request.method == 'POST':
         searched_name = request.form.values()
         searched_name = searched_name[0]
