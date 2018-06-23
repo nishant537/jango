@@ -2,12 +2,20 @@ from flask import Flask, render_template, request, redirect, url_for
 from functools import wraps
 from werkzeug.utils import secure_filename
 from collections import OrderedDict
-import os, requests, json
+from pygame import mixer
+import os, requests, json, time
+
 #### Initiate Flask
 app = Flask(__name__)
 
+
+# Setup license folder
 UPLOAD_FOLDER = '/opt/godeep'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Initialize alarm.mp3 file
+mixer.init()
+mixer.music.load('alarm.mp3')
 
 # Get License info from backend
 def get_license():
@@ -29,6 +37,14 @@ def get_background():
     background_payload = json.loads(get_background)
     background_img = background_payload['image']
     return background_img
+
+# Get Alerts from backend
+def get_alerts():
+    # while True:
+        # time.sleep(1)
+    get_alert = requests.get('http://127.0.0.1:8081/alertInfo').content
+    alert_payload = json.loads(get_alert)
+    return alert_payload
 
 # Decorator - Checking for license first before loading any page
 def license_required(func):
@@ -101,15 +117,25 @@ def edit_camera_page(camera_id):
 def home_page():
     img = get_background()
     camera_payload = get_camera_info()
+    alert_payload = get_alerts()
     camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
     cameras_in_floor_dict = {}
+    alert_camera_name = ''
+    alert_camera_message = ''
 
+    if alert_payload:
+        (alert_id, alert_message), = alert_payload.items()
+        if alert_id in camera_payload:
+            alert_camera_name = camera_payload[str(alert_id)]['camera_name']
+            alert_camera_message = alert_message[0]
+            mixer.music.play()
+         
     for i in camera_payload:
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         floors_list.append(str(camera_payload[str(i)]['floor']))
         unique_floors = set(floors_list)
         unique_floors = list(unique_floors)
-
+        
         # Adding all Cameras which are favourite to a list
         if str(camera_payload[str(i)]['favourite']) == '1':
             favourites_list.append(str(camera_payload[str(i)]['camera_name']))
@@ -121,9 +147,9 @@ def home_page():
                 cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
 
     print 'Favourites: ' + str(favourites_list)
-    print 'Dictionary: ' + str(cameras_in_floor_dict)
+    print 'Camaras in each floor: ' + str(cameras_in_floor_dict)
     
-    return render_template('home.html', image = img, camera = camera_names_list, favourites = favourites_list, unique_floors = unique_floors, camera_floor = cameras_in_floor_dict)
+    return render_template('home.html', image = img, alert_name = alert_camera_name, alert_message = alert_camera_message, camera = camera_names_list, favourites = favourites_list, unique_floors = unique_floors, camera_floor = cameras_in_floor_dict)
 
 # Route list page
 @app.route('/list')
@@ -255,11 +281,9 @@ def background_image(background_image):
 def license():
     # Upload license
     if request.method == 'POST':
-        f = request.files['license_file']
-        # Using original file name
-        filename = secure_filename(f.filename)
-        print 'The filename of the license uploaded is: ' + filename
-        # f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        license_file = request.files['license_file']
+        license_file.filename = 'GoDeep.lic'
+        license_file.save(os.path.join(app.config['UPLOAD_FOLDER'], license_file.filename))
     return redirect(url_for('home_page'))
 
 # Add Camera
@@ -406,4 +430,4 @@ def edit_camera():
 if __name__ == "__main__":
     # Running Flask
     # To access globally - WSGI Server
-    app.run(host='127.0.0.1', debug=True)
+    app.run(host='127.0.0.1', debug=True, threaded=True)

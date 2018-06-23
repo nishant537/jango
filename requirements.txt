@@ -1,3 +1,5 @@
 flask
 functools
 werkzeug.utils
+collections
+pygame

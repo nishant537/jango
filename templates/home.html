@@ -18,7 +18,7 @@
 </head>
 
 <body class="profile-page">
-    <nav class="navbar navbar-expand-lg bg-white fixed-top navbar-transparent" color-on-scroll="500">
+    <nav class="navbar navbar-expand-lg bg-white navbar-absolute navbar-transparent">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight Labs" data-placement="bottom" target="_blank">
@@ -66,6 +66,21 @@
                         <i class="fa fa-home"></i>
                     </a>
                 </div>
+                {% if alert_name and alert_message is defined %}
+                <div class="alert alert-danger" role="alert">
+                    <div class="container">
+                        <div class="alert-icon">
+                            <i class="fa fa-bell"></i>
+                        </div>
+                        <strong>{{ alert_message }} Alert!</strong> Please check {{ alert_name }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">
+                                <i class="fa fa-times"></i>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
                 <div class="row">
                     <div class="col-md-12">
                         <div class="nav-align-center">
