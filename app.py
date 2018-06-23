@@ -188,10 +188,8 @@ def search_page():
     email_dict = {}
     sms_dict = {}
     call_dict = {}
-    print 'Hey'
 
     if request.method == 'POST':
-        print 'POST'
         searched_name = request.form.values()
         searched_name = searched_name[0]
         for i in camera_payload:
@@ -220,11 +218,6 @@ def search_page():
                 intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
                 fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
                 helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
-        
-        print 'Something: ' + str(camera_names_list)
-        print 'Something: ' + str(camera_id_list)
-        print 'Something: ' + str(floors_list)
-        print 'Something: ' + str(favourites_list)
 
     return render_template('list.html', image = img,
     email_list = email_dict,
