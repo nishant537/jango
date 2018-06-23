@@ -150,9 +150,6 @@ def home_page():
             if str(camera_payload[str(k)]['floor']) == i:
                 cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
 
-    print 'Favourites: ' + str(favourites_list)
-    print 'Camaras in each floor: ' + str(cameras_in_floor_dict)
-    
     return render_template('home.html', image = img, alert_name = alert_camera_name, alert_message = alert_camera_message, camera = camera_names_list, favourites = favourites_list, unique_floors = unique_floors, camera_floor = cameras_in_floor_dict)
 
 # Route list page
