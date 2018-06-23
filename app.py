@@ -2,11 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for
 from functools import wraps
 from werkzeug.utils import secure_filename
 from collections import OrderedDict
-import requests
-import json
-
+import os, requests, json
 #### Initiate Flask
 app = Flask(__name__)
+
+UPLOAD_FOLDER = '/opt/godeep'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Get License info from backend
 def get_license():
@@ -170,6 +171,60 @@ def list_page():
 
 #### Data Handling from GUI
 
+# Handling search
+@app.route('/search', methods=['GET', 'POST'])
+@license_required
+def search_page():
+    img = get_background()
+    camera_payload = get_camera_info()
+    camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, http_url_list, hoody_list, masked_face_list, intrusion_list, fire_list, helmet_list = ([] for i in range(14))
+    email_dict = {}
+    sms_dict = {}
+    call_dict = {}
+    print 'Hey'
+
+    if request.method == 'POST':
+        print 'POST'
+        searched_name = request.form.values()
+        searched_name = searched_name[0]
+        for i in camera_payload:
+            if searched_name.lower() in camera_payload[str(i)]['camera_name'].lower():
+
+                for j in range(0, len(camera_payload[str(i)]['email_list'])):
+                    email_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['email_list'][j]))
+                
+                for k in range(0, len(camera_payload[str(i)]['sms_list'])):
+                    sms_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['sms_list'][k]))
+                
+                for l in range(0, len(camera_payload[str(i)]['call_list'])):
+                    call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
+
+                camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
+                camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
+                floors_list.append(str(camera_payload[str(i)]['floor']))
+                favourites_list.append(str(camera_payload[str(i)]['favourite']))
+                start_time_list.append(str(camera_payload[str(i)]['intrusion_start_time']))
+                end_time_list.append(str(camera_payload[str(i)]['intrusion_end_time']))
+                sound_alarm_list.append(str(camera_payload[str(i)]['sound_alarm']))
+                rtsp_url_list.append(str(camera_payload[str(i)]['rtsp_url']))
+                http_url_list.append(str(camera_payload[str(i)]['http_url']))
+                hoody_list.append(str(camera_payload[str(i)]['object_detect']['hoody']))
+                masked_face_list.append(str(camera_payload[str(i)]['object_detect']['burkha']))
+                intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
+                fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
+                helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
+        
+        print 'Something: ' + str(camera_names_list)
+        print 'Something: ' + str(camera_id_list)
+        print 'Something: ' + str(floors_list)
+        print 'Something: ' + str(favourites_list)
+
+    return render_template('list.html', image = img,
+    email_list = email_dict,
+    sms_list = sms_dict,
+    call_list = call_dict,
+    data = zip(camera_id_list, camera_names_list, rtsp_url_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+
 # Send background information to backend
 @app.route('/background/<background_image>')
 @license_required
@@ -204,6 +259,7 @@ def license():
         # Using original file name
         filename = secure_filename(f.filename)
         print 'The filename of the license uploaded is: ' + filename
+        # f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return redirect(url_for('home_page'))
 
 # Add Camera
@@ -269,7 +325,7 @@ def add_camera():
         new_camera_dict["intrusion_start_time"] = start_time
         new_camera_dict["intrusion_end_time"] = end_time
         new_camera_dict["floor"] = floor
-        new_camera_dict["sound_alarm"] = sound_alarm
+        new_camera_dict["sound_alarm"] = sound_alarm_value
         new_camera_dict["favourite"] = favourite_value
 
         # Making a POST to the Backend - New Camera
@@ -340,7 +396,7 @@ def edit_camera():
         edited_camera_dict["intrusion_start_time"] = start_time
         edited_camera_dict["intrusion_end_time"] = end_time
         edited_camera_dict["floor"] = floor
-        edited_camera_dict["sound_alarm"] = sound_alarm
+        edited_camera_dict["sound_alarm"] = sound_alarm_value
         edited_camera_dict["favourite"] = favourite_value
 
         # Making a POST to the Backend - Edited Camera

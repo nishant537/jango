@@ -65,9 +65,32 @@
                     <a href="/" class="btn btn-default btn-round btn-lg btn-icon" rel="tooltip" title="Home">
                         <i class="fa fa-home"></i>
                     </a>
-                    <a href="/" class="btn btn-default btn-round btn-lg btn-icon" rel="tooltip" title="Search">
-                        <i class="fa fa-search"></i>
-                    </a>
+                </div>
+            </div>
+            <div class="col-md-4 mr-auto ml-auto">
+                <div class="card card-plain card-form-horizontal">
+                    <div class="card-body">
+                        <form class="form" method="POST" action="/search">
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">
+                                                <i class="fa fa-search"></i>
+                                            </span>
+                                        </div>
+                                        <input id="search_name" name="seach_name" type="text" class="form-control" placeholder="Search">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button type="submit" class="btn btn-primary btn-round btn-block">Search</button>
+                                </div>
+                                <div class="col-sm-2">
+                                    <a href="/list" class="btn btn-default btn-round btn-block">Clear</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="row" style="padding: 50px">
@@ -80,9 +103,9 @@
                                         <th class="text-center">
                                             Camera Name
                                         </th>
-                                        <th class="text-center">
+                                        <!-- <th class="text-center">
                                             RTSP URL
-                                        </th>
+                                        </th> -->
                                         <th class="text-center">
                                             Email ID List
                                         </th>
@@ -131,9 +154,9 @@
                                         <td class="text-center">
                                             {{ name }}
                                         </td>
-                                        <td class="text-center">
+                                        <!-- <td class="text-center">
                                             {{ rtsp_url }}
-                                        </td>
+                                        </td> -->
                                         <td class="text-center">
                                             {% if id in email_list %} {% for key1, value1 in email_list.iteritems() if id in key1 %} {{ value1 }} {% endfor %} {% else
                                             %} None {% endif %}
@@ -177,7 +200,7 @@
                                             <a class="btn btn-success btn-icon btn-sm" data-original-title="Edit" title="Edit" href="/edit/{{id}}">
                                                 <i class="fa fa-pencil"></i>
                                             </a>
-                                            <a class="btn btn-danger btn-icon btn-sm" data-original-title="Delete" title="Delete" href="/deleteCamera">
+                                            <a class="btn btn-danger btn-icon btn-sm" data-original-title="Delete" title="Delete" href="/deleteCamera/{{id}}">
                                                 <i class="fa fa-times"></i>
                                             </a>
                                         </td>
