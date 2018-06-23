@@ -158,16 +158,16 @@
                                             {{ rtsp_url }}
                                         </td> -->
                                         <td class="text-center">
-                                            {% if id in email_list %} {% for key1, value1 in email_list.iteritems() if id in key1 %} {{ value1 }} {% endfor %} {% else
-                                            %} None {% endif %}
+                                            {% if id in email_list %} {% for key1, value1 in email_list.iteritems() if id in key1 %} {% for emails in value1 %} {{ emails
+                                            }} {% endfor %} {% endfor %} {% else %} None {% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {% if id in sms_list %} {% for key2, value2 in sms_list.iteritems() if id in key2 %} {{ value2 }} {% endfor %} {% else %}
-                                            None {% endif %}
+                                            {% if id in sms_list %} {% for key2, value2 in sms_list.iteritems() if id in key2 %} {% for sms in value2 %} {{ sms }} {%
+                                            endfor %} {% endfor %} {% else %} None {% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {% if id in call_list %} {% for key3, value3 in call_list.iteritems() if id in key3 %} {{ value3 }} {% endfor %} {% else
-                                            %} None {% endif %}
+                                            {% if id in call_list %} {% for key3, value3 in call_list.iteritems() if id in key3 %} {% for calls in value3 %} {{ calls
+                                            }} {% endfor %} {% endfor %} {% else %} None {% endif %}
                                         </td>
                                         <td class="text-center">
                                             {{ hoody }}
