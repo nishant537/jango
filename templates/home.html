@@ -95,19 +95,19 @@
                                         All
                                     </a>
                                 </li>
-                                <!-- {% for floors in camera_floor %}
+                                {% for floors in unique_floors %}
                                 <li class="nav-item">
                                     <a class="nav-link" data-toggle="tab" href="#{{floors}}" role="tablist">
                                         {{floors}}
                                     </a>
                                 </li>
-                                {% endfor %} -->
+                                {% endfor %}
                             </ul>
                         </div>
                         <div class="tab-content gallery">
                             <div class="tab-pane active" id="favorite" role="tabpanel">
                                 <div class="row">
-                                    {% for name in favourites %}
+                                    {% for favourited_camera_name in favourites %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
                                             <div class="card-image">
@@ -115,7 +115,7 @@
                                             </div>
                                             <div class="card-body">
                                                 <a href="pablo">
-                                                    <h4 class="card-title">{{name}}</h4>
+                                                    <h4 class="card-title">{{favourited_camera_name}}</h4>
                                                 </a>
                                                 <div class="card-footer">
                                                     <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
@@ -133,7 +133,7 @@
                             </div>
                             <div class="tab-pane" id="all" role="tabpanel">
                                 <div class="row">
-                                    {% for camera_name in camera %}
+                                    {% for all_cameras in camera %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
                                             <div class="card-image">
@@ -141,10 +141,10 @@
                                             </div>
                                             <div class="card-body">
                                                 <a href="pablo">
-                                                    <h4 class="card-title">{{camera_name}}</h4>
+                                                    <h4 class="card-title">{{all_cameras}}</h4>
                                                 </a>
                                                 <div class="card-footer">
-                                                    {% if camera_name in favourites %}
+                                                    {% if all_cameras in favourites %}
                                                     <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
@@ -159,10 +159,12 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                            <!-- {% for floors in camera_floor %}
+                            {% for floors in unique_floors %}
                             <div class="tab-pane" id="{{floors}}" role="tabpanel">
                                 <div class="row">
-                                    {% for camera_name in camera_floor %}
+                                    {% for floor_camera, camera_name in camera_floor.items() %}
+                                    {% if floor_camera in floors %}
+                                    {% for names in camera_name %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
                                             <div class="card-image">
@@ -170,10 +172,10 @@
                                             </div>
                                             <div class="card-body">
                                                 <a href="pablo">
-                                                    <h4 class="card-title">{{camera_name}}</h4>
+                                                    <h4 class="card-title">{{names}}</h4>
                                                 </a>
                                                 <div class="card-footer">
-                                                    {% if camera_name in favourites %}
+                                                    {% if names in favourites %}
                                                     <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
@@ -189,9 +191,11 @@
                                         </div>
                                     </div>
                                     {% endfor %}
+                                    {% endif %}
+                                    {% endfor %}
                                 </div>
                             </div>
-                            {% endfor %} -->
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
