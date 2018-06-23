@@ -171,6 +171,13 @@ def list_page():
 
 #### Data Handling from GUI
 
+# Handling delete camera
+@app.route('/deleteCamera/<camera_id>')
+@license_required
+def delete_camera(camera_id):
+    post_delete_camera = requests.post(url = 'http://127.0.0.1:8081/deleteCamera/' + camera_id)
+    return redirect(url_for('list_page'))
+
 # Handling search
 @app.route('/search', methods=['GET', 'POST'])
 @license_required
