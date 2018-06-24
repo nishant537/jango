@@ -121,6 +121,7 @@ def home_page():
     alert_payload = get_alerts()
     camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
     cameras_in_floor_dict = {}
+    camera_id_dict = {}
     alert_camera_name = ''
     alert_camera_message = ''
 
@@ -143,14 +144,18 @@ def home_page():
         # Adding all Cameras which are favourite to a list
         if str(camera_payload[str(i)]['favourite']) == '1':
             favourites_list.append(str(camera_payload[str(i)]['camera_name']))
-            
+    
+    for i in camera_payload:
+        camera_id_dict.setdefault(str(camera_payload[str(i)]['camera_name']), []).append(str(i))
+    print (camera_id_dict)
+
     # Sorting all cameras based on the floor - Storing in a dictionary to make it easier for Jinja Templating
     for i in unique_floors:
         for k in camera_payload:
             if str(camera_payload[str(k)]['floor']) == i:
                 cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
 
-    return render_template('home.html', image = img, alert_name = alert_camera_name, alert_message = alert_camera_message, camera = camera_names_list, favourites = favourites_list, unique_floors = unique_floors, camera_floor = cameras_in_floor_dict)
+    return render_template('home.html', image = img, camera_url = camera_id_dict, alert_name = alert_camera_name, alert_message = alert_camera_message, camera = camera_names_list, favourites = favourites_list, unique_floors = unique_floors, camera_floor = cameras_in_floor_dict)
 
 # Route list page
 @app.route('/list')
@@ -203,6 +208,21 @@ def list_page():
 def delete_camera(camera_id):
     post_delete_camera = requests.post(url = 'http://127.0.0.1:8081/deleteCamera/' + camera_id)
     return redirect(url_for('list_page'))
+
+# Support Streaming
+@app.route('/stream/<some_id>')
+@license_required
+def streaming_url(some_id):
+    camera_payload = get_camera_info()
+    if some_id in camera_payload:
+        rtsp_url = str(camera_payload[some_id]['rtsp_url'])
+
+    print 'Camera ID: ' + str(some_id)
+    print 'RTSP URL: ' + str(rtsp_url)
+
+    # Your code here...
+    
+    return redirect(url_for('home_page'))
 
 # Handling search
 @app.route('/search', methods=['GET', 'POST'])

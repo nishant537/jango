@@ -121,9 +121,12 @@
                                                     <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
+                                                    {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1 in favourited_camera_name
+                                                    %} {% for id1 in stream_camera_id1 %}
+                                                    <a href="/stream/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
+                                                    {% endfor %} {% endif %} {% endfor %}
                                                 </div>
                                             </div>
                                         </div>
@@ -148,10 +151,12 @@
                                                     <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% endif %}
-                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
+                                                    {% endif %} {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2 in all_cameras
+                                                    %} {% for id2 in stream_camera_id2 %}
+                                                    <a href="/stream/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
+                                                    {% endfor %} {% endif %} {% endfor %}
                                                 </div>
                                             </div>
                                         </div>
@@ -162,9 +167,7 @@
                             {% for floors in unique_floors %}
                             <div class="tab-pane" id="{{floors}}" role="tabpanel">
                                 <div class="row">
-                                    {% for floor_camera, camera_name in camera_floor.items() %}
-                                    {% if floor_camera in floors %}
-                                    {% for names in camera_name %}
+                                    {% for floor_camera, camera_name in camera_floor.items() %} {% if floor_camera in floors %} {% for names in camera_name %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
                                             <div class="card-image">
@@ -179,17 +182,17 @@
                                                     <a href="" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% endif %}
-                                                    <a href="" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
+                                                    {% endif %} {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3 in names
+                                                    %} {% for id3 in stream_camera_id3 %}
+                                                    <a href="/stream/{{ id3 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
+                                                    {% endfor %} {% endif %} {% endfor %}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    {% endfor %}
-                                    {% endif %}
-                                    {% endfor %}
+                                    {% endfor %} {% endif %} {% endfor %}
                                 </div>
                             </div>
                             {% endfor %}
