@@ -401,7 +401,7 @@ def add_camera():
 
         # Making a POST to the Backend - New Camera
         post_new_camera_info = requests.post(url = 'http://127.0.0.1:8081/createCamera', data = new_camera_dict)
-    return redirect(url_for('home_page'))
+    return redirect(url_for('list_page'))
 
 # Edit Camera
 @app.route('/editCamera', methods=['GET', 'POST'])
