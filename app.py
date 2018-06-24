@@ -1,13 +1,34 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, Response
 from functools import wraps
 from werkzeug.utils import secure_filename
 from collections import OrderedDict
 from pygame import mixer
 import os, requests, json, time
+import cv2
 
 #### Initiate Flask
 app = Flask(__name__)
 
+class VideoCamera(object):
+
+    def __init__(self, url):
+        self.video = cv2.VideoCapture(url)
+
+    def __del__(self):
+        self.video.release()
+    
+    def get_frame(self):
+        ret, image = self.video.read()
+
+        # TODO: Check status using ret, if failed, send a default image
+        # showing the error status instead of the image frame
+
+        # We are using Motion JPEG, but OpenCV defaults to capture raw images,
+        # so we must encode it into JPEG in order to correctly display the
+        # video stream.
+        
+        ret, jpeg = cv2.imencode('.jpg', image)
+        return jpeg.tobytes()
 
 # Setup license folder
 UPLOAD_FOLDER = '/opt/godeep'
@@ -209,20 +230,25 @@ def delete_camera(camera_id):
     post_delete_camera = requests.post(url = 'http://127.0.0.1:8081/deleteCamera/' + camera_id)
     return redirect(url_for('list_page'))
 
+# HTTP stream generation
+def generate_http_stream(camera):
+    while True:
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
 # Support Streaming
-@app.route('/stream/<some_id>')
+@app.route('/stream/<camera_id>')
 @license_required
-def streaming_url(some_id):
+def streaming_url(camera_id):
     camera_payload = get_camera_info()
-    if some_id in camera_payload:
-        rtsp_url = str(camera_payload[some_id]['rtsp_url'])
+    if camera_id in camera_payload:
+        feed = str(camera_payload[camera_id]['rtsp_url'])
 
-    print 'Camera ID: ' + str(some_id)
-    print 'RTSP URL: ' + str(rtsp_url)
+    print 'Camera ID: ' + str(camera_id)
+    print 'RTSP URL: ' + str(feed)
 
-    # Your code here...
-    
-    return redirect(url_for('home_page'))
+    return Response(generate_http_stream(VideoCamera(feed)), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Handling search
 @app.route('/search', methods=['GET', 'POST'])
@@ -303,7 +329,7 @@ def license():
     # Upload license
     if request.method == 'POST':
         license_file = request.files['license_file']
-        license_file.filename = 'GoDeep.lic'
+        license_file.filename = 'godeep.lic'
         license_file.save(os.path.join(app.config['UPLOAD_FOLDER'], license_file.filename))
     return redirect(url_for('home_page'))
 
