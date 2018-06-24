@@ -1,5 +1,3 @@
-flask
-functools
-werkzeug.utils
-collections
+Flask
 pygame
+werkzeug
