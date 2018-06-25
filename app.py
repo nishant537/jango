@@ -212,10 +212,7 @@ def list_page():
         fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
         helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
-    return render_template('list.html', image = img,
-    email_list = email_dict,
-    sms_list = sms_dict,
-    call_list = call_dict,
+    return render_template('list.html', image = img, email_list = email_dict, sms_list = sms_dict, call_list = call_dict,
     data = zip(camera_id_list, camera_names_list, rtsp_url_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 #### Data Handling from GUI
@@ -267,7 +264,7 @@ def search_home_page():
                 if str(camera_payload[str(i)]['favourite']) == '1':
                     search_favourites_list.append(str(camera_payload[str(i)]['camera_name']))
 
-    return render_template('home.html', image = img, searching = searching, search_id_name = searched_camera_id_dict, search_camera_id = search_camera_id_list, search_camera_names = search_camera_names_list, search_favourites = search_favourites_list)
+    return render_template('home.html', searched_name = searched_name, image = img, searching = searching, search_id_name = searched_camera_id_dict, search_camera_id = search_camera_id_list, search_camera_names = search_camera_names_list, search_favourites = search_favourites_list)
 
 # Handling search for list page
 @app.route('/list/search', methods=['GET', 'POST'])
@@ -311,10 +308,7 @@ def search_list_page():
                 fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
                 helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
-    return render_template('list.html', image = img,
-    email_list = email_dict,
-    sms_list = sms_dict,
-    call_list = call_dict,
+    return render_template('list.html', image = img, searched_name = searched_name, email_list = email_dict, sms_list = sms_dict, call_list = call_dict,
     data = zip(camera_id_list, camera_names_list, rtsp_url_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 # Send background information to backend
