@@ -6,9 +6,8 @@
     <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
     <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>DeepSight AI Labs</title>
-    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'
-    />
+    <title>Add Camera · GoDeep by DeepSight AI Labs</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'/>
     <!-- Fonts and icons -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat: 400,700,200" rel="stylesheet" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
@@ -47,11 +46,24 @@
                                                 <input id="floor" name="floor" type="text" class="form-control" placeholder="Floor" required>
                                             </div>
                                         </div>
+
                                         <div class="row">
                                             <div class="col-md-12 form-group">
-                                                <input id="main_stream_url" name="main_stream_url" type="text" class="form-control" placeholder="Main Stream URL" required>
+                                                <input id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Main Stream URL" required>
                                             </div>
                                         </div>
+
+                                        <div class="row">
+                                            <div class="col-md-12 bootstrap-select show-tick">
+                                                <select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"
+                                                    title="Camera Priority" required>
+                                                    <option value="" selected disabled hidden>Choose Priority Level</option>
+                                                    <option value="high">High</option>
+                                                    <option value="low">Low</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
                                         <div class="row">
                                             <div class="col-md-12 form-group">
                                                 <input id="email_id_list" name="email_id_list" type="text" class="form-control" placeholder="Email ID List">
@@ -63,6 +75,7 @@
                                                 <input id="call_list" name="call_list" type="text" class="form-control" placeholder="Call List">
                                             </div>
                                         </div>
+
                                         <div class="row">
                                             <div class="col-md-6 form-group">
                                                 <input id="intrusion_start_time" name="intrusion_start_time" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" type="text" class="form-control"
@@ -73,10 +86,12 @@
                                                     placeholder="Intrusion End Time (24hrs HH:MM)">
                                             </div>
                                         </div>
+                                        
                                         <div class="row">
-                                            <div class="col-md-6 bootstrap-select show-tick">
+                                            <div class="col-md-12 bootstrap-select show-tick">
                                                 <select class="selectpicker show-tick" name="object_detection" id="object_detection" data-style="btn btn-default btn-round" multiple=""
                                                     title="Object Detection">
+                                                    <option value="" selected disabled hidden>Select Here</option>
                                                     <option value="tamper">Tamper</option>
                                                     <option value="helmet">Helmet</option>
                                                     <option value="fire">Fire</option>
@@ -84,6 +99,7 @@
                                                 </select>
                                             </div>
                                         </div>
+
                                         <div class="row">
                                             <div class="form-check">
                                                 <label class="form-check-label">
@@ -93,6 +109,7 @@
                                                 </label>
                                             </div>
                                         </div>
+
                                         <div class="row">
                                             <div class="form-check">
                                                 <label class="form-check-label">
@@ -103,8 +120,9 @@
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="text-center">
-                                        <a href="/home" class="btn btn-default">Close</a>
+                                        <a href="/list" class="btn btn-default">Close</a>
                                         <button type="submit" class="btn btn-success">Add</button>
                                     </div>
                                 </form>
@@ -120,9 +138,7 @@
             <nav>
                 <ul>
                     <li>
-                        <a href="https://deepsightlabs.com">
-                            DeepSight AI Labs
-                        </a>
+                        GoDeep GUI v2.0
                     </li>
                 </ul>
             </nav>
@@ -131,7 +147,7 @@
                 <script>
                     document.write(new Date().getFullYear())
                 </script>,
-                <a href="http://www.deepsightlabs.com" target="_blank">DeepSight AI Labs</a>.
+                <a href="http://www.deepsightlabs.com" target="_blank">DeepSight AI Labs</a>
             </div>
         </div>
     </footer>
