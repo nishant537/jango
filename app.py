@@ -159,16 +159,13 @@ def home_page():
     for i in camera_payload:
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         floors_list.append(str(camera_payload[str(i)]['floor']))
+        camera_id_dict.setdefault(str(camera_payload[str(i)]['camera_name']), []).append(str(i))
         unique_floors = set(floors_list)
         unique_floors = list(unique_floors)
         
         # Adding all Cameras which are favourite to a list
         if str(camera_payload[str(i)]['favourite']) == '1':
             favourites_list.append(str(camera_payload[str(i)]['camera_name']))
-    
-    for i in camera_payload:
-        camera_id_dict.setdefault(str(camera_payload[str(i)]['camera_name']), []).append(str(i))
-    print (camera_id_dict)
 
     # Sorting all cameras based on the floor - Storing in a dictionary to make it easier for Jinja Templating
     for i in unique_floors:
@@ -244,16 +241,38 @@ def streaming_url(camera_id):
     camera_payload = get_camera_info()
     if camera_id in camera_payload:
         feed = str(camera_payload[camera_id]['rtsp_url'])
-
-    print 'Camera ID: ' + str(camera_id)
-    print 'RTSP URL: ' + str(feed)
-
     return Response(generate_http_stream(VideoCamera(feed)), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# Handling search
-@app.route('/search', methods=['GET', 'POST'])
+# Handling search for home page
+@app.route('/home/search', methods=['GET', 'POST'])
 @license_required
-def search_page():
+def search_home_page():
+    img = get_background()
+    camera_payload = get_camera_info()
+    search_camera_names_list, search_camera_id_list, search_favourites_list = ([] for i in range(3))
+    searched_camera_id_dict = {}
+    searching = True
+
+    # Searching through all camera names
+    if request.method == 'POST':
+        searched_name = request.form.values()
+        searched_name = searched_name[0]
+        for i in camera_payload:
+            if searched_name.lower() in camera_payload[str(i)]['camera_name'].lower():
+                search_camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
+                search_camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
+                searched_camera_id_dict.setdefault(str(camera_payload[str(i)]['camera_name']), []).append(str(i))
+
+                # Adding all searched cameras which are favourite to a list
+                if str(camera_payload[str(i)]['favourite']) == '1':
+                    search_favourites_list.append(str(camera_payload[str(i)]['camera_name']))
+
+    return render_template('home.html', image = img, searching = searching, search_id_name = searched_camera_id_dict, search_camera_id = search_camera_id_list, search_camera_names = search_camera_names_list, search_favourites = search_favourites_list)
+
+# Handling search for list page
+@app.route('/list/search', methods=['GET', 'POST'])
+@license_required
+def search_list_page():
     img = get_background()
     camera_payload = get_camera_info()
     camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, http_url_list, hoody_list, masked_face_list, intrusion_list, fire_list, helmet_list = ([] for i in range(14))
