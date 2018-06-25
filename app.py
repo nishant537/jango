@@ -128,10 +128,9 @@ def edit_camera_page(camera_id):
             current_floor = camera_payload[str(i)]['floor']
             current_start_time = camera_payload[str(i)]['intrusion_start_time']
             current_end_time = camera_payload[str(i)]['intrusion_end_time']
-            current_rtsp = camera_payload[str(i)]['rtsp_url']
-            current_http = camera_payload[str(i)]['http_url']
+            current_stream = camera_payload[str(i)]['stream_url']
 
-    return render_template('edit.html', image = img, current_name = current_name, current_floor = current_floor,current_rtsp = current_rtsp, current_http = current_http, current_email = current_email, current_sms = current_sms, current_call = current_call, current_start_time = current_start_time, current_end_time = current_end_time)
+    return render_template('edit.html', image = img, current_name = current_name, current_floor = current_floor, current_stream = current_stream, current_email = current_email, current_sms = current_sms, current_call = current_call, current_start_time = current_start_time, current_end_time = current_end_time)
 
 # Route home page
 @app.route('/home')
@@ -235,7 +234,7 @@ def generate_http_stream(camera):
 def streaming_url(camera_id):
     camera_payload = get_camera_info()
     if camera_id in camera_payload:
-        feed = str(camera_payload[camera_id]['rtsp_url'])
+        feed = str(camera_payload[camera_id]['stream_url'])
     return Response(generate_http_stream(VideoCamera(feed)), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Handling search for home page
