@@ -181,7 +181,7 @@ def home_page():
 def list_page():
     img = get_background()
     camera_payload = get_camera_info()
-    camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, http_url_list, hoody_list, masked_face_list, intrusion_list, fire_list, helmet_list = ([] for i in range(14))
+    camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, stream_url_list, tamper_list, intrusion_list, fire_list, helmet_list = ([] for i in range(12))
     email_dict = {}
     sms_dict = {}
     call_dict = {}
@@ -204,16 +204,14 @@ def list_page():
         start_time_list.append(str(camera_payload[str(i)]['intrusion_start_time']))
         end_time_list.append(str(camera_payload[str(i)]['intrusion_end_time']))
         sound_alarm_list.append(str(camera_payload[str(i)]['sound_alarm']))
-        rtsp_url_list.append(str(camera_payload[str(i)]['rtsp_url']))
-        http_url_list.append(str(camera_payload[str(i)]['http_url']))
-        hoody_list.append(str(camera_payload[str(i)]['object_detect']['hoody']))
-        masked_face_list.append(str(camera_payload[str(i)]['object_detect']['burkha']))
+        stream_url_list.append(str(camera_payload[str(i)]['stream_url']))
+        tamper_list.append(str(camera_payload[str(i)]['object_detect']['tamper']))
         intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
         fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
         helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
     return render_template('list.html', image = img, email_list = email_dict, sms_list = sms_dict, call_list = call_dict,
-    data = zip(camera_id_list, camera_names_list, rtsp_url_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+    data = zip(camera_id_list, camera_names_list, stream_url_list, tamper_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 #### Data Handling from GUI
 
@@ -272,7 +270,7 @@ def search_home_page():
 def search_list_page():
     img = get_background()
     camera_payload = get_camera_info()
-    camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, http_url_list, hoody_list, masked_face_list, intrusion_list, fire_list, helmet_list = ([] for i in range(14))
+    camera_names_list, camera_id_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, stream_url_list, tamper_list, intrusion_list, fire_list, helmet_list = ([] for i in range(12))
     email_dict = {}
     sms_dict = {}
     call_dict = {}
@@ -300,16 +298,14 @@ def search_list_page():
                 start_time_list.append(str(camera_payload[str(i)]['intrusion_start_time']))
                 end_time_list.append(str(camera_payload[str(i)]['intrusion_end_time']))
                 sound_alarm_list.append(str(camera_payload[str(i)]['sound_alarm']))
-                rtsp_url_list.append(str(camera_payload[str(i)]['rtsp_url']))
-                http_url_list.append(str(camera_payload[str(i)]['http_url']))
-                hoody_list.append(str(camera_payload[str(i)]['object_detect']['hoody']))
-                masked_face_list.append(str(camera_payload[str(i)]['object_detect']['burkha']))
+                stream_url_list.append(str(camera_payload[str(i)]['stream_url']))
+                tamper_list.append(str(camera_payload[str(i)]['object_detect']['tamper']))
                 intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
                 fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
                 helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
     return render_template('list.html', image = img, searched_name = searched_name, email_list = email_dict, sms_list = sms_dict, call_list = call_dict,
-    data = zip(camera_id_list, camera_names_list, rtsp_url_list, hoody_list, masked_face_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+    data = zip(camera_id_list, camera_names_list, stream_url_list, tamper_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 # Send background information to backend
 @app.route('/background/<background_image>')
