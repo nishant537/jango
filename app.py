@@ -350,13 +350,20 @@ def license():
 @app.route('/addCamera', methods=['GET', 'POST'])
 @license_required
 def add_camera():
+    object_hoody = 0
+    object_masked_face = 0
+    object_helmet = 0
+    object_fire = 0
+    object_intrusion = 0
+    favourite_value = 0
+    sound_alarm_value = 0
+    
     # Get new camera data from form
     if request.method == 'POST':
         name = request.form['camera_name']
         floor = request.form['floor']
         main_url = request.form['main_stream_url']
         email = request.form['email_id_list']
-        sub_url = request.form['sub_stream_url']
         sms = request.form['sms_list']
         call = request.form['call_list']
         start_time = request.form['intrusion_start_time']
@@ -365,13 +372,9 @@ def add_camera():
         sound_alarm = request.form.getlist('sound_alarm')
         object_detection = request.form.getlist('object_detection')
 
-        object_hoody = 0
-        object_masked_face = 0
-        object_helmet = 0
-        object_fire = 0
-        object_intrusion = 0
-        favourite_value = 0
-        sound_alarm_value = 0
+        email_list = [i.strip() for i in email.split(',')]
+        sms_list = [i.strip() for i in sms.split(',')]
+        call_list = [i.strip() for i in call.split(',')]
 
         if favourite:
             favourite_value = 1
@@ -400,11 +403,10 @@ def add_camera():
 
         new_camera_dict = OrderedDict()
         new_camera_dict["camera_name"] = name
-        new_camera_dict["email_list"] = email
-        new_camera_dict["sms_list"] = sms
-        new_camera_dict["call_list"] = call
+        new_camera_dict["email_list"] = email_list
+        new_camera_dict["sms_list"] = sms_list
+        new_camera_dict["call_list"] = call_list
         new_camera_dict["rtsp_url"] = main_url
-        new_camera_dict["http_url"] = sub_url
         new_camera_dict["object_detect"] = object_detection_dict
         new_camera_dict["intrusion_start_time"] = start_time
         new_camera_dict["intrusion_end_time"] = end_time
@@ -420,6 +422,13 @@ def add_camera():
 @app.route('/editCamera', methods=['GET', 'POST'])
 @license_required
 def edit_camera():
+    object_hoody = 0
+    object_masked_face = 0
+    object_helmet = 0
+    object_fire = 0
+    object_intrusion = 0
+    favourite_value = 0
+    sound_alarm_value = 0
 
     # Get edited camera data from form
     if request.method == 'POST':
@@ -436,13 +445,9 @@ def edit_camera():
         sound_alarm = request.form.getlist('sound_alarm')
         object_detection = request.form.getlist('object_detection')
 
-        object_hoody = 0
-        object_masked_face = 0
-        object_helmet = 0
-        object_fire = 0
-        object_intrusion = 0
-        favourite_value = 0
-        sound_alarm_value = 0
+        email_list = [i.strip() for i in email.split(',')]
+        sms_list = [i.strip() for i in sms.split(',')]
+        call_list = [i.strip() for i in call.split(',')]
 
         if favourite:
             favourite_value = 1
@@ -471,9 +476,9 @@ def edit_camera():
 
         edited_camera_dict = OrderedDict()
         edited_camera_dict["camera_name"] = name
-        edited_camera_dict["email_list"] = email
-        edited_camera_dict["sms_list"] = sms
-        edited_camera_dict["call_list"] = call
+        edited_camera_dict["email_list"] = email_list
+        edited_camera_dict["sms_list"] = sms_list
+        edited_camera_dict["call_list"] = call_list
         edited_camera_dict["rtsp_url"] = main_url
         edited_camera_dict["http_url"] = sub_url
         edited_camera_dict["object_detect"] = object_detection_dict
