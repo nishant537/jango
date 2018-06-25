@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from collections import OrderedDict
 from pygame import mixer
 import os, requests, json, time
-import cv2
+# import cv2
 
 #### Initiate Flask
 app = Flask(__name__)
@@ -350,14 +350,6 @@ def license():
 @app.route('/addCamera', methods=['GET', 'POST'])
 @license_required
 def add_camera():
-    object_hoody = 0
-    object_masked_face = 0
-    object_helmet = 0
-    object_fire = 0
-    object_intrusion = 0
-    favourite_value = 0
-    sound_alarm_value = 0
-    
     # Get new camera data from form
     if request.method == 'POST':
         name = request.form['camera_name']
@@ -376,6 +368,13 @@ def add_camera():
         sms_list = [i.strip() for i in sms.split(',')]
         call_list = [i.strip() for i in call.split(',')]
 
+        object_tamper = 0
+        object_helmet = 0
+        object_fire = 0
+        object_intrusion = 0
+        favourite_value = 0
+        sound_alarm_value = 0
+        
         if favourite:
             favourite_value = 1
 
@@ -383,20 +382,17 @@ def add_camera():
             sound_alarm_value = 1
 
         for i in range(0,len(object_detection)):
-            if object_detection[i] == 'hoody':
-                object_hoody = 1
-            if object_detection[i] == 'masked_face':
-                object_masked_face = 1
-            if object_detection[i] == 'helmet':
-                object_helmet = 1
             if object_detection[i] == 'fire':
                 object_fire = 1
+            if object_detection[i] == 'helmet':
+                object_helmet = 1
+            if object_detection[i] == 'tamper':
+                object_tamper = 1
             if object_detection[i] == 'intrusion':
                 object_intrusion = 1
 
         object_detection_dict = OrderedDict()
-        object_detection_dict["hoody"] = object_hoody
-        object_detection_dict["burkha"] = object_masked_face
+        object_detection_dict["tamper"] = object_tamper
         object_detection_dict["helmet"] = object_helmet
         object_detection_dict["fire"] = object_fire
         object_detection_dict["intrusion"] = object_intrusion
@@ -406,7 +402,7 @@ def add_camera():
         new_camera_dict["email_list"] = email_list
         new_camera_dict["sms_list"] = sms_list
         new_camera_dict["call_list"] = call_list
-        new_camera_dict["rtsp_url"] = main_url
+        new_camera_dict["stream_url"] = main_url
         new_camera_dict["object_detect"] = object_detection_dict
         new_camera_dict["intrusion_start_time"] = start_time
         new_camera_dict["intrusion_end_time"] = end_time
@@ -422,13 +418,6 @@ def add_camera():
 @app.route('/editCamera', methods=['GET', 'POST'])
 @license_required
 def edit_camera():
-    object_hoody = 0
-    object_masked_face = 0
-    object_helmet = 0
-    object_fire = 0
-    object_intrusion = 0
-    favourite_value = 0
-    sound_alarm_value = 0
 
     # Get edited camera data from form
     if request.method == 'POST':
@@ -449,6 +438,13 @@ def edit_camera():
         sms_list = [i.strip() for i in sms.split(',')]
         call_list = [i.strip() for i in call.split(',')]
 
+        object_tamper = 0
+        object_helmet = 0
+        object_fire = 0
+        object_intrusion = 0
+        favourite_value = 0
+        sound_alarm_value = 0
+
         if favourite:
             favourite_value = 1
 
@@ -456,20 +452,17 @@ def edit_camera():
             sound_alarm_value = 1
 
         for i in range(0,len(object_detection)):
-            if object_detection[i] == 'hoody':
-                object_hoody = 1
-            if object_detection[i] == 'masked_face':
-                object_masked_face = 1
-            if object_detection[i] == 'helmet':
-                object_helmet = 1
             if object_detection[i] == 'fire':
                 object_fire = 1
+            if object_detection[i] == 'helmet':
+                object_helmet = 1
+            if object_detection[i] == 'tamper':
+                object_tamper = 1
             if object_detection[i] == 'intrusion':
                 object_intrusion = 1
 
         object_detection_dict = OrderedDict()
-        object_detection_dict["hoody"] = object_hoody
-        object_detection_dict["burkha"] = object_masked_face
+        object_detection_dict["tamper"] = object_tamper
         object_detection_dict["helmet"] = object_helmet
         object_detection_dict["fire"] = object_fire
         object_detection_dict["intrusion"] = object_intrusion
@@ -479,8 +472,7 @@ def edit_camera():
         edited_camera_dict["email_list"] = email_list
         edited_camera_dict["sms_list"] = sms_list
         edited_camera_dict["call_list"] = call_list
-        edited_camera_dict["rtsp_url"] = main_url
-        edited_camera_dict["http_url"] = sub_url
+        edited_camera_dict["stream_url"] = main_url
         edited_camera_dict["object_detect"] = object_detection_dict
         edited_camera_dict["intrusion_start_time"] = start_time
         edited_camera_dict["intrusion_end_time"] = end_time
