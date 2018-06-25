@@ -104,9 +104,6 @@
                                         <th class="text-center">
                                             Camera Name
                                         </th>
-                                        <!-- <th class="text-center">
-                                            RTSP URL
-                                        </th> -->
                                         <th class="text-center">
                                             Email ID List
                                         </th>
@@ -146,15 +143,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for id, name, stream_url, tamper, helmet, fire, intrusion, start_time, end_time, floor, sound_alarm in data
+                                    {% for id, name, tamper, helmet, fire, intrusion, start_time, end_time, floor, sound_alarm in data
                                     %}
                                     <tr>
                                         <td class="text-center">
                                             {{ name }}
                                         </td>
-                                        <!-- <td class="text-center">
-                                            {{ rtsp_url }}
-                                        </td> -->
                                         <td class="text-center">
                                             {% if id in email_list %} {% for key1, value1 in email_list.iteritems() if id in key1 %} {% for emails in value1 %} {{ emails
                                             }}, {% endfor %} {% endfor %} {% else %} None {% endif %}

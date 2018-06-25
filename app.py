@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from collections import OrderedDict
 from pygame import mixer
 import os, requests, json, time
-# import cv2
+import cv2
 
 #### Initiate Flask
 app = Flask(__name__)
@@ -211,7 +211,7 @@ def list_page():
         helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
     return render_template('list.html', image = img, email_list = email_dict, sms_list = sms_dict, call_list = call_dict,
-    data = zip(camera_id_list, camera_names_list, stream_url_list, tamper_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+    data = zip(camera_id_list, camera_names_list, tamper_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 #### Data Handling from GUI
 
@@ -305,7 +305,7 @@ def search_list_page():
                 helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
     return render_template('list.html', image = img, searched_name = searched_name, email_list = email_dict, sms_list = sms_dict, call_list = call_dict,
-    data = zip(camera_id_list, camera_names_list, stream_url_list, tamper_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+    data = zip(camera_id_list, camera_names_list, tamper_list, helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 # Send background information to backend
 @app.route('/background/<background_image>')
