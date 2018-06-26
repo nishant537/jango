@@ -166,15 +166,17 @@ def home_page():
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         floors_list.append(str(camera_payload[str(i)]['floor']))
         camera_id_dict.setdefault(str(camera_payload[str(i)]['camera_name']), []).append(str(i))
-        unique_floors = set(floors_list)
-        unique_floors = list(unique_floors)
+        unique_floors = list(set(floors_list))
+        # Save whitespace stripped version of floors for HTML ID tags
+        unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
+        print unique_floors
         
         # Adding all Cameras which are favourite to a list
         if str(camera_payload[str(i)]['favourite']) == '1':
             favourites_list.append(str(camera_payload[str(i)]['camera_name']))
 
     # Sorting all cameras based on the floor - Storing in a dictionary to make it easier for Jinja Templating
-    for i in unique_floors:
+    for i, _ in unique_floors:
         for k in camera_payload:
             if str(camera_payload[str(k)]['floor']) == i:
                 cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
