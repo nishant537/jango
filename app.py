@@ -69,7 +69,9 @@ def get_alerts():
     alert_payload = json.loads(get_alert)
     return alert_payload
 
-# Decorator - Checking for license first before loading any page
+#### Custom Decorators
+
+# Checking for license first before loading any page
 def license_required(func):
     @wraps(func)
     def valid_license(*args, **kwargs):
@@ -78,25 +80,35 @@ def license_required(func):
         if not license_status:
             return redirect(url_for('landing'))
         return func(*args, **kwargs)
-
     return valid_license
+
+# Check for server connection, if failed redirect every URL to landing page. 
+def server_connection(func):
+    @wraps(func)
+    def valid_connection(*args, **kwargs):
+        # In case we need the validity number too
+        try:
+            license_status, license_message = get_license()
+            if license_status: return func(*args, **kwargs)
+        except ConnectionError:
+            return render_template('landing.html', alert_message = 'Failed to establish connection with server')
+    return valid_connection
 
 #### Flask Routing
 
 # Route / or landing page
 @app.route('/')
+@server_connection
 def landing():
-    try:
-        license_status, license_reason = get_license()
-        if license_status: 
-            license_message = 'Valid'
-            img = 'Landing.jpeg'
-        return render_template('landing.html', message=license_message, image = img)
-    except ConnectionError:
-        return render_template('landing.html', alert_message = 'Failed to establish connection with server')
+    license_status, license_reason = get_license()
+    if license_status: 
+        license_message = 'Valid'
+        img = 'Landing.jpeg'
+    return render_template('landing.html', message=license_message, image = img)
 
 # Route Add Camera page
 @app.route('/add')
+@server_connection
 @license_required
 def add_camera_page():
     img = get_background()
@@ -104,6 +116,7 @@ def add_camera_page():
 
 # Route Edit Camera page
 @app.route('/edit/<camera_id>')
+@server_connection
 @license_required
 def edit_camera_page(camera_id):
     img = get_background()
@@ -151,6 +164,7 @@ def edit_camera_page(camera_id):
 
 # Route home page
 @app.route('/home')
+@server_connection
 @license_required
 def home_page():
     img = get_background()
@@ -196,6 +210,7 @@ def home_page():
 
 # Route list page
 @app.route('/list')
+@server_connection
 @license_required
 def list_page():
     img = get_background()
@@ -239,6 +254,7 @@ def list_page():
 
 # Handling delete camera
 @app.route('/deleteCamera/<camera_id>')
+@server_connection
 @license_required
 def delete_camera(camera_id):
     post_delete_camera = requests.post(url='http://127.0.0.1:8081/deleteCamera/' + camera_id)
@@ -253,6 +269,7 @@ def generate_http_stream(camera):
 
 # Support Streaming
 @app.route('/stream/<camera_id>')
+@server_connection
 @license_required
 def streaming_url(camera_id):
     camera_payload = get_camera_info()
@@ -263,6 +280,7 @@ def streaming_url(camera_id):
 
 # Support Favourites
 @app.route('/favourite/<camera_id>')
+@server_connection
 @license_required
 def favourite(camera_id):
     camera_payload = get_camera_info()
@@ -325,6 +343,7 @@ def favourite(camera_id):
 
 # Handling search for home page
 @app.route('/home/search', methods=['GET', 'POST'])
+@server_connection
 @license_required
 def search_home_page():
     img = get_background()
@@ -355,6 +374,7 @@ def search_home_page():
 
 # Handling search for list page
 @app.route('/list/search', methods=['GET', 'POST'])
+@server_connection
 @license_required
 def search_list_page():
     img = get_background()
@@ -401,6 +421,7 @@ def search_list_page():
 
 # Send background information to backend
 @app.route('/background/<background_image>')
+@server_connection
 @license_required
 def background_image(background_image):
     if background_image == 'retail':
@@ -426,6 +447,7 @@ def background_image(background_image):
     
 # Handle license upload 
 @app.route('/licenseUpload', methods=['GET', 'POST'])
+@server_connection
 def license():
     # Upload license
     if request.method == 'POST':
@@ -441,6 +463,7 @@ def license():
 
 # Add Camera
 @app.route('/addCamera', methods=['GET', 'POST'])
+@server_connection
 @license_required
 def add_camera():
     # Get new camera data from form
@@ -513,6 +536,7 @@ def add_camera():
 
 # Edit Camera
 @app.route('/editCamera/<camera_id>', methods=['GET', 'POST'])
+@server_connection
 @license_required
 def edit_camera(camera_id):
     # Get edited camera data from form
@@ -588,5 +612,5 @@ def edit_camera(camera_id):
 
 if __name__ == "__main__":
     # Running Flask
-    # To access globally - WSGI Server
+    # To access globally - WSGI Server (0.0.0.0)
     app.run(host='127.0.0.1', debug=True, threaded=True)
