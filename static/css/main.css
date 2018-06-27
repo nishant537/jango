@@ -12108,3 +12108,35 @@ Created using IcoMoon - icomoon.io
         right: 14%;
     }
 }
+
+/* Custom CSS */
+.dsal_logo
+{
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    border-radius: 0.5rem !important;
+}
+
+/* The Modal (background) */
+.modal
+{
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal_content
+{
+    display: block;
+    background-color: #fff;
+    margin: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 6px;
+    width: auto;
+    height: 98%;
+}
