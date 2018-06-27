@@ -134,13 +134,20 @@ def edit_camera_page(camera_id):
             current_start_time = camera_payload[str(i)]['intrusion_start_time']
             current_end_time = camera_payload[str(i)]['intrusion_end_time']
             current_stream = camera_payload[str(i)]['rtsp_url']
+            current_sound_alarm = camera_payload[str(i)]['sound_alarm']
+            current_favourite = camera_payload[str(i)]['favourite']
+            current_object_tamper = camera_payload[str(i)]['object_detect']['tamper']
+            current_object_fire = camera_payload[str(i)]['object_detect']['fire']
+            current_object_helmet = camera_payload[str(i)]['object_detect']['helmet']
+            current_object_intrusion = camera_payload[str(i)]['object_detect']['intrusion']
 
-    return render_template('edit.html', image=img, current_name=current_name, 
-        current_id=camera_id, current_priority=current_priority,
-        current_floor=current_floor, current_stream=current_stream, 
-        current_email=current_email, current_sms=current_sms, 
+    return render_template('edit.html', image=img, current_name=current_name, current_id=camera_id,
+        current_floor=current_floor, current_priority=current_priority, current_stream=current_stream, 
+        current_email=current_email, current_sms=current_sms, current_favourite=current_favourite,
         current_call=current_call, current_start_time=current_start_time, 
-        current_end_time=current_end_time)
+        current_end_time=current_end_time, current_sound_alarm=current_sound_alarm, 
+        current_object_fire=current_object_fire, current_object_tamper=current_object_tamper, 
+        current_object_helmet=current_object_helmet, current_object_intrusion=current_object_intrusion)
 
 # Route home page
 @app.route('/home')
