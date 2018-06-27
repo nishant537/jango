@@ -15,6 +15,67 @@
     <!-- CSS Files -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/static/css/main.css" rel="stylesheet" />
+
+    <script type="text/javascript">
+        playStatus = {};
+
+        function sleep(ms)
+        {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function playerOnLoad(key, tab)
+        {
+            console.log("On Load " + tab + " " + key + " " + playStatus[key]);
+            if (playStatus[key])
+            {
+                $('#playBtn' + tab + key).hide();
+                $('#pauseBtn' + tab + key).show();
+                $('#fullScreenBtn' + tab + key).show();
+            }
+            else
+            {
+                $('#playBtn' + tab + key).show();
+                $('#pauseBtn' + tab + key).hide();
+                $('#fullScreenBtn' + tab + key).hide();
+            }
+        }
+
+        async function playButton(key, tab) 
+        {
+            console.log("Play " + tab + " " + key + " " + playStatus[key]);
+            console.log('Stream: ' + $('#stream' + tab + key).text())
+
+            $('#playBtn' + tab + key).hide();
+            $('#pauseBtn' + tab + key).fadeIn(300);
+            $('#fullScreenBtn' + tab + key).fadeIn(300);
+            $('#cameraView' + tab + key).fadeOut(500, function() 
+            {   
+                $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
+            }.bind(this)).fadeIn(500);
+            $('#cameraView' + tab + key).fadeOut(500, function() 
+            {
+                $('#cameraView' + tab + key).attr('src', $('#stream' + tab + key).text());
+            }.bind(this)).fadeIn(500);
+
+            playStatus[key] = true;
+        }
+
+        function pauseButton(key, tab) 
+        {
+            console.log("Pause " + tab + " " + key + " " + playStatus[key]);
+            $('#playBtn' + tab + key).fadeIn(300);
+            $('#pauseBtn' + tab + key).hide();
+            $('#fullScreenBtn' + tab + key).hide();
+            $('#cameraView' + tab + key).fadeOut(500, function() 
+            {
+                $('#cameraView' + tab + key).attr('src', '/static/img/default_view.jpg');
+            }.bind(this)).fadeIn(500);
+            
+            playStatus[key] = false;
+        }
+    </script>
+
 </head>
 
 <body class="profile-page">
@@ -114,141 +175,161 @@
                         <div class="nav-align-center">
                             <ul class="nav nav-pills nav-pills-primary justify-content-center" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" data-toggle="tab" href="#favorite" role="tablist">
-                                        Favorite
+                                    <a class="nav-link" data-toggle="tab" href="#favorite" role="tablist">
+                                        Favorites
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#all" role="tablist">
+                                    <a class="nav-link active" data-toggle="tab" href="#all" role="tablist">
                                         All
                                     </a>
                                 </li>
-                                {% for floors in unique_floors %}
+                                {% for floors, floor_stripped in unique_floors %}
                                 <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#{{floors}}" role="tablist">
-                                        {{floors}}
+                                    <a class="nav-link" data-toggle="tab" href="#{{ floor_stripped }}" role="tablist">
+                                        {{ floors }}
                                     </a>
                                 </li>
                                 {% endfor %}
                             </ul>
                         </div>
                         <div class="tab-content gallery">
-                            <div class="tab-pane active" id="favorite" role="tabpanel">
+                            <div class="tab-pane" id="favorite" role="tabpanel">
                                 <div class="row">
                                     {% for favourited_camera_name in favourites %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
-                                            {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1 in favourited_camera_name%}
+                                            {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} 
+                                            {% if stream_camera_name1 in favourited_camera_name %}
                                             {% for id1 in stream_camera_id1 %}
                                             <div class="card-image">
-                                                <img class="img rounded" src="{{ '/stream/' + id1 | default('/static/img/default_view.jpg') }}">
+                                                <img id="cameraViewFav{{ id1 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
-                                            {% endfor %} {% endif %} {% endfor %}
                                             <div class="card-body">
-                                                <a>
-                                                    <h4 class="card-title">{{favourited_camera_name}}</h4>
-                                                </a>
+                                                <h4 class="card-title">{{ favourited_camera_name }}</h4>
+                                                
                                                 <div class="card-footer">
-                                                    {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1 in favourited_camera_name%}
-                                                    {% for id1 in stream_camera_id1 %}
                                                     <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% endfor %} {% endif %} {% endfor %} {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1
-                                                    in favourited_camera_name %} {% for id1 in stream_camera_id1 %}
-                                                    <a href="/stream/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                        <i class="fa fa-play"></i>
-                                                    </a>
-                                                    {% endfor %} {% endif %} {% endfor %}
+                                                    <p hidden id="streamFav{{ id1 }}">/stream/{{ id1 }}</p>
+                                                    
+                                                    <div id="playerControls{{ id1 }}" class="playerControls">
+                                                        <a id='playBtnFav{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="playButton({{ id1 }}, 'Fav')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        <a id='pauseBtnFav{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="pauseButton({{ id1 }}, 'Fav')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        <a id='fullScreenBtnFav{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="showFullScreen({{ id1 }}, 'Fav')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        
+                                                        <!-- Dummy image for onload event trigger -->
+                                                        <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id1 }}, 'Fav')">
+                                                    </div>
                                                 </div>
                                             </div>
+                                            {% endfor %} {% endif %} {% endfor %}
                                         </div>
                                     </div>
                                     {% endfor %}
                                 </div>
                             </div>
-                            <div class="tab-pane" id="all" role="tabpanel">
+                            <div class="tab-pane active" id="all" role="tabpanel">
                                 <div class="row">
                                     {% for all_cameras in camera %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
-                                            {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2 in all_cameras %} {%
-                                            for id2 in stream_camera_id2 %}
+                                            {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} 
+                                            {% if stream_camera_name2 in all_cameras %} 
+                                            {% for id2 in stream_camera_id2 %}
                                             <div class="card-image">
-                                                <img class="img rounded" src="{{ '/stream/' + id2 | default('/static/img/default_view.jpg') }}">
+                                                <img id="cameraViewAll{{ id2 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
-                                            {% endfor %} {% endif %} {% endfor %}
                                             <div class="card-body">
-                                                <a>
-                                                    <h4 class="card-title">{{all_cameras}}</h4>
-                                                </a>
+                                                <h4 class="card-title">{{ all_cameras }}</h4>
+
                                                 <div class="card-footer">
-                                                    {% if all_cameras in favourites %} {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2
-                                                    in all_cameras %} {% for id2 in stream_camera_id2 %}
+                                                    {% if all_cameras in favourites %} 
                                                     <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% endfor %} {% endif %} {% endfor %} 
                                                     {% else %} 
-                                                    {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2 in all_cameras %} {%
-                                                        for id2 in stream_camera_id2 %}
                                                     <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% endfor %} {% endif %} {% endfor %}
-                                                    {% endif %} 
-                                                    {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} 
-                                                    {% if stream_camera_name2 in all_cameras %} {% for id2 in stream_camera_id2 %}
-                                                    <a href="/stream/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                        <i class="fa fa-play"></i>
-                                                    </a>
-                                                    {% endfor %} {% endif %} {% endfor %}
+                                                    {% endif %}
+                                                    <p hidden id="streamAll{{ id2 }}">/stream/{{ id2 }}</p>
+                                                    
+                                                    <div id="playerControls{{ id2 }}" class="playerControls">
+                                                        <a id='playBtnAll{{ id2 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="playButton({{ id2 }}, 'All')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        <a id='pauseBtnAll{{ id2 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="pauseButton({{ id2 }}, 'All')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        <a id='fullScreenBtnAll{{ id2 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="showFullScreen({{ id2 }}, 'All')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        
+                                                        <!-- Dummy image for onload event trigger -->
+                                                        <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id2 }}, 'All')">
+                                                    </div>
                                                 </div>
                                             </div>
+                                            {% endfor %} {% endif %} {% endfor %}
                                         </div>
                                     </div>
                                     {% endfor %}
                                 </div>
                             </div>
-                            {% for floors in unique_floors %}
-                            <div class="tab-pane" id="{{floors}}" role="tabpanel">
+                            {% for floors, floor_stripped in unique_floors %}
+                            <div class="tab-pane" id="{{ floor_stripped }}" role="tabpanel">
                                 <div class="row">
-                                    {% for floor_camera, camera_name in camera_floor.items() %} {% if floor_camera in floors %} {% for names in camera_name %}
+                                    {% for floor_camera, camera_name in camera_floor.items() %} 
+                                    {% if floor_camera|string() == floors|string() %}
+                                    {% for names in camera_name %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
-                                            {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3 in names %} {% for id3
-                                            in stream_camera_id3 %}
+                                            {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} 
+                                            {% if stream_camera_name3 in names %} 
+                                            {% for id3 in stream_camera_id3 %}
                                             <div class="card-image">
-                                                <img class="img rounded" src="{{ '/stream/' + id3 | default('/static/img/default_view.jpg') }}">
+                                                <img id="cameraView{{ floor_stripped }}{{ id3 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
-                                            {% endfor %} {% endif %} {% endfor %}
                                             <div class="card-body">
-                                                <a>
-                                                    <h4 class="card-title">{{names}}</h4>
-                                                </a>
+                                                <h4 class="card-title">{{ names }}</h4>
+
                                                 <div class="card-footer">
-                                                    {% if names in favourites %} {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3
-                                                    in names %} {% for id3 in stream_camera_id3 %}
+                                                    {% if names in favourites %} 
                                                     <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i href="/favourite/{{ id3 }}" class="fa fa-star"></i>
                                                     </a>
-                                                    {% endfor %} {% endif %} {% endfor %} 
                                                     {% else %}
-                                                    {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3 in names %} {% for id3
-                                                        in stream_camera_id3 %}
                                                     <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% endfor %} {% endif %} {% endfor %}
-                                                    {% endif %} {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems()
-                                                    %} {% if stream_camera_name3 in names %} {% for id3 in stream_camera_id3
-                                                    %}
-                                                    <a href="/stream/{{ id3 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                        <i class="fa fa-play"></i>
-                                                    </a>
-                                                    {% endfor %} {% endif %} {% endfor %}
+                                                    {% endif %}
+                                                    <p hidden id="stream{{ floor_stripped }}{{ id3 }}">/stream/{{ id3 }}</p>
+                                                    
+                                                    <div id="playerControls{{ floor_stripped }}{{ id3 }}" class="playerControls">
+                                                        <a id='playBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="playButton({{ id3 }}, '{{ floor_stripped }}')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        <a id='pauseBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="pauseButton({{ id3 }}, '{{ floor_stripped }}')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        <a id='fullScreenBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral">
+                                                            <i onclick="showFullScreen({{ id3 }}, '{{ floor_stripped }}')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
+                                                        </a>
+                                                        
+                                                        <!-- Dummy image for onload event trigger -->
+                                                        <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id3 }}, '{{ floor_stripped }}')">
+                                                    </div>
                                                 </div>
                                             </div>
+                                            {% endfor %} {% endif %} {% endfor %}
                                         </div>
                                     </div>
                                     {% endfor %} {% endif %} {% endfor %}
@@ -261,29 +342,44 @@
                             {% for searched_names in search_camera_names %}
                             <div class="col-md-4">
                                 <div class="card card-profile">
-                                    {% for search_camera_name1, search_camera_id1 in search_id_name.iteritems() %} {% if search_camera_name1 in searched_names%}
+                                    {% for search_camera_name1, search_camera_id1 in search_id_name.iteritems() %}
+                                    {% if search_camera_name1 in searched_names%}
                                     {% for id1 in search_camera_id1 %}
                                     <div class="card-image">
-                                        <img class="img rounded" src="{{ '/stream/' + id1 | default('/static/img/default_view.jpg') }}">
+                                        <img id="cameraViewSearch{{ id1 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                     </div>
-                                    {% endfor %} {% endif %} {% endfor %}
                                     <div class="card-body">
-                                        <a>
-                                            <h4 class="card-title">{{searched_names}}</h4>
-                                        </a>
+                                        <h4 class="card-title">{{ searched_names }}</h4>
+
                                         <div class="card-footer">
                                             {% if searched_names in search_favourites %}
                                             <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                 <i class="fa fa-star"></i>
                                             </a>
-                                            {% endif %} {% for search_camera_name1, search_camera_id1 in search_id_name.iteritems() %} {% if search_camera_name1 in searched_names%}
-                                            {% for id1 in search_camera_id1 %}
-                                            <a href="/stream/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
-                                                <i class="fa fa-play"></i>
+                                            {% else %}
+                                            <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
+                                                <i class="fa fa-star"></i>
                                             </a>
-                                            {% endfor %} {% endif %} {% endfor %}
+                                            {% endif %}
+                                            <p hidden id="streamSearch{{ id1 }}">/stream/{{ id1 }}</p>
+                                                    
+                                            <div id="playerControls{{ id1 }}" class="playerControls">
+                                                <a id='playBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                    <i onclick="playButton({{ id1 }}, 'Search')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
+                                                </a>
+                                                <a id='pauseBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                    <i onclick="pauseButton({{ id1 }}, 'Search')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
+                                                </a>
+                                                <a id='fullScreenBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                    <i onclick="showFullScreen({{ id1 }}, 'Search')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
+                                                </a>
+                                                
+                                                <!-- Dummy image for onload event trigger -->
+                                                <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id1 }}, 'Search')">
+                                            </div>
                                         </div>
                                     </div>
+                                    {% endfor %} {% endif %} {% endfor %}
                                 </div>
                             </div>
                             {% endfor %}
