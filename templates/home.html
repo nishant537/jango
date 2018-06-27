@@ -7,7 +7,8 @@
     <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>Home · GoDeep by DeepSight AI Labs</title>
-    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'/>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'
+    />
     <!-- Fonts and icons -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat: 400,700,200" rel="stylesheet" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
@@ -144,15 +145,17 @@
                                             </div>
                                             {% endfor %} {% endif %} {% endfor %}
                                             <div class="card-body">
-                                                <a href="pablo">
+                                                <a>
                                                     <h4 class="card-title">{{favourited_camera_name}}</h4>
                                                 </a>
                                                 <div class="card-footer">
-                                                    <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1 in favourited_camera_name%}
+                                                    {% for id1 in stream_camera_id1 %}
+                                                    <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1 in favourited_camera_name
-                                                    %} {% for id1 in stream_camera_id1 %}
+                                                    {% endfor %} {% endif %} {% endfor %} {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1
+                                                    in favourited_camera_name %} {% for id1 in stream_camera_id1 %}
                                                     <a href="/stream/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
@@ -176,16 +179,26 @@
                                             </div>
                                             {% endfor %} {% endif %} {% endfor %}
                                             <div class="card-body">
-                                                <a href="pablo">
+                                                <a>
                                                     <h4 class="card-title">{{all_cameras}}</h4>
                                                 </a>
                                                 <div class="card-footer">
-                                                    {% if all_cameras in favourites %}
-                                                    <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    {% if all_cameras in favourites %} {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2
+                                                    in all_cameras %} {% for id2 in stream_camera_id2 %}
+                                                    <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% endif %} {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2 in all_cameras
-                                                    %} {% for id2 in stream_camera_id2 %}
+                                                    {% endfor %} {% endif %} {% endfor %} 
+                                                    {% else %} 
+                                                    {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2 in all_cameras %} {%
+                                                        for id2 in stream_camera_id2 %}
+                                                    <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
+                                                        <i class="fa fa-star"></i>
+                                                    </a>
+                                                    {% endfor %} {% endif %} {% endfor %}
+                                                    {% endif %} 
+                                                    {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} 
+                                                    {% if stream_camera_name2 in all_cameras %} {% for id2 in stream_camera_id2 %}
                                                     <a href="/stream/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
@@ -210,16 +223,26 @@
                                             </div>
                                             {% endfor %} {% endif %} {% endfor %}
                                             <div class="card-body">
-                                                <a href="pablo">
+                                                <a>
                                                     <h4 class="card-title">{{names}}</h4>
                                                 </a>
                                                 <div class="card-footer">
-                                                    {% if names in favourites %}
+                                                    {% if names in favourites %} {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3
+                                                    in names %} {% for id3 in stream_camera_id3 %}
                                                     <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                        <i href="/favourite/{{ id3 }}" class="fa fa-star"></i>
+                                                    </a>
+                                                    {% endfor %} {% endif %} {% endfor %} 
+                                                    {% else %}
+                                                    {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3 in names %} {% for id3
+                                                        in stream_camera_id3 %}
+                                                    <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% endif %} {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3 in names
-                                                    %} {% for id3 in stream_camera_id3 %}
+                                                    {% endfor %} {% endif %} {% endfor %}
+                                                    {% endif %} {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems()
+                                                    %} {% if stream_camera_name3 in names %} {% for id3 in stream_camera_id3
+                                                    %}
                                                     <a href="/stream/{{ id3 }}" class="btn btn-icon btn-neutral btn-lg btn-dribbble">
                                                         <i class="fa fa-play"></i>
                                                     </a>
@@ -245,7 +268,7 @@
                                     </div>
                                     {% endfor %} {% endif %} {% endfor %}
                                     <div class="card-body">
-                                        <a href="pablo">
+                                        <a>
                                             <h4 class="card-title">{{searched_names}}</h4>
                                         </a>
                                         <div class="card-footer">

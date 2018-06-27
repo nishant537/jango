@@ -251,6 +251,68 @@ def streaming_url(camera_id):
     return Response(generate_http_stream(VideoCamera(feed)), 
         mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# Support Favourites
+@app.route('/favourite/<camera_id>')
+@license_required
+def favourite(camera_id):
+    camera_payload = get_camera_info()
+    favourite_email_list, favourite_sms_list, favourite_call_list = ([] for i in range(3))
+
+    # Match camera_id from camera_payload and load it's details.
+    if camera_id in camera_payload:
+            for j in range(0, len(camera_payload[camera_id]['email_list'])):
+                favourite_email_list.append(camera_payload[camera_id]['email_list'][j])
+
+            for k in range(0, len(camera_payload[camera_id]['sms_list'])):
+                favourite_sms_list.append(camera_payload[camera_id]['sms_list'][k])
+
+            for l in range(0, len(camera_payload[camera_id]['call_list'])):
+                favourite_call_list.append(camera_payload[camera_id]['call_list'][l])
+
+            favourite_name = camera_payload[camera_id]['camera_name']
+            favourite_priority = camera_payload[camera_id]['camera_priority']
+            favourite_floor = camera_payload[camera_id]['floor']
+            favourite_start_time = camera_payload[camera_id]['intrusion_start_time']
+            favourite_end_time = camera_payload[camera_id]['intrusion_end_time']
+            favourite_stream = camera_payload[camera_id]['rtsp_url']
+            favourite_sound_alarm = camera_payload[camera_id]['sound_alarm']
+            favourite_object_tamper = camera_payload[camera_id]['object_detect']['tamper']
+            favourite_object_fire = camera_payload[camera_id]['object_detect']['fire']
+            favourite_object_helmet = camera_payload[camera_id]['object_detect']['helmet']
+            favourite_object_intrusion = camera_payload[camera_id]['object_detect']['intrusion']
+
+            favourite_favourite = camera_payload[camera_id]['favourite']
+
+    if favourite_favourite == 1:
+        favourite_favourite = 0
+    else:
+        favourite_favourite = 1
+
+    object_detection_dict = OrderedDict()
+    object_detection_dict["tamper"] = favourite_object_tamper
+    object_detection_dict["helmet"] = favourite_object_helmet
+    object_detection_dict["fire"] = favourite_object_fire
+    object_detection_dict["intrusion"] = favourite_object_intrusion
+
+    favourited_camera_dict = OrderedDict()
+    favourited_camera_dict["camera_name"] = favourite_name
+    favourited_camera_dict["camera_priority"] = favourite_priority
+    favourited_camera_dict["email_list"] = favourite_email_list
+    favourited_camera_dict["sms_list"] = favourite_sms_list
+    favourited_camera_dict["call_list"] = favourite_call_list
+    favourited_camera_dict["rtsp_url"] = favourite_stream
+    favourited_camera_dict["object_detect"] = object_detection_dict
+    favourited_camera_dict["intrusion_start_time"] = favourite_start_time
+    favourited_camera_dict["intrusion_end_time"] = favourite_end_time
+    favourited_camera_dict["floor"] = favourite_floor
+    favourited_camera_dict["sound_alarm"] = favourite_sound_alarm
+    favourited_camera_dict["favourite"] = favourite_favourite
+
+    # Making a POST to the Backend - Favourited / Unfavourited Camera
+    post_favourited_camera_info = requests.post(url='http://127.0.0.1:8081/editCamera/' + camera_id, data=json.dumps(favourited_camera_dict))
+
+    return redirect(url_for('home_page'))
+
 # Handling search for home page
 @app.route('/home/search', methods=['GET', 'POST'])
 @license_required
