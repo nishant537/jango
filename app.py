@@ -1,14 +1,22 @@
-from flask import Flask, render_template, request, redirect, url_for, Response
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file
 from functools import wraps
 from werkzeug.utils import secure_filename
 from collections import OrderedDict
 from requests.exceptions import ConnectionError
-from pygame import mixer
 import os, requests, json, time
 import cv2
 
 #### Initiate Flask
 app = Flask(__name__)
+
+# GoDeep backend server settings
+BACKEND_IP = '127.0.0.1'
+BACKEND_PORT = '8081'
+BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
+
+# Setup license folder
+UPLOAD_FOLDER = '/var/www/html/godeep/license'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 class VideoCamera(object):
 
@@ -31,18 +39,9 @@ class VideoCamera(object):
         ret, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
 
-# Setup license folder
-# TODO: Keeping the same POC-GUI location for comptability with other repos
-UPLOAD_FOLDER = '/var/www/html/godeep/license'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Initialize alarm.mp3 file
-mixer.init()
-mixer.music.load('alarm.mp3')
-
 # Get License info from backend
 def get_license():
-    get_license = requests.get('http://127.0.0.1:8081/getLicense').content
+    get_license = requests.get(BACKEND_URL + 'getLicense').content
     license_payload = json.loads(get_license)
     license_status = license_payload['status']
     license_message = license_payload['reason']
@@ -50,24 +49,16 @@ def get_license():
 
 # Get Camera info from backend
 def get_camera_info():
-    all_camera_info = requests.get('http://127.0.0.1:8081/getAllCameraInfo').content
+    all_camera_info = requests.get(BACKEND_URL + 'getAllCameraInfo').content
     camera_info = json.loads(all_camera_info)
     return camera_info
     
 # Get Background info from backend
 def get_background():
-    get_background = requests.get('http://127.0.0.1:8081/getBackground').content
+    get_background = requests.get(BACKEND_URL + 'getBackground').content
     background_payload = json.loads(get_background)
     background_img = background_payload['image']
     return background_img
-
-# Get Alerts from backend
-def get_alerts():
-    # while True:
-        # time.sleep(1)
-    get_alert = requests.get('http://127.0.0.1:8081/alertInfo').content
-    alert_payload = json.loads(get_alert)
-    return alert_payload
 
 #### Custom Decorators
 
@@ -91,7 +82,7 @@ def server_connection(func):
             license_status, license_message = get_license()
             if license_status: return func(*args, **kwargs)
         except ConnectionError:
-            return render_template('landing.html', alert_message = 'Failed to establish connection with server')
+            return render_template('landing.html', alert_message='Failed to establish connection with server')
     return valid_connection
 
 #### Flask Routing
@@ -104,7 +95,7 @@ def landing():
     if license_status: 
         license_message = 'Valid'
         img = 'Landing.jpeg'
-    return render_template('landing.html', message=license_message, image = img)
+    return render_template('landing.html', message=license_message, image=img)
 
 # Route Add Camera page
 @app.route('/add')
@@ -169,22 +160,10 @@ def edit_camera_page(camera_id):
 def home_page():
     img = get_background()
     camera_payload = get_camera_info()
-    alert_payload = get_alerts()
     camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
     cameras_in_floor_dict = {}
     camera_id_dict = {}
-    alert_camera_name = ''
-    alert_camera_message = ''
-
-    # Creating an alert and playing alarm
-    if alert_payload:
-        (alert_id, alert_message), = alert_payload.items()
-        if alert_id in camera_payload:
-            alert_camera_name = camera_payload[str(alert_id)]['camera_name']
-            alert_camera_message = alert_message[0]
-            alert_sound = camera_payload[str(alert_id)]['sound_alarm']
-            if alert_sound == 1:
-                mixer.music.play()
+    sound_dict = {}
          
     for i in camera_payload:
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
@@ -199,15 +178,18 @@ def home_page():
         if str(camera_payload[str(i)]['favourite']) == '1':
             favourites_list.append(str(camera_payload[str(i)]['camera_name']))
 
+        # Adding all Cameras for which sound alarm is enabled to a dict
+        if str(camera_payload[str(i)]['sound_alarm']) == '1':
+            sound_dict[str(i)] = camera_payload[str(i)]['sound_alarm']
+
     # Sorting all cameras based on the floor - Storing in a dictionary to make it easier for Jinja Templating
     for i, _ in unique_floors:
         for k in camera_payload:
             if str(camera_payload[str(k)]['floor']) == i:
                 cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
 
-    return render_template('home.html', image=img, camera_url=camera_id_dict, 
-        alert_name=alert_camera_name, alert_message=alert_camera_message, 
-        camera=camera_names_list, favourites=favourites_list, 
+    return render_template('home.html', image=img, camera_url=camera_id_dict,
+        camera=camera_names_list, favourites=favourites_list, sound_dict=json.dumps(sound_dict),
         unique_floors=unique_floors, camera_floor=cameras_in_floor_dict)
 
 # Route list page
@@ -254,12 +236,29 @@ def list_page():
 
 #### Data Handling from GUI
 
+# Get Alerts from backend, also no need for license check here
+@app.route('/getAlerts', methods=['GET', 'POST'])
+@server_connection
+def get_alerts():
+    alert_payload = requests.get(BACKEND_URL + 'alertInfo').content
+    alert_dict = json.loads(alert_payload)
+
+    for key, objects in alert_dict.iteritems():
+        alert_dict[key] = [obj.title() for obj in objects]
+
+    return json.dumps(alert_dict)
+
+# Return alarm.mp3 file
+@app.route('/getAlarmAudio')
+def send_alarm_file():
+    return send_file('alarm.mp3')
+
 # Handling delete camera
 @app.route('/deleteCamera/<camera_id>')
 @server_connection
 @license_required
 def delete_camera(camera_id):
-    post_delete_camera = requests.post(url='http://127.0.0.1:8081/deleteCamera/' + camera_id)
+    post_delete_camera = requests.post(url=BACKEND_URL + 'deleteCamera/' + camera_id)
     return redirect(url_for('list_page'))
 
 # HTTP stream generation
@@ -269,10 +268,9 @@ def generate_http_stream(camera):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-# Support Streaming
+# Support Streaming, license check not required
 @app.route('/stream/<camera_id>')
 @server_connection
-@license_required
 def streaming_url(camera_id):
     camera_payload = get_camera_info()
     if camera_id in camera_payload:
@@ -339,7 +337,7 @@ def favourite(camera_id):
     favourited_camera_dict["favourite"] = favourite_favourite
 
     # Making a POST to the Backend - Favourited / Unfavourited Camera
-    post_favourited_camera_info = requests.post(url='http://127.0.0.1:8081/editCamera/' + camera_id, data=json.dumps(favourited_camera_dict))
+    post_favourited_camera_info = requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, data=json.dumps(favourited_camera_dict))
 
     return redirect(url_for('home_page'))
 
@@ -442,7 +440,7 @@ def background_image(background_image):
     # Making a POST to the Backend - Background information
     background_dict = OrderedDict()
     background_dict["image"] = img
-    post_background_info = requests.post(url='http://127.0.0.1:8081/sendBackground', 
+    post_background_info = requests.post(url=BACKEND_URL + 'sendBackground', 
         data=json.dumps(background_dict))
 
     return redirect(url_for('home_page'))
@@ -459,7 +457,7 @@ def license():
         print 'License file location:', filename
         license_file.save(filename)
         
-        requests.post(url='http://127.0.0.1:8081/licenseUpdate')
+        requests.post(url=BACKEND_URL + 'licenseUpdate')
 
     return redirect(url_for('landing'))
 
@@ -531,7 +529,7 @@ def add_camera():
         new_camera_dict["favourite"] = favourite_value
 
         # Making a POST to the Backend - New Camera
-        post_new_camera_info = requests.post(url='http://127.0.0.1:8081/createCamera', 
+        post_new_camera_info = requests.post(url=BACKEND_URL + 'createCamera', 
             data=json.dumps(new_camera_dict))
 
     return redirect(url_for('list_page'))
@@ -607,7 +605,7 @@ def edit_camera(camera_id):
         print 'POST 127.0.0.1:8081 ID:', camera_id, edited_camera_dict
 
         # Making a POST to the Backend - Edited Camera
-        post_edited_camera_info = requests.post(url='http://127.0.0.1:8081/editCamera/' + camera_id, 
+        post_edited_camera_info = requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, 
             data=json.dumps(edited_camera_dict))
     
     return redirect(url_for('list_page'))

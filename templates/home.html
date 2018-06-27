@@ -17,7 +17,19 @@
     <link href="/static/css/main.css" rel="stylesheet" />
 
     <script type="text/javascript">
-        playStatus = {};
+        // Alerts
+        var alerts = [];
+        var interval = 2000; // Polling interval
+        var alertShowTime = 10000; // Alert show interval
+        var audio = new Audio('/getAlarmAudio');
+
+        // HTTP Player
+        var playStatus = {};
+
+        function onLoad()
+        {
+            startTimer();
+        }
 
         function sleep(ms)
         {
@@ -39,6 +51,8 @@
                 $('#pauseBtn' + tab + key).hide();
                 $('#fullScreenBtn' + tab + key).hide();
             }
+
+            $('.cardSubtitle' + key).hide();
         }
 
         async function playButton(key, tab) 
@@ -51,6 +65,7 @@
             $('#fullScreenBtn' + tab + key).fadeIn(300);
             $('#cameraView' + tab + key).fadeOut(500, function() 
             {   
+                $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
                 $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
             }.bind(this)).fadeIn(500);
             $('#cameraView' + tab + key).fadeOut(500, function() 
@@ -74,17 +89,99 @@
             
             playStatus[key] = false;
         }
+
+        function playAlarm()
+        {
+            audio.addEventListener('ended', function()
+            {
+                this.currentTime = 0;
+                this.play();
+            }, false);
+            audio.play();
+        }
+
+        function pauseAlarm()
+        {
+            audio.pause();
+        }
+
+        function startTimer()
+        {
+            setInterval(alertFunc, interval);
+        }
+
+        function alertFunc()
+        {
+            var sound_dict = {{ sound_dict|safe }};
+
+            for (var key in alerts)
+            {
+                alerts[key] = alerts[key] + interval;
+                if (alerts[key] >= alertShowTime)
+                {
+                    // Remove
+                    if ($(".cardBody" + key) != undefined)
+                    {
+                        $('.cardSubtitle' + key).hide();
+                        $('.cardSubtitle' + key).html('No Alerts')
+                        $('.cardBody' + key).removeClass('bg-danger');
+                        $('.cardTitle' + key).css('color', 'initial');
+                        
+                        pauseAlarm();
+                        delete alerts[key];
+                    }
+                }
+                else if (sound_dict[key] == 1)
+                {
+                    playAlarm();
+                }
+            }
+
+            $.ajax(
+            {
+                url: '/getAlerts',
+                type: 'POST',
+                dataType: "json",
+                success: function(response)
+                {
+                    console.log(response);
+                    $.each(response, function(key, val)
+                    {
+                        if ($(".cardBody" + key) != undefined)
+                        {
+                            alerts[key] = 0;
+                            if (sound_dict[key] == 1)
+                            {
+                                playAlarm();
+                            }
+                            
+                            $('.cardBody' + key).addClass('bg-danger');
+                            $('.cardSubtitle' + key).html('<strong>' + [val.slice(0, -1).join(', '), val.slice(-1)[0]].join(val.length < 2 ? '' : ' and ') + ' Detected!</strong>');   
+                            $('.cardSubtitle' + key).fadeIn(500);
+                            $('.cardSubtitle' + key).css('color', 'white');
+                            $('.cardTitle' + key).css('color', 'white');
+                        }
+                    });
+                },
+                error: function()
+                {
+                    // window.location = "/";
+                    console.log('Error');
+                }
+            });
+        }
+
     </script>
 
 </head>
 
-<body class="profile-page">
+<body class="profile-page" onload="onLoad()">
     <nav class="navbar navbar-expand-lg bg-white navbar-absolute navbar-transparent">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
                     <!-- TODO: Dynamic resizing of logo needs to be done -->
-                    <img src="/static/img/dsal.png">
+                    <img class="dsal_logo" src="/static/img/dsal.png">
                 </a>
             </div>
             <div class="collapse navbar-collapse" id="example-navbar-primary">
@@ -128,7 +225,7 @@
                         <i class="fa fa-home"></i>
                     </a>
                 </div>
-                {% if alert_name and alert_message is defined %}
+                <!-- {% if alert_name and alert_message is defined %}
                 <div class="alert alert-danger" role="alert">
                     <div class="container">
                         <div class="alert-icon">
@@ -142,7 +239,7 @@
                         </button>
                     </div>
                 </div>
-                {% endif %}
+                {% endif %} -->
                 <div class="col-md-7 mr-auto ml-auto">
                     <div class="card card-plain card-form-horizontal">
                         <div class="card-body">
@@ -176,7 +273,7 @@
                             <ul class="nav nav-pills nav-pills-primary justify-content-center" role="tablist">
                                 <li class="nav-item">
                                     <a class="nav-link" data-toggle="tab" href="#favorite" role="tablist">
-                                        Favorites
+                                        Favourites
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -205,11 +302,12 @@
                                             <div class="card-image">
                                                 <img id="cameraViewFav{{ id1 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
-                                            <div class="card-body">
-                                                <h4 class="card-title">{{ favourited_camera_name }}</h4>
+                                            <div class="card-body cardBody{{ id1 }}">
+                                                <h4 class="card-title cardTitle{{ id1 }}">{{ favourited_camera_name }}</h4>
+                                                <h5 class="cardSubtitle{{ id1 }}">No Alerts</h5>
                                                 
                                                 <div class="card-footer">
-                                                    <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     <p hidden id="streamFav{{ id1 }}">/stream/{{ id1 }}</p>
@@ -247,16 +345,17 @@
                                             <div class="card-image">
                                                 <img id="cameraViewAll{{ id2 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
-                                            <div class="card-body">
-                                                <h4 class="card-title">{{ all_cameras }}</h4>
+                                            <div class="card-body cardBody{{ id2 }}">
+                                                <h4 class="card-title cardTitle{{ id2 }}">{{ all_cameras }}</h4>
+                                                <h5 class="cardSubtitle{{ id2 }}">No Alerts</h5>
 
                                                 <div class="card-footer">
                                                     {% if all_cameras in favourites %} 
-                                                    <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     {% else %} 
-                                                    <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
+                                                    <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-unfavourite">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     {% endif %}
@@ -298,16 +397,17 @@
                                             <div class="card-image">
                                                 <img id="cameraView{{ floor_stripped }}{{ id3 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
-                                            <div class="card-body">
-                                                <h4 class="card-title">{{ names }}</h4>
+                                            <div class="card-body cardBody{{ id3 }}">
+                                                <h4 class="card-title cardTitle{{ id3 }}">{{ names }}</h4>
+                                                <h5 class="cardSubtitle{{ id3 }}">No Alerts</h5>
 
                                                 <div class="card-footer">
                                                     {% if names in favourites %} 
-                                                    <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    <a class="btn btn-icon btn-neutral btn-twitter">
                                                         <i href="/favourite/{{ id3 }}" class="fa fa-star"></i>
                                                     </a>
                                                     {% else %}
-                                                    <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
+                                                    <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-unfavourite">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     {% endif %}
@@ -348,16 +448,17 @@
                                     <div class="card-image">
                                         <img id="cameraViewSearch{{ id1 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                     </div>
-                                    <div class="card-body">
-                                        <h4 class="card-title">{{ searched_names }}</h4>
+                                    <div class="card-body cardBody{{ id1 }}">
+                                        <h4 class="card-title cardTitle{{ id1 }}">{{ searched_names }}</h4>
+                                        <h5 class="cardSubtitle{{ id1 }}">No Alerts</h5>
 
                                         <div class="card-footer">
                                             {% if searched_names in search_favourites %}
-                                            <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                            <a class="btn btn-icon btn-neutral btn-twitter">
                                                 <i class="fa fa-star"></i>
                                             </a>
                                             {% else %}
-                                            <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
+                                            <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-unfavourite">
                                                 <i class="fa fa-star"></i>
                                             </a>
                                             {% endif %}

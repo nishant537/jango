@@ -12108,3 +12108,10 @@ Created using IcoMoon - icomoon.io
         right: 14%;
     }
 }
+
+/* Custom CSS */
+.dsal_logo
+{
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    border-radius: 0.5rem !important;
+}
