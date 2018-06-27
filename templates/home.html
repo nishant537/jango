@@ -90,6 +90,38 @@
             playStatus[key] = false;
         }
 
+        function showFullScreen(key, tab)
+        {
+            console.log("Enter Full Screen");
+            $('#fullScreenImage').attr('src', $('#stream' + tab + key).text());
+            $('#myModal').fadeIn();
+            inFullScreen = true;
+        }
+
+        function exitFullScreen()
+        {
+            console.log("Exit Full Screen");
+            $('#myModal').fadeOut();
+            inFullScreen = false;
+        }
+
+        window.onclick = function(event) 
+        {
+            var modal = document.getElementById('myModal');
+            if (event.target == modal) 
+            {
+                exitFullScreen();
+            }
+        }
+
+        $(document).keyup(function(event) 
+        {
+            if ((event.keyCode == 27) && inFullScreen)
+            {
+                exitFullScreen();
+            }
+        });
+
         function playAlarm()
         {
             audio.addEventListener('ended', function()
@@ -202,6 +234,11 @@
             </div>
         </div>
     </nav>
+
+    <div id="myModal" class="modal">
+        <img id='fullScreenImage' class='modal_content' src=''">
+    </div>
+
     <div class="wrapper">
         <div class="page-header page-header-mini">
             <div class="page-header-image" style="background-image: url('/static/img/{{ image }}') ;"></div>
