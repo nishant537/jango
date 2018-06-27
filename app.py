@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, Response
 from functools import wraps
 from werkzeug.utils import secure_filename
 from collections import OrderedDict
+from requests.exceptions import ConnectionError
 from pygame import mixer
 import os, requests, json, time
 import cv2
@@ -85,12 +86,14 @@ def license_required(func):
 # Route / or landing page
 @app.route('/')
 def landing():
-    # TODO: Background image wont work without licensing, use default image if license failed
-    # img = get_background()
-    img = 'Landing.jpeg'
-    license_status, license_message = get_license()
-    if license_status: license_message = 'Valid'
-    return render_template('landing.html', message=license_message, image=img)
+    try:
+        license_status, license_reason = get_license()
+        if license_status: 
+            license_message = 'Valid'
+            img = 'Landing.jpeg'
+        return render_template('landing.html', message=license_message, image = img)
+    except ConnectionError:
+        return render_template('landing.html', alert_message = 'Failed to establish connection with server')
 
 # Route Add Camera page
 @app.route('/add')
