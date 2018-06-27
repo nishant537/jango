@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, Response
 from functools import wraps
 from werkzeug.utils import secure_filename
 from collections import OrderedDict
+from requests.exceptions import ConnectionError
 from pygame import mixer
 import os, requests, json, time
 import cv2
@@ -68,7 +69,9 @@ def get_alerts():
     alert_payload = json.loads(get_alert)
     return alert_payload
 
-# Decorator - Checking for license first before loading any page
+#### Custom Decorators
+
+# Checking for license first before loading any page
 def license_required(func):
     @wraps(func)
     def valid_license(*args, **kwargs):
@@ -77,23 +80,35 @@ def license_required(func):
         if not license_status:
             return redirect(url_for('landing'))
         return func(*args, **kwargs)
-
     return valid_license
+
+# Check for server connection, if failed redirect every URL to landing page. 
+def server_connection(func):
+    @wraps(func)
+    def valid_connection(*args, **kwargs):
+        # In case we need the validity number too
+        try:
+            license_status, license_message = get_license()
+            if license_status: return func(*args, **kwargs)
+        except ConnectionError:
+            return render_template('landing.html', alert_message = 'Failed to establish connection with server')
+    return valid_connection
 
 #### Flask Routing
 
 # Route / or landing page
 @app.route('/')
+@server_connection
 def landing():
-    # TODO: Background image wont work without licensing, use default image if license failed
-    # img = get_background()
-    img = 'Landing.jpeg'
-    license_status, license_message = get_license()
-    if license_status: license_message = 'Valid'
-    return render_template('landing.html', message=license_message, image=img)
+    license_status, license_reason = get_license()
+    if license_status: 
+        license_message = 'Valid'
+        img = 'Landing.jpeg'
+    return render_template('landing.html', message=license_message, image = img)
 
 # Route Add Camera page
 @app.route('/add')
+@server_connection
 @license_required
 def add_camera_page():
     img = get_background()
@@ -101,6 +116,7 @@ def add_camera_page():
 
 # Route Edit Camera page
 @app.route('/edit/<camera_id>')
+@server_connection
 @license_required
 def edit_camera_page(camera_id):
     img = get_background()
@@ -131,16 +147,24 @@ def edit_camera_page(camera_id):
             current_start_time = camera_payload[str(i)]['intrusion_start_time']
             current_end_time = camera_payload[str(i)]['intrusion_end_time']
             current_stream = camera_payload[str(i)]['rtsp_url']
+            current_sound_alarm = camera_payload[str(i)]['sound_alarm']
+            current_favourite = camera_payload[str(i)]['favourite']
+            current_object_tamper = camera_payload[str(i)]['object_detect']['tamper']
+            current_object_fire = camera_payload[str(i)]['object_detect']['fire']
+            current_object_helmet = camera_payload[str(i)]['object_detect']['helmet']
+            current_object_intrusion = camera_payload[str(i)]['object_detect']['intrusion']
 
-    return render_template('edit.html', image=img, current_name=current_name, 
-        current_id=camera_id, current_priority=current_priority,
-        current_floor=current_floor, current_stream=current_stream, 
-        current_email=current_email, current_sms=current_sms, 
+    return render_template('edit.html', image=img, current_name=current_name, current_id=camera_id,
+        current_floor=current_floor, current_priority=current_priority, current_stream=current_stream, 
+        current_email=current_email, current_sms=current_sms, current_favourite=current_favourite,
         current_call=current_call, current_start_time=current_start_time, 
-        current_end_time=current_end_time)
+        current_end_time=current_end_time, current_sound_alarm=current_sound_alarm, 
+        current_object_fire=current_object_fire, current_object_tamper=current_object_tamper, 
+        current_object_helmet=current_object_helmet, current_object_intrusion=current_object_intrusion)
 
 # Route home page
 @app.route('/home')
+@server_connection
 @license_required
 def home_page():
     img = get_background()
@@ -188,6 +212,7 @@ def home_page():
 
 # Route list page
 @app.route('/list')
+@server_connection
 @license_required
 def list_page():
     img = get_background()
@@ -231,6 +256,7 @@ def list_page():
 
 # Handling delete camera
 @app.route('/deleteCamera/<camera_id>')
+@server_connection
 @license_required
 def delete_camera(camera_id):
     post_delete_camera = requests.post(url='http://127.0.0.1:8081/deleteCamera/' + camera_id)
@@ -245,6 +271,7 @@ def generate_http_stream(camera):
 
 # Support Streaming
 @app.route('/stream/<camera_id>')
+@server_connection
 @license_required
 def streaming_url(camera_id):
     camera_payload = get_camera_info()
@@ -253,8 +280,72 @@ def streaming_url(camera_id):
     return Response(generate_http_stream(VideoCamera(feed)), 
         mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# Support Favourites
+@app.route('/favourite/<camera_id>')
+@server_connection
+@license_required
+def favourite(camera_id):
+    camera_payload = get_camera_info()
+    favourite_email_list, favourite_sms_list, favourite_call_list = ([] for i in range(3))
+
+    # Match camera_id from camera_payload and load it's details.
+    if camera_id in camera_payload:
+            for j in range(0, len(camera_payload[camera_id]['email_list'])):
+                favourite_email_list.append(camera_payload[camera_id]['email_list'][j])
+
+            for k in range(0, len(camera_payload[camera_id]['sms_list'])):
+                favourite_sms_list.append(camera_payload[camera_id]['sms_list'][k])
+
+            for l in range(0, len(camera_payload[camera_id]['call_list'])):
+                favourite_call_list.append(camera_payload[camera_id]['call_list'][l])
+
+            favourite_name = camera_payload[camera_id]['camera_name']
+            favourite_priority = camera_payload[camera_id]['camera_priority']
+            favourite_floor = camera_payload[camera_id]['floor']
+            favourite_start_time = camera_payload[camera_id]['intrusion_start_time']
+            favourite_end_time = camera_payload[camera_id]['intrusion_end_time']
+            favourite_stream = camera_payload[camera_id]['rtsp_url']
+            favourite_sound_alarm = camera_payload[camera_id]['sound_alarm']
+            favourite_object_tamper = camera_payload[camera_id]['object_detect']['tamper']
+            favourite_object_fire = camera_payload[camera_id]['object_detect']['fire']
+            favourite_object_helmet = camera_payload[camera_id]['object_detect']['helmet']
+            favourite_object_intrusion = camera_payload[camera_id]['object_detect']['intrusion']
+
+            favourite_favourite = camera_payload[camera_id]['favourite']
+
+    if favourite_favourite == 1:
+        favourite_favourite = 0
+    else:
+        favourite_favourite = 1
+
+    object_detection_dict = OrderedDict()
+    object_detection_dict["tamper"] = favourite_object_tamper
+    object_detection_dict["helmet"] = favourite_object_helmet
+    object_detection_dict["fire"] = favourite_object_fire
+    object_detection_dict["intrusion"] = favourite_object_intrusion
+
+    favourited_camera_dict = OrderedDict()
+    favourited_camera_dict["camera_name"] = favourite_name
+    favourited_camera_dict["camera_priority"] = favourite_priority
+    favourited_camera_dict["email_list"] = favourite_email_list
+    favourited_camera_dict["sms_list"] = favourite_sms_list
+    favourited_camera_dict["call_list"] = favourite_call_list
+    favourited_camera_dict["rtsp_url"] = favourite_stream
+    favourited_camera_dict["object_detect"] = object_detection_dict
+    favourited_camera_dict["intrusion_start_time"] = favourite_start_time
+    favourited_camera_dict["intrusion_end_time"] = favourite_end_time
+    favourited_camera_dict["floor"] = favourite_floor
+    favourited_camera_dict["sound_alarm"] = favourite_sound_alarm
+    favourited_camera_dict["favourite"] = favourite_favourite
+
+    # Making a POST to the Backend - Favourited / Unfavourited Camera
+    post_favourited_camera_info = requests.post(url='http://127.0.0.1:8081/editCamera/' + camera_id, data=json.dumps(favourited_camera_dict))
+
+    return redirect(url_for('home_page'))
+
 # Handling search for home page
 @app.route('/home/search', methods=['GET', 'POST'])
+@server_connection
 @license_required
 def search_home_page():
     img = get_background()
@@ -285,6 +376,7 @@ def search_home_page():
 
 # Handling search for list page
 @app.route('/list/search', methods=['GET', 'POST'])
+@server_connection
 @license_required
 def search_list_page():
     img = get_background()
@@ -331,6 +423,7 @@ def search_list_page():
 
 # Send background information to backend
 @app.route('/background/<background_image>')
+@server_connection
 @license_required
 def background_image(background_image):
     if background_image == 'retail':
@@ -356,6 +449,7 @@ def background_image(background_image):
     
 # Handle license upload 
 @app.route('/licenseUpload', methods=['GET', 'POST'])
+@server_connection
 def license():
     # Upload license
     if request.method == 'POST':
@@ -371,6 +465,7 @@ def license():
 
 # Add Camera
 @app.route('/addCamera', methods=['GET', 'POST'])
+@server_connection
 @license_required
 def add_camera():
     # Get new camera data from form
@@ -443,6 +538,7 @@ def add_camera():
 
 # Edit Camera
 @app.route('/editCamera/<camera_id>', methods=['GET', 'POST'])
+@server_connection
 @license_required
 def edit_camera(camera_id):
     # Get edited camera data from form
@@ -518,5 +614,5 @@ def edit_camera(camera_id):
 
 if __name__ == "__main__":
     # Running Flask
-    # To access globally - WSGI Server
+    # To access globally - WSGI Server (0.0.0.0)
     app.run(host='127.0.0.1', debug=True, threaded=True)

@@ -7,7 +7,8 @@
     <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>Home · GoDeep by DeepSight AI Labs</title>
-    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'/>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'
+    />
     <!-- Fonts and icons -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat: 400,700,200" rel="stylesheet" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
@@ -206,8 +207,9 @@
                                             </div>
                                             <div class="card-body">
                                                 <h4 class="card-title">{{ favourited_camera_name }}</h4>
+                                                
                                                 <div class="card-footer">
-                                                    <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     <p hidden id="streamFav{{ id1 }}">/stream/{{ id1 }}</p>
@@ -224,7 +226,7 @@
                                                         </a>
                                                         
                                                         <!-- Dummy image for onload event trigger -->
-                                                        <img hidden src onerror="playerOnLoad({{ id1 }}, 'Fav')">
+                                                        <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id1 }}, 'Fav')">
                                                     </div>
                                                 </div>
                                             </div>
@@ -246,10 +248,15 @@
                                                 <img id="cameraViewAll{{ id2 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
                                             <div class="card-body">
-                                                <h4 class="card-title">{{all_cameras}}</h4>
+                                                <h4 class="card-title">{{ all_cameras }}</h4>
+
                                                 <div class="card-footer">
-                                                    {% if all_cameras in favourites %}
-                                                    <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                    {% if all_cameras in favourites %} 
+                                                    <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                        <i class="fa fa-star"></i>
+                                                    </a>
+                                                    {% else %} 
+                                                    <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     {% endif %}
@@ -267,7 +274,7 @@
                                                         </a>
                                                         
                                                         <!-- Dummy image for onload event trigger -->
-                                                        <img hidden src onerror="playerOnLoad({{ id2 }}, 'All')">
+                                                        <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id2 }}, 'All')">
                                                     </div>
                                                 </div>
                                             </div>
@@ -293,9 +300,14 @@
                                             </div>
                                             <div class="card-body">
                                                 <h4 class="card-title">{{ names }}</h4>
+
                                                 <div class="card-footer">
-                                                    {% if names in favourites %}
+                                                    {% if names in favourites %} 
                                                     <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                        <i href="/favourite/{{ id3 }}" class="fa fa-star"></i>
+                                                    </a>
+                                                    {% else %}
+                                                    <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     {% endif %}
@@ -313,7 +325,7 @@
                                                         </a>
                                                         
                                                         <!-- Dummy image for onload event trigger -->
-                                                        <img hidden src onerror="playerOnLoad({{ id3 }}, '{{ floor_stripped }}')">
+                                                        <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id3 }}, '{{ floor_stripped }}')">
                                                     </div>
                                                 </div>
                                             </div>
@@ -338,9 +350,14 @@
                                     </div>
                                     <div class="card-body">
                                         <h4 class="card-title">{{ searched_names }}</h4>
+
                                         <div class="card-footer">
                                             {% if searched_names in search_favourites %}
                                             <a class="btn btn-icon btn-neutral btn-lg btn-twitter">
+                                                <i class="fa fa-star"></i>
+                                            </a>
+                                            {% else %}
+                                            <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-lg btn-unfavourite">
                                                 <i class="fa fa-star"></i>
                                             </a>
                                             {% endif %}
@@ -358,7 +375,7 @@
                                                 </a>
                                                 
                                                 <!-- Dummy image for onload event trigger -->
-                                                <img hidden src onerror="playerOnLoad({{ id1 }}, 'Search')">
+                                                <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id1 }}, 'Search')">
                                             </div>
                                         </div>
                                     </div>

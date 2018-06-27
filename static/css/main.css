@@ -2917,6 +2917,12 @@ fieldset[disabled] .navbar .navbar-nav>a.btn.active {
     background-color: #FFFFFF;
 }
 
+.btn.btn-unfavourite.btn-neutral,
+.navbar .navbar-nav>a.btn.btn-twitter.btn-neutral {
+    color: #888888;
+    background-color: #FFFFFF;
+}
+
 .btn.btn-twitter.btn-neutral:hover,
 .btn.btn-twitter.btn-neutral:focus,
 .btn.btn-twitter.btn-neutral:active,

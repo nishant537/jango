@@ -54,22 +54,6 @@
                                         </div>
 
                                         <div class="row">
-                                            <div class="col-md-12 bootstrap-select show-tick">
-                                                <select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"
-                                                    title="Camera Priority" required>
-                                                    <option value="" selected disabled hidden>Choose Priority Level</option>
-                                                    {% if 'high' in current_priority %}
-                                                        <option value="high" selected>High</option>
-                                                        <option value="low">Low</option>
-                                                    {% else %}
-                                                        <option value="high">High</option>
-                                                        <option value="low" selected>Low</option>
-                                                    {% endif %}
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
                                             <div class="col-md-12 form-group">
                                                 <input value="{{ current_email }}" id="email_id_list" name="email_id_list" type="text" class="form-control" placeholder="Email ID List">
                                             </div>
@@ -94,13 +78,39 @@
 
                                         <div class="row">
                                             <div class="col-md-12 bootstrap-select show-tick">
+                                                <select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"
+                                                    title="Camera Priority" required>
+                                                    {% if 'high' in current_priority %}
+                                                    <option value="high" selected>High</option>
+                                                    <option value="low">Low</option>
+                                                    {% else %}
+                                                    <option value="high">High</option>
+                                                    <option value="low" selected>Low</option>
+                                                    {% endif %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 bootstrap-select show-tick">
                                                 <select class="selectpicker show-tick" name="object_detection" id="object_detection" data-style="btn btn-default btn-round"
                                                     multiple="" title="Object Detection">
-                                                    <option value="" selected disabled hidden>Select Here</option>
+                                                    {% if current_object_tamper == 0 %}
                                                     <option value="tamper">Tamper</option>
+                                                    {% else %}
+                                                    <option value="tamper" selected>Tamper</option>
+                                                    {% endif %} {% if current_object_helmet == 0 %}
                                                     <option value="helmet">Helmet</option>
+                                                    {% else %}
+                                                    <option value="helmet" selected>Helmet</option>
+                                                    {% endif %} {% if current_object_fire == 0 %}
                                                     <option value="fire">Fire</option>
+                                                    {% else %}
+                                                    <option value="fire" selected>Fire</option>
+                                                    {% endif %} {% if current_object_intrusion == 0 %}
                                                     <option value="intrusion">Intrusion</option>
+                                                    {% else %}
+                                                    <option value="intrusion" selected>Intrusion</option>
+                                                    {% endif %}
                                                 </select>
                                             </div>
                                         </div>
@@ -108,7 +118,9 @@
                                         <div class="row">
                                             <div class="form-check">
                                                 <label class="form-check-label">
-                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox">
+                                                    {% if current_sound_alarm == 0 %}
+                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox"> {% else %}
+                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" checked> {% endif %}
                                                     <span class="form-check-sign"></span>
                                                     Sound Alarm
                                                 </label>
@@ -118,7 +130,9 @@
                                         <div class="row">
                                             <div class="form-check">
                                                 <label class="form-check-label">
-                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox">
+                                                    {% if current_favourite == 0 %}
+                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox"> {% else %}
+                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox" checked> {% endif %}
                                                     <span class="form-check-sign"></span>
                                                     Favourite
                                                 </label>

@@ -30,11 +30,22 @@
         <div class="page-header-image" style="background-image: url('/static/img/{{ image }}') ;"></div>
         <div class="content-center">
             <div class="container">
+                {% if alert_message is defined %}
+                <div class="alert alert-danger" role="alert">
+                    <div class="container">
+                        <div class="alert-icon">
+                            <i class="fa fa-bell"></i>
+                        </div>
+                        <strong>Error!</strong> {{ alert_message }}
+                    </div>
+                </div>
+                {% endif %}
                 <div class="row">
                     <div class="col-md-6 ml-auto mr-auto mr-center">
                         <div class="card card-signup">
                             <img src="/static/img/dsal.png">
                             <div class="card-body">
+                                {% if message is defined %}
                                 <form class="form" method="POST" action="/licenseUpload" enctype="multipart/form-data">
                                     <h4 class="card-title text-center">License Status: {{ message }}</h4>
                                     <div class="fileinput fileinput-new" data-provides="fileinput">
@@ -50,6 +61,7 @@
                                     </div>
                                 </form>
                             </div>
+                            {% endif %}
                             {% if 'Valid' in message %}
                             <div class="card-footer">
                                 <a href="/home" class="btn btn-primary btn-round">Launch</a>
