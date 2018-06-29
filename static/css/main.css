@@ -3503,7 +3503,7 @@ fieldset[disabled] .btn-primary.active {
 }
 
 .btn-success {
-    background-color: #18ce0f;
+    background-color: rgba(40, 160, 40, 1);
     color: #FFFFFF;
 }
 
@@ -3518,7 +3518,7 @@ fieldset[disabled] .btn-primary.active {
 .show>.btn-success.dropdown-toggle,
 .show>.btn-success.dropdown-toggle:focus,
 .show>.btn-success.dropdown-toggle:hover {
-    background-color: #1beb11;
+    background-color: rgba(40, 190, 40, 1);
     color: #FFFFFF;
     box-shadow: none;
 }
@@ -4097,32 +4097,32 @@ fieldset[disabled] .btn-link.active {
 }
 
 .form-control::-moz-placeholder {
-    color: #DDDDDD;
+    color: #AAAAAA;
     opacity: 1;
     filter: alpha(opacity=100);
 }
 
 .form-control:-moz-placeholder {
-    color: #DDDDDD;
+    color: #AAAAAA;
     opacity: 1;
     filter: alpha(opacity=100);
 }
 
 .form-control::-webkit-input-placeholder {
-    color: #DDDDDD;
+    color: #AAAAAA;
     opacity: 1;
     filter: alpha(opacity=100);
 }
 
 .form-control:-ms-input-placeholder {
-    color: #DDDDDD;
+    color: #AAAAAA;
     opacity: 1;
     filter: alpha(opacity=100);
 }
 
 .form-control {
     background-color: transparent;
-    border: 1px solid #E3E3E3;
+    border: 1px solid #BBBBBB;
     border-radius: 30px;
     color: #2c2c2c;
     line-height: normal;
@@ -4137,7 +4137,7 @@ fieldset[disabled] .btn-link.active {
 }
 
 .has-success .form-control {
-    border-color: #E3E3E3;
+    border-color: #BBBBBB;
 }
 
 .form-control:focus {
@@ -4538,7 +4538,7 @@ textarea.form-control:active {
     border-radius: 3px;
     top: 0;
     background-color: transparent;
-    border: 1px solid #E3E3E3;
+    border: 1px solid #AAAAAA;
     -webkit-transition: opacity 0.3s linear;
     -moz-transition: opacity 0.3s linear;
     -o-transition: opacity 0.3s linear;
@@ -4996,7 +4996,7 @@ h5,
 .h5 {
     font-size: 1.3em;
     line-height: 1.4em;
-    margin-bottom: 15px;
+    margin-bottom: 6px;
 }
 
 h5.category,
@@ -5225,11 +5225,11 @@ body {
     min-width: 100px;
     font-weight: 400;
     color: #444;
-    background-color: rgba(222, 222, 222, 0.3);
+    background-color: rgba(255, 255, 255, 0.85);
 }
 
 .nav-pills .nav-item .nav-link:hover {
-    background-color: rgba(222, 222, 222, 0.3);
+    background-color: rgba(255, 255, 255, 1.0);
 }
 
 .nav-pills .nav-item .nav-link.active,

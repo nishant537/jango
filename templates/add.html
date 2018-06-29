@@ -17,7 +17,7 @@
 </head>
 
 <body class="signup-page">
-    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
+    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
@@ -34,7 +34,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/home">
+                        <a class="nav-link" href="/view">
                             <i class="fa fa-camera"></i>
                             <p>View</p>
                         </a>
@@ -50,11 +50,11 @@
                             <p>Background</p>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="/background/bank">Bank</a>
-                            <a class="dropdown-item" href="/background/hospital">Hospital</a>
-                            <a class="dropdown-item" href="/background/insurance">Insurance</a>
-                            <a class="dropdown-item" href="/background/pixel">Pixel</a>
-                            <a class="dropdown-item" href="/background/retail">Retail</a>
+                            <a class="dropdown-item" href="/background/bank/add_camera">Bank</a>
+                            <a class="dropdown-item" href="/background/hospital/add_camera">Hospital</a>
+                            <a class="dropdown-item" href="/background/insurance/add_camera">Insurance</a>
+                            <a class="dropdown-item" href="/background/pixel/add_camera">Pixel</a>
+                            <a class="dropdown-item" href="/background/retail/add_camera">Retail</a>
                         </div>
                     </li>
                 </ul>
@@ -66,9 +66,10 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 ml-auto mr-auto">
-                        <div class="card card-signup">
+                        <div class="card card-signup" style="background-color: rgba(255, 255, 255, 0.7); border-radius: 1rem;">
                             <div class="card-body">
-                                <h4 class="card-title text-center">Add Camera</h4>
+                                <h3 class="card-title text-center">Add Camera</h3>
+                                <br>
                                 <form class="form" method="POST" action="/addCamera">
                                     <div class="card-body">
                                         <div class="row">
@@ -82,10 +83,9 @@
 
                                         <div class="row">
                                             <div class="col-md-12 form-group">
-                                                <input id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Main Stream URL" required>
+                                                <input id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Camera Stream URL" required>
                                             </div>
                                         </div>
-
 
                                         <div class="row">
                                             <div class="col-md-12 form-group">
@@ -154,8 +154,8 @@
                                     </div>
 
                                     <div class="text-center">
-                                        <a href="/list" class="btn btn-default">Close</a>
-                                        <button type="submit" class="btn btn-success">Add</button>
+                                        <a href="/list" class="btn btn-default">Cancel</a>
+                                        <button type="submit" class="btn btn-success">Done</button>
                                     </div>
                                 </form>
                             </div>
@@ -165,12 +165,12 @@
             </div>
         </div>
     </div>
-    <footer class="footer">
+    <footer class="footer" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;">
         <div class="container">
             <nav>
                 <ul>
                     <li>
-                        GoDeep Platform
+                        <strong>GoDeep</strong> Platform
                     </li>
                 </ul>
             </nav>

@@ -17,7 +17,7 @@
 </head>
 
 <body class="signup-page">
-    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
+    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
@@ -34,7 +34,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/home">
+                        <a class="nav-link" href="/view">
                             <i class="fa fa-camera"></i>
                             <p>View</p>
                         </a>
@@ -50,11 +50,11 @@
                             <p>Background</p>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="/background/bank">Bank</a>
-                            <a class="dropdown-item" href="/background/hospital">Hospital</a>
-                            <a class="dropdown-item" href="/background/insurance">Insurance</a>
-                            <a class="dropdown-item" href="/background/pixel">Pixel</a>
-                            <a class="dropdown-item" href="/background/retail">Retail</a>
+                            <a class="dropdown-item" href="/background/bank/list">Bank</a>
+                            <a class="dropdown-item" href="/background/hospital/list">Hospital</a>
+                            <a class="dropdown-item" href="/background/insurance/list">Insurance</a>
+                            <a class="dropdown-item" href="/background/pixel/list">Pixel</a>
+                            <a class="dropdown-item" href="/background/retail/list">Retail</a>
                         </div>
                     </li>
                 </ul>
@@ -66,9 +66,10 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 ml-auto mr-auto">
-                        <div class="card card-signup">
+                        <div class="card card-signup" style="background-color: rgba(255, 255, 255, 0.7); border-radius: 1rem;">
                             <div class="card-body">
-                                <h4 class="card-title text-center">Edit {{ current_name }}</h4>
+                                <h3 class="card-title text-center">Edit <strong>{{ current_name }}</strong></h3>
+                                <br>
                                 <form class="form" method="POST" action="/editCamera/{{ current_id }}">
                                     <div class="card-body">
                                         <div class="row">
@@ -82,7 +83,7 @@
 
                                         <div class="row">
                                             <div class="col-md-12 form-group">
-                                                <input value="{{ current_stream }}" id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Stream URL" required>
+                                                <input value="{{ current_stream }}" id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Camera Stream URL" required>
                                             </div>
                                         </div>
 
@@ -109,6 +110,7 @@
                                             </div>
                                         </div>
 
+                                        <h5 style="font-size: 13px; padding-bottom: 0px; text-align: center;">Select Camera Priority</h5>
                                         <div class="row">
                                             <div class="col-md-12 bootstrap-select show-tick">
                                                 <select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"
@@ -123,6 +125,10 @@
                                                 </select>
                                             </div>
                                         </div>
+
+                                        <br>
+
+                                        <h5 style="font-size: 13px; padding-bottom: 0px; text-align: center;">Select Objects to Detect</h5>
                                         <div class="row">
                                             <div class="col-md-12 bootstrap-select show-tick">
                                                 <select class="selectpicker show-tick" name="object_detection" id="object_detection" data-style="btn btn-default btn-round"
@@ -152,8 +158,10 @@
                                             <div class="form-check">
                                                 <label class="form-check-label">
                                                     {% if current_sound_alarm == 0 %}
-                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox"> {% else %}
-                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" checked> {% endif %}
+                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox">
+                                                    {% else %}
+                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" checked>
+                                                    {% endif %}
                                                     <span class="form-check-sign"></span>
                                                     Sound Alarm
                                                 </label>
@@ -164,8 +172,10 @@
                                             <div class="form-check">
                                                 <label class="form-check-label">
                                                     {% if current_favourite == 0 %}
-                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox"> {% else %}
-                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox" checked> {% endif %}
+                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox">
+                                                    {% else %}
+                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox" checked>
+                                                    {% endif %}
                                                     <span class="form-check-sign"></span>
                                                     Favourite
                                                 </label>
@@ -174,8 +184,8 @@
                                     </div>
 
                                     <div class="text-center">
-                                        <a href="/list" class="btn btn-default">Close</a>
-                                        <button type="submit" class="btn btn-success">Edit</button>
+                                        <a href="/list" class="btn btn-default">Cancel</a>
+                                        <button type="submit" class="btn btn-success">Done</button>
                                     </div>
                                 </form>
                             </div>
@@ -185,12 +195,12 @@
             </div>
         </div>
     </div>
-    <footer class="footer">
+    <footer class="footer" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;">
         <div class="container">
             <nav>
                 <ul>
                     <li>
-                        GoDeep Platform
+                        <strong>GoDeep</strong> Platform
                     </li>
                 </ul>
             </nav>

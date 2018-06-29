@@ -22,7 +22,7 @@
 </head>
 
 <body class="profile-page">
-    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
+    <nav class="navbar navbar-expand-sm fixed-top bg-white" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;" id="mainNavbar">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
@@ -39,7 +39,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/home">
+                        <a class="nav-link" href="/view">
                             <i class="fa fa-camera"></i>
                             <p>View</p>
                         </a>
@@ -55,11 +55,11 @@
                             <p>Background</p>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="/background/bank">Bank</a>
-                            <a class="dropdown-item" href="/background/hospital">Hospital</a>
-                            <a class="dropdown-item" href="/background/insurance">Insurance</a>
-                            <a class="dropdown-item" href="/background/pixel">Pixel</a>
-                            <a class="dropdown-item" href="/background/retail">Retail</a>
+                            <a class="dropdown-item" href="/background/bank/list">Bank</a>
+                            <a class="dropdown-item" href="/background/hospital/list">Hospital</a>
+                            <a class="dropdown-item" href="/background/insurance/list">Insurance</a>
+                            <a class="dropdown-item" href="/background/pixel/list">Pixel</a>
+                            <a class="dropdown-item" href="/background/retail/list">Retail</a>
                         </div>
                     </li>
                 </ul>
@@ -75,7 +75,7 @@
         </form>
     </nav>
 
-    <div class="wrapper" style="background-image: url('/static/img/{{ image }}'); padding-top: 10vh;">
+    <div class="wrapper" style="background-image: url('/static/img/{{ image }}'); padding-top: 10vh; height: 100vh;">
         <div class="row" style="padding: 50px;">
             <div class="card card-plain" style="background-color: rgba(255, 255, 255, 0.8); border-radius: 0.4rem;">
                 <div class="card-body">
@@ -191,12 +191,12 @@
             </div>
         </div>
     </div>
-    <footer class="footer">
+    <footer class="footer" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;">
         <div class="container">
             <nav>
                 <ul>
                     <li>
-                        GoDeep Platform
+                        <strong>GoDeep</strong> Platform
                     </li>
                 </ul>
             </nav>
