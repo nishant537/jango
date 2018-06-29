@@ -87,116 +87,114 @@
                 </div>
             </div>
         </div>
-        <div class="section">
-            <div class="row" style="padding: 50px">
-                <div class="card card-plain">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead class>
-                                    <tr>
-                                        <th class="text-center">
-                                            Camera Name
-                                        </th>
-                                        <th class="text-center">
-                                            Floor
-                                        </th>
-                                        <th class="text-center">
-                                            Priority
-                                        </th>
-                                        <th class="text-center">
-                                            Email ID List
-                                        </th>
-                                        <th class="text-center">
-                                            SMS List
-                                        </th>
-                                        <th class="text-center">
-                                            Call List
-                                        </th>
-                                        <th class="text-center">
-                                            Tamper
-                                        </th>
-                                        <th class="text-center">
-                                            Helmet
-                                        </th>
-                                        <th class="text-center">
-                                            Fire
-                                        </th>
-                                        <th class="text-center">
-                                            Intrusion
-                                        </th>
-                                        <th class="text-center">
-                                            Start Time
-                                        </th>
-                                        <th class="text-center">
-                                            End Time
-                                        </th>
-                                        <th class="text-center">
-                                            Sound Alarm
-                                        </th>
-                                        <th class="text-center">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for id, name, tamper, priority, helmet, fire, intrusion, start_time, end_time, floor, sound_alarm in data %}
-                                    <tr>
-                                        <td class="text-center">
-                                            {{ name }}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ floor }}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ priority }}
-                                        </td>
-                                        <td class="text-center">
-                                            {% if id in email_list %} {% for key1, value1 in email_list.iteritems() if id in key1 %} {% for emails in value1 %} {{ emails
-                                            }}, {% endfor %} {% endfor %} {% else %} None {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            {% if id in sms_list %} {% for key2, value2 in sms_list.iteritems() if id in key2 %} {% for sms in value2 %} {{ sms }}, {%
-                                            endfor %} {% endfor %} {% else %} None {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            {% if id in call_list %} {% for key3, value3 in call_list.iteritems() if id in key3 %} {% for calls in value3 %} {{ calls
-                                            }}, {% endfor %} {% endfor %} {% else %} None {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ tamper }}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ helmet }}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ fire }}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ intrusion }}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ start_time }}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ end_time }}
-                                        </td>
-                                        <td class="text-center">
-                                            {{ sound_alarm }}
-                                        </td>
-                                        <td class="text-center">
-                                            <a class="btn btn-default btn-icon btn-sm" data-original-title="Edit" title="Edit" href="/edit/{{id}}">
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
-                                            <a class="btn btn-danger btn-icon btn-sm" data-original-title="Delete" title="Delete" href="/deleteCamera/{{id}}">
-                                                <i class="fa fa-times"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+        <div class="row" style="padding: 50px">
+            <div class="card card-plain">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class>
+                                <tr>
+                                    <th class="text-center">
+                                        Camera Name
+                                    </th>
+                                    <th class="text-center">
+                                        Floor
+                                    </th>
+                                    <th class="text-center">
+                                        Priority
+                                    </th>
+                                    <th class="text-center">
+                                        Email ID List
+                                    </th>
+                                    <th class="text-center">
+                                        SMS List
+                                    </th>
+                                    <th class="text-center">
+                                        Call List
+                                    </th>
+                                    <th class="text-center">
+                                        Tamper
+                                    </th>
+                                    <th class="text-center">
+                                        Helmet
+                                    </th>
+                                    <th class="text-center">
+                                        Fire
+                                    </th>
+                                    <th class="text-center">
+                                        Intrusion
+                                    </th>
+                                    <th class="text-center">
+                                        Start Time
+                                    </th>
+                                    <th class="text-center">
+                                        End Time
+                                    </th>
+                                    <th class="text-center">
+                                        Sound Alarm
+                                    </th>
+                                    <th class="text-center">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for id, name, tamper, priority, helmet, fire, intrusion, start_time, end_time, floor, sound_alarm in data %}
+                                <tr>
+                                    <td class="text-center">
+                                        {{ name }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ floor }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ priority }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if id in email_list %} {% for key1, value1 in email_list.iteritems() if id in key1 %} {% for emails in value1 %} {{ emails
+                                        }}, {% endfor %} {% endfor %} {% else %} None {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if id in sms_list %} {% for key2, value2 in sms_list.iteritems() if id in key2 %} {% for sms in value2 %} {{ sms }}, {%
+                                        endfor %} {% endfor %} {% else %} None {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if id in call_list %} {% for key3, value3 in call_list.iteritems() if id in key3 %} {% for calls in value3 %} {{ calls
+                                        }}, {% endfor %} {% endfor %} {% else %} None {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ tamper }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ helmet }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ fire }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ intrusion }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ start_time }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ end_time }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ sound_alarm }}
+                                    </td>
+                                    <td class="text-center">
+                                        <a class="btn btn-default btn-icon btn-sm" data-original-title="Edit" title="Edit" href="/edit/{{id}}">
+                                            <i class="fa fa-pencil"></i>
+                                        </a>
+                                        <a class="btn btn-danger btn-icon btn-sm" data-original-title="Delete" title="Delete" href="/deleteCamera/{{id}}">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
