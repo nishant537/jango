@@ -47,7 +47,8 @@
                             <div class="card-body">
                                 {% if message is defined %}
                                 <form class="form" method="POST" action="/licenseUpload" enctype="multipart/form-data">
-                                    <h4 class="card-title text-center">License Status: {{ message }}</h4>
+                                    <h5 class="card-title text-center">License Status: <strong>{{ message }}</strong></h5>
+                                    <h5 class="card-title text-center">Validity: <strong>{{ validity }} Days</strong></h5>
                                     <div class="fileinput fileinput-new" data-provides="fileinput">
                                         <span class="btn btn-raised btn-round btn-default btn-file">
                                             <span class="fileinput-new">Add License</span>
@@ -64,9 +65,11 @@
                             {% endif %}
                             {% if 'Valid' in message %}
                             <div class="card-footer">
-                                <a href="/home" class="btn btn-primary btn-round">Launch</a>
+                                <a href="/home" class="btn btn-success btn-lg btn-round">Launch</a>
                             </div>
                             {% endif %}
+                            <br>
+                            <a href="mailto:info@deepsightlabs.com" class="card-title">Customer Support</a>
                         </div>
                     </div>
                 </div>

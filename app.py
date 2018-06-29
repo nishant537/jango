@@ -44,8 +44,8 @@ def get_license():
     get_license = requests.get(BACKEND_URL + 'getLicense').content
     license_payload = json.loads(get_license)
     license_status = license_payload['status']
-    license_message = license_payload['reason']
-    return license_status, license_message
+    license_validity = license_payload['validity']
+    return license_status, license_validity
 
 # Get Camera info from backend
 def get_camera_info():
@@ -67,7 +67,7 @@ def license_required(func):
     @wraps(func)
     def valid_license(*args, **kwargs):
         # In case we need the validity number too
-        license_status, license_message = get_license()
+        license_status, license_validity = get_license()
         if not license_status:
             return redirect(url_for('landing'))
         return func(*args, **kwargs)
@@ -79,7 +79,7 @@ def server_connection(func):
     def valid_connection(*args, **kwargs):
         # In case we need the validity number too
         try:
-            license_status, license_message = get_license()
+            license_status, license_validity = get_license()
             if license_status: return func(*args, **kwargs)
         except ConnectionError:
             return render_template('landing.html', alert_message='Failed to establish connection with server')
@@ -91,11 +91,11 @@ def server_connection(func):
 @app.route('/')
 @server_connection
 def landing():
-    license_status, license_reason = get_license()
+    license_status, license_validity = get_license()
     if license_status: 
         license_message = 'Valid'
         img = 'Landing.jpeg'
-    return render_template('landing.html', message=license_message, image=img)
+    return render_template('landing.html', message=license_message, validity = license_validity, image=img)
 
 # Route Add Camera page
 @app.route('/add')
