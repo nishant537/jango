@@ -1,13 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for, Response, send_file
-from functools import wraps
-from werkzeug.utils import secure_filename
-from collections import OrderedDict
-from requests.exceptions import ConnectionError
-import os, requests, json, time
+import os
 import cv2
+import json
+import time
+import socket
+import requests
+from functools import wraps
+from collections import OrderedDict
+from werkzeug.utils import secure_filename
+from requests.exceptions import ConnectionError
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file
 
 #### Initiate Flask
 app = Flask(__name__)
+
+# GoDeep GUI Path
+GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # GoDeep backend server settings
 BACKEND_IP = '127.0.0.1'
@@ -22,6 +29,10 @@ class VideoCamera(object):
 
     def __init__(self, url):
         self.video = cv2.VideoCapture(url)
+        self.width = self.video.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
+        self.height = self.video.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
+        self.fps = self.video.get(cv2.cv.CV_CAP_PROP_FPS)
+        self.default_stream = cv2.imread(GUI_PATH + '/static/img/default_stream.jpg')
 
     def __del__(self):
         self.video.release()
@@ -29,23 +40,42 @@ class VideoCamera(object):
     def get_frame(self):
         ret, image = self.video.read()
 
-        # TODO: Check status using ret, if failed, send a default image
-        # showing the error status instead of the image frame
-
-        # We are using Motion JPEG, but OpenCV defaults to capture raw images,
-        # so we must encode it into JPEG in order to correctly display the
-        # video stream.
+        # If stream load to fail, display default stream
+        if not ret: image = self.default_stream
         
         ret, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
 
+def check_port(port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    result = False
+    try:
+        sock.bind(("0.0.0.0", port))
+        result = True
+    except: pass
+    sock.close()
+    return result
+
+# Check for server connection, if failed redirect every URL to home page. 
+def server_connection(func):
+    @wraps(func)
+    def valid_connection(*args, **kwargs):
+        # Try to acquire backend port, if successful, backend is not running
+        if check_port(int(BACKEND_PORT)):
+            return render_template('home.html', image="Landing.jpeg", alert_message='Failed to establish connection with server')
+        
+        # If port is in use, then backend is running
+        return func(*args, **kwargs)
+    return valid_connection
+
 # Get License info from backend
+@server_connection
 def get_license():
     get_license = requests.get(BACKEND_URL + 'getLicense').content
     license_payload = json.loads(get_license)
     license_status = license_payload['status']
-    license_validity = license_payload['validity']
-    return license_status, license_validity
+    license_message = license_payload['reason']
+    return license_status, license_message
 
 # Get Camera info from backend
 def get_camera_info():
@@ -67,35 +97,32 @@ def license_required(func):
     @wraps(func)
     def valid_license(*args, **kwargs):
         # In case we need the validity number too
-        license_status, license_validity = get_license()
+        license_status, license_message = get_license()
         if not license_status:
-            return redirect(url_for('landing'))
+            return redirect(url_for('home'))
         return func(*args, **kwargs)
     return valid_license
 
-# Check for server connection, if failed redirect every URL to landing page. 
-def server_connection(func):
-    @wraps(func)
-    def valid_connection(*args, **kwargs):
-        # In case we need the validity number too
-        try:
-            license_status, license_validity = get_license()
-            if license_status: return func(*args, **kwargs)
-        except ConnectionError:
-            return render_template('landing.html', alert_message='Failed to establish connection with server')
-    return valid_connection
-
 #### Flask Routing
 
-# Route / or landing page
+# Route / or home page
 @app.route('/')
 @server_connection
-def landing():
-    license_status, license_validity = get_license()
+def landing_page():
+    license_status, license_message = get_license()
+    img = 'Landing.jpeg'
     if license_status: 
         license_message = 'Valid'
-        img = 'Landing.jpeg'
-    return render_template('landing.html', message=license_message, validity = license_validity, image=img)
+    return render_template('home.html', message=license_message, image=img)
+
+@app.route('/home')
+@server_connection
+def home_page():
+    license_status, license_message = get_license()
+    img = 'Landing.jpeg'
+    if license_status: 
+        license_message = 'Valid'
+    return render_template('home.html', message=license_message, image=img)
 
 # Route Add Camera page
 @app.route('/add')
@@ -153,11 +180,11 @@ def edit_camera_page(camera_id):
         current_object_fire=current_object_fire, current_object_tamper=current_object_tamper, 
         current_object_helmet=current_object_helmet, current_object_intrusion=current_object_intrusion)
 
-# Route home page
-@app.route('/home')
+# Route view page
+@app.route('/view')
 @server_connection
 @license_required
-def home_page():
+def view_page():
     img = get_background()
     camera_payload = get_camera_info()
     camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
@@ -188,7 +215,7 @@ def home_page():
             if str(camera_payload[str(k)]['floor']) == i:
                 cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
 
-    return render_template('home.html', image=img, camera_url=camera_id_dict,
+    return render_template('view.html', image=img, camera_url=camera_id_dict,
         camera=camera_names_list, favourites=favourites_list, sound_dict=json.dumps(sound_dict),
         unique_floors=unique_floors, camera_floor=cameras_in_floor_dict)
 
@@ -231,8 +258,8 @@ def list_page():
 
     return render_template('list.html', image=img, email_list=email_dict, 
         sms_list=sms_dict, call_list=call_dict, data=zip(camera_id_list, 
-            camera_names_list, priority_list, tamper_list, helmet_list, fire_list, intrusion_list, 
-            start_time_list, end_time_list, floors_list, sound_alarm_list))
+        camera_names_list, priority_list, tamper_list, helmet_list, fire_list, 
+        intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 #### Data Handling from GUI
 
@@ -339,17 +366,18 @@ def favourite(camera_id):
     # Making a POST to the Backend - Favourited / Unfavourited Camera
     post_favourited_camera_info = requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, data=json.dumps(favourited_camera_dict))
 
-    return redirect(url_for('home_page'))
+    return redirect(url_for('view_page'))
 
-# Handling search for home page
-@app.route('/home/search', methods=['GET', 'POST'])
+# Handling search for view page
+@app.route('/view/search', methods=['GET', 'POST'])
 @server_connection
 @license_required
-def search_home_page():
+def search_view_page():
     img = get_background()
     camera_payload = get_camera_info()
     search_camera_names_list, search_camera_id_list, search_favourites_list = ([] for i in range(3))
     searched_camera_id_dict = {}
+    sound_dict = {}
     searching = True
 
     # Searching through all camera names
@@ -366,11 +394,14 @@ def search_home_page():
                 if str(camera_payload[str(i)]['favourite']) == '1':
                     search_favourites_list.append(str(camera_payload[str(i)]['camera_name']))
 
-    return render_template('home.html', searched_name=searched_name, image=img, 
+                # Adding all Cameras for which sound alarm is enabled to a dict
+                if str(camera_payload[str(i)]['sound_alarm']) == '1':
+                    sound_dict[str(i)] = camera_payload[str(i)]['sound_alarm']
+
+    return render_template('view.html', searched_name=searched_name, image=img, 
         searching=searching, search_id_name=searched_camera_id_dict, 
-        search_camera_id=search_camera_id_list, 
-        search_camera_names=search_camera_names_list, 
-        search_favourites=search_favourites_list)
+        search_camera_id=search_camera_id_list, search_camera_names=search_camera_names_list, 
+        search_favourites=search_favourites_list, sound_dict=sound_dict)
 
 # Handling search for list page
 @app.route('/list/search', methods=['GET', 'POST'])
@@ -420,10 +451,10 @@ def search_list_page():
             intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 # Send background information to backend
-@app.route('/background/<background_image>')
+@app.route('/background/<background_image>/<page_redirect>')
 @server_connection
 @license_required
-def background_image(background_image):
+def background_image(background_image, page_redirect):
     if background_image == 'retail':
         img = 'Retail.jpeg'
     if background_image == 'bank':
@@ -443,7 +474,7 @@ def background_image(background_image):
     post_background_info = requests.post(url=BACKEND_URL + 'sendBackground', 
         data=json.dumps(background_dict))
 
-    return redirect(url_for('home_page'))
+    return redirect(url_for(page_redirect + '_page'))
     
 # Handle license upload 
 @app.route('/licenseUpload', methods=['GET', 'POST'])
@@ -459,7 +490,7 @@ def license():
         
         requests.post(url=BACKEND_URL + 'licenseUpdate')
 
-    return redirect(url_for('landing'))
+    return redirect(url_for('home'))
 
 # Add Camera
 @app.route('/addCamera', methods=['GET', 'POST'])
@@ -613,4 +644,4 @@ def edit_camera(camera_id):
 if __name__ == "__main__":
     # Running Flask
     # To access globally - WSGI Server (0.0.0.0)
-    app.run(host='127.0.0.1', debug=True, threaded=True)
+    app.run(host='0.0.0.0', debug=True, threaded=True)
