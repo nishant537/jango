@@ -17,13 +17,47 @@
 </head>
 
 <body class="signup-page">
-    <nav class="navbar navbar-expand-lg bg-white navbar-absolute navbar-transparent">
+    <nav class="navbar navbar-expand-lg bg-white navbar-absolute">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
-                    <!-- TODO: Dynamic resizing of logo needs to be done -->
-                    <img class="dsal_logo" src="/static/img/dsal.png">
+                    <!-- TODO: Need higher quality logo, which can scale -->
+                    <!-- <img class="dsal_logo" src="/static/img/dsal.png"> -->
                 </a>
+            </div>
+            <div class="collapse navbar-collapse" id="example-navbar-primary">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fa fa-home"></i>
+                            <p>Home</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/home">
+                            <i class="fa fa-camera"></i>
+                            <p>View</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/list">
+                            <i class="fa fa-list"></i>
+                            <p>List</p>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">
+                            <p>Background</p>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="/background/bank">Bank</a>
+                            <a class="dropdown-item" href="/background/hospital">Hospital</a>
+                            <a class="dropdown-item" href="/background/insurance">Insurance</a>
+                            <a class="dropdown-item" href="/background/pixel">Pixel</a>
+                            <a class="dropdown-item" href="/background/retail">Retail</a>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>

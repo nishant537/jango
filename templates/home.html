@@ -26,27 +26,22 @@
         // HTTP Player
         var playStatus = {};
 
-        function onLoad()
-        {
+        function onLoad() {
             startTimer();
         }
 
-        function sleep(ms)
-        {
+        function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function playerOnLoad(key, tab)
-        {
+        function playerOnLoad(key, tab) {
             console.log("On Load " + tab + " " + key + " " + playStatus[key]);
-            if (playStatus[key])
-            {
+            if (playStatus[key]) {
                 $('#playBtn' + tab + key).hide();
                 $('#pauseBtn' + tab + key).show();
                 $('#fullScreenBtn' + tab + key).show();
             }
-            else
-            {
+            else {
                 $('#playBtn' + tab + key).show();
                 $('#pauseBtn' + tab + key).hide();
                 $('#fullScreenBtn' + tab + key).hide();
@@ -55,148 +50,124 @@
             $('.cardSubtitle' + key).hide();
         }
 
-        async function playButton(key, tab) 
-        {
+        async function playButton(key, tab) {
             console.log("Play " + tab + " " + key + " " + playStatus[key]);
             console.log('Stream: ' + $('#stream' + tab + key).text())
 
             $('#playBtn' + tab + key).hide();
             $('#pauseBtn' + tab + key).fadeIn(300);
             $('#fullScreenBtn' + tab + key).fadeIn(300);
-            $('#cameraView' + tab + key).fadeOut(500, function() 
-            {   
+            $('#cameraView' + tab + key).fadeOut(500, function () {
                 $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
                 $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
             }.bind(this)).fadeIn(500);
-            $('#cameraView' + tab + key).fadeOut(500, function() 
-            {
+            $('#cameraView' + tab + key).fadeOut(500, function () {
                 $('#cameraView' + tab + key).attr('src', $('#stream' + tab + key).text());
             }.bind(this)).fadeIn(500);
 
             playStatus[key] = true;
         }
 
-        function pauseButton(key, tab) 
-        {
+        function pauseButton(key, tab) {
             console.log("Pause " + tab + " " + key + " " + playStatus[key]);
             $('#playBtn' + tab + key).fadeIn(300);
             $('#pauseBtn' + tab + key).hide();
             $('#fullScreenBtn' + tab + key).hide();
-            $('#cameraView' + tab + key).fadeOut(500, function() 
-            {
+            $('#cameraView' + tab + key).fadeOut(500, function () {
                 $('#cameraView' + tab + key).attr('src', '/static/img/default_view.jpg');
             }.bind(this)).fadeIn(500);
-            
+
             playStatus[key] = false;
         }
 
-        function showFullScreen(key, tab)
-        {
+        function showFullScreen(key, tab) {
             console.log("Enter Full Screen");
             $('#fullScreenImage').attr('src', $('#stream' + tab + key).text());
             $('#myModal').fadeIn();
             inFullScreen = true;
         }
 
-        function exitFullScreen()
-        {
+        function exitFullScreen() {
             console.log("Exit Full Screen");
             $('#myModal').fadeOut();
             inFullScreen = false;
         }
 
-        window.onclick = function(event) 
-        {
+        window.onclick = function (event) {
             var modal = document.getElementById('myModal');
-            if (event.target == modal) 
-            {
+            if (event.target == modal) {
                 exitFullScreen();
             }
         }
 
-        $(document).keyup(function(event) 
-        {
-            if ((event.keyCode == 27) && inFullScreen)
-            {
+        $(document).keyup(function (event) {
+            if ((event.keyCode == 27) && inFullScreen) {
                 exitFullScreen();
             }
         });
 
-        function playAlarm()
-        {
-            audio.addEventListener('ended', function()
-            {
+        function playAlarm() {
+            audio.addEventListener('ended', function () {
                 this.currentTime = 0;
                 this.play();
             }, false);
             audio.play();
         }
 
-        function pauseAlarm()
-        {
+        function pauseAlarm() {
             audio.pause();
         }
 
-        function startTimer()
-        {
+        function startTimer() {
             setInterval(alertFunc, interval);
         }
 
-        function alertFunc()
-        {
-            var sound_dict = {{ sound_dict|safe }};
+        function alertFunc() {
+            var sound_dict = {{ sound_dict| safe
+        }};
 
-            for (var key in alerts)
-            {
-                alerts[key] = alerts[key] + interval;
-                if (alerts[key] >= alertShowTime)
-                {
-                    // Remove
-                    if ($(".cardBody" + key) != undefined)
-                    {
-                        $('.cardSubtitle' + key).hide();
-                        $('.cardSubtitle' + key).html('No Alerts')
-                        $('.cardBody' + key).removeClass('bg-danger');
-                        $('.cardTitle' + key).css('color', 'initial');
-                        
-                        pauseAlarm();
-                        delete alerts[key];
-                    }
-                }
-                else if (sound_dict[key] == 1)
-                {
-                    playAlarm();
+        for (var key in alerts) {
+            alerts[key] = alerts[key] + interval;
+            if (alerts[key] >= alertShowTime) {
+                // Remove
+                if ($(".cardBody" + key) != undefined) {
+                    $('.cardSubtitle' + key).hide();
+                    $('.cardSubtitle' + key).html('No Alerts')
+                    $('.cardBody' + key).removeClass('bg-danger');
+                    $('.cardTitle' + key).css('color', 'initial');
+
+                    pauseAlarm();
+                    delete alerts[key];
                 }
             }
+            else if (sound_dict[key] == 1) {
+                playAlarm();
+            }
+        }
 
-            $.ajax(
+        $.ajax(
             {
                 url: '/getAlerts',
                 type: 'POST',
                 dataType: "json",
-                success: function(response)
-                {
+                success: function (response) {
                     console.log(response);
-                    $.each(response, function(key, val)
-                    {
-                        if ($(".cardBody" + key) != undefined)
-                        {
+                    $.each(response, function (key, val) {
+                        if ($(".cardBody" + key) != undefined) {
                             alerts[key] = 0;
-                            if (sound_dict[key] == 1)
-                            {
+                            if (sound_dict[key] == 1) {
                                 playAlarm();
                             }
-                            
+
                             $('.cardBody' + key).addClass('bg-danger');
-                            $('.cardSubtitle' + key).html('<strong>' + [val.slice(0, -1).join(', '), val.slice(-1)[0]].join(val.length < 2 ? '' : ' and ') + ' Detected!</strong>');   
+                            $('.cardSubtitle' + key).html('<strong>' + [val.slice(0, -1).join(', '), val.slice(-1)[0]].join(val.length < 2 ? '' : ' and ') + ' Detected!</strong>');
                             $('.cardSubtitle' + key).fadeIn(500);
                             $('.cardSubtitle' + key).css('color', 'white');
                             $('.cardTitle' + key).css('color', 'white');
                         }
                     });
                 },
-                error: function()
-                {
+                error: function () {
                     // window.location = "/";
                     console.log('Error');
                 }
@@ -208,17 +179,41 @@
 </head>
 
 <body class="profile-page" onload="onLoad()">
-    <nav class="navbar navbar-expand-lg bg-white navbar-absolute navbar-transparent">
+    <nav class="navbar navbar-expand-lg bg-white navbar-absolute">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
-                    <!-- TODO: Dynamic resizing of logo needs to be done -->
-                    <img class="dsal_logo" src="/static/img/dsal.png">
+                    <!-- TODO: Need higher quality logo, which can scale -->
+                    <!-- <img class="dsal_logo" src="/static/img/dsal.png"> -->
                 </a>
             </div>
             <div class="collapse navbar-collapse" id="example-navbar-primary">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item active dropdown">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fa fa-home"></i>
+                            <p>Home</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/home">
+                            <i class="fa fa-camera"></i>
+                            <p>View</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/list">
+                            <i class="fa fa-list"></i>
+                            <p>List</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/add">
+                            <i class="fa fa-plus"></i>
+                            <p>Add Camera</p>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">
                             <p>Background</p>
                         </a>
@@ -233,6 +228,14 @@
                 </ul>
             </div>
         </div>
+        <form class="form form-newsletter" method="POST" action="/home/search">
+            <div class="form-group">
+                <input value="{{searched_name}}" id="search_name" name="seach_name" type="text" class="form-control" placeholder="Search">
+            </div>
+            <button type="submit" class="btn btn-primary btn-icon btn-round">
+                <i class="fa fa-search"></i>
+            </button>
+        </form>
     </nav>
 
     <div id="myModal" class="modal">
@@ -252,57 +255,6 @@
         </div>
         <div class="section">
             <div class="container">
-                <div class="button-container">
-                    <a href="/add" class="btn btn-primary btn-round btn-lg">
-                        <i class="fa fa-plus"></i> Add Camera</a>
-                    <a href="/list" class="btn btn-default btn-round btn-lg btn-icon" rel="tooltip" title="List View">
-                        <i class="fa fa-list"></i>
-                    </a>
-                    <a href="/" class="btn btn-default btn-round btn-lg btn-icon" rel="tooltip" title="Home">
-                        <i class="fa fa-home"></i>
-                    </a>
-                </div>
-                <!-- {% if alert_name and alert_message is defined %}
-                <div class="alert alert-danger" role="alert">
-                    <div class="container">
-                        <div class="alert-icon">
-                            <i class="fa fa-bell"></i>
-                        </div>
-                        <strong>{{ alert_message }} Alert!</strong> Please check {{ alert_name }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">
-                                <i class="fa fa-times"></i>
-                            </span>
-                        </button>
-                    </div>
-                </div>
-                {% endif %} -->
-                <div class="col-md-7 mr-auto ml-auto">
-                    <div class="card card-plain card-form-horizontal">
-                        <div class="card-body">
-                            <form class="form" method="POST" action="/home/search">
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">
-                                                    <i class="fa fa-search"></i>
-                                                </span>
-                                            </div>
-                                            <input value="{{searched_name}}" id="search_name" name="seach_name" type="text" class="form-control" placeholder="Search">
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <button type="submit" class="btn btn-primary btn-round btn-block">Search</button>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <a href="/home" class="btn btn-default btn-round btn-block">Clear</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-12">
                         {% if searching is not defined %}
@@ -333,22 +285,21 @@
                                     {% for favourited_camera_name in favourites %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
-                                            {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} 
-                                            {% if stream_camera_name1 in favourited_camera_name %}
-                                            {% for id1 in stream_camera_id1 %}
+                                            {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1 in favourited_camera_name
+                                            %} {% for id1 in stream_camera_id1 %}
                                             <div class="card-image">
                                                 <img id="cameraViewFav{{ id1 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
                                             <div class="card-body cardBody{{ id1 }}">
                                                 <h4 class="card-title cardTitle{{ id1 }}">{{ favourited_camera_name }}</h4>
                                                 <h5 class="cardSubtitle{{ id1 }}">No Alerts</h5>
-                                                
+
                                                 <div class="card-footer">
                                                     <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     <p hidden id="streamFav{{ id1 }}">/stream/{{ id1 }}</p>
-                                                    
+
                                                     <div id="playerControls{{ id1 }}" class="playerControls">
                                                         <a id='playBtnFav{{ id1 }}' class="btn btn-icon btn-neutral">
                                                             <i onclick="playButton({{ id1 }}, 'Fav')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
@@ -359,7 +310,7 @@
                                                         <a id='fullScreenBtnFav{{ id1 }}' class="btn btn-icon btn-neutral">
                                                             <i onclick="showFullScreen({{ id1 }}, 'Fav')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                         </a>
-                                                        
+
                                                         <!-- Dummy image for onload event trigger -->
                                                         <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id1 }}, 'Fav')">
                                                     </div>
@@ -376,9 +327,8 @@
                                     {% for all_cameras in camera %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
-                                            {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} 
-                                            {% if stream_camera_name2 in all_cameras %} 
-                                            {% for id2 in stream_camera_id2 %}
+                                            {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2 in all_cameras %} {%
+                                            for id2 in stream_camera_id2 %}
                                             <div class="card-image">
                                                 <img id="cameraViewAll{{ id2 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
@@ -387,17 +337,17 @@
                                                 <h5 class="cardSubtitle{{ id2 }}">No Alerts</h5>
 
                                                 <div class="card-footer">
-                                                    {% if all_cameras in favourites %} 
+                                                    {% if all_cameras in favourites %}
                                                     <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-twitter">
                                                         <i class="fa fa-star"></i>
                                                     </a>
-                                                    {% else %} 
+                                                    {% else %}
                                                     <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-unfavourite">
                                                         <i class="fa fa-star"></i>
                                                     </a>
                                                     {% endif %}
                                                     <p hidden id="streamAll{{ id2 }}">/stream/{{ id2 }}</p>
-                                                    
+
                                                     <div id="playerControls{{ id2 }}" class="playerControls">
                                                         <a id='playBtnAll{{ id2 }}' class="btn btn-icon btn-neutral">
                                                             <i onclick="playButton({{ id2 }}, 'All')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
@@ -408,7 +358,7 @@
                                                         <a id='fullScreenBtnAll{{ id2 }}' class="btn btn-icon btn-neutral">
                                                             <i onclick="showFullScreen({{ id2 }}, 'All')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                         </a>
-                                                        
+
                                                         <!-- Dummy image for onload event trigger -->
                                                         <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id2 }}, 'All')">
                                                     </div>
@@ -423,14 +373,12 @@
                             {% for floors, floor_stripped in unique_floors %}
                             <div class="tab-pane" id="{{ floor_stripped }}" role="tabpanel">
                                 <div class="row">
-                                    {% for floor_camera, camera_name in camera_floor.items() %} 
-                                    {% if floor_camera|string() == floors|string() %}
-                                    {% for names in camera_name %}
+                                    {% for floor_camera, camera_name in camera_floor.items() %} {% if floor_camera|string() == floors|string() %} {% for names
+                                    in camera_name %}
                                     <div class="col-md-4">
                                         <div class="card card-profile">
-                                            {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} 
-                                            {% if stream_camera_name3 in names %} 
-                                            {% for id3 in stream_camera_id3 %}
+                                            {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3 in names %} {% for id3
+                                            in stream_camera_id3 %}
                                             <div class="card-image">
                                                 <img id="cameraView{{ floor_stripped }}{{ id3 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                             </div>
@@ -439,7 +387,7 @@
                                                 <h5 class="cardSubtitle{{ id3 }}">No Alerts</h5>
 
                                                 <div class="card-footer">
-                                                    {% if names in favourites %} 
+                                                    {% if names in favourites %}
                                                     <a class="btn btn-icon btn-neutral btn-twitter">
                                                         <i href="/favourite/{{ id3 }}" class="fa fa-star"></i>
                                                     </a>
@@ -449,7 +397,7 @@
                                                     </a>
                                                     {% endif %}
                                                     <p hidden id="stream{{ floor_stripped }}{{ id3 }}">/stream/{{ id3 }}</p>
-                                                    
+
                                                     <div id="playerControls{{ floor_stripped }}{{ id3 }}" class="playerControls">
                                                         <a id='playBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral">
                                                             <i onclick="playButton({{ id3 }}, '{{ floor_stripped }}')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
@@ -460,7 +408,7 @@
                                                         <a id='fullScreenBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral">
                                                             <i onclick="showFullScreen({{ id3 }}, '{{ floor_stripped }}')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                         </a>
-                                                        
+
                                                         <!-- Dummy image for onload event trigger -->
                                                         <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id3 }}, '{{ floor_stripped }}')">
                                                     </div>
@@ -475,12 +423,14 @@
                             {% endfor %}
                         </div>
                         {% else %}
+                        <div class="ml-auto mr-auto col-md-4">
+                            <a href="/home" class="btn btn-default btn-round btn-block">Clear Search</a>
+                        </div>
                         <div class="row">
                             {% for searched_names in search_camera_names %}
                             <div class="col-md-4">
                                 <div class="card card-profile">
-                                    {% for search_camera_name1, search_camera_id1 in search_id_name.iteritems() %}
-                                    {% if search_camera_name1 in searched_names%}
+                                    {% for search_camera_name1, search_camera_id1 in search_id_name.iteritems() %} {% if search_camera_name1 in searched_names%}
                                     {% for id1 in search_camera_id1 %}
                                     <div class="card-image">
                                         <img id="cameraViewSearch{{ id1 }}" class="img rounded loading" src="/static/img/default_view.jpg">
@@ -500,7 +450,7 @@
                                             </a>
                                             {% endif %}
                                             <p hidden id="streamSearch{{ id1 }}">/stream/{{ id1 }}</p>
-                                                    
+
                                             <div id="playerControls{{ id1 }}" class="playerControls">
                                                 <a id='playBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral">
                                                     <i onclick="playButton({{ id1 }}, 'Search')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
@@ -511,7 +461,7 @@
                                                 <a id='fullScreenBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral">
                                                     <i onclick="showFullScreen({{ id1 }}, 'Search')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                 </a>
-                                                
+
                                                 <!-- Dummy image for onload event trigger -->
                                                 <img hidden src="/static/img/Pixel.jpeg" onload="playerOnLoad({{ id1 }}, 'Search')">
                                             </div>
