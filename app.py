@@ -269,7 +269,6 @@ def list_page():
 def get_alerts():
     alert_payload = requests.get(BACKEND_URL + 'alertInfo').content
     alert_dict = json.loads(alert_payload)
-    alert_dict = {"8": ["intrusion"]}
 
     for key, objects in alert_dict.iteritems():
         alert_dict[key] = [obj.title() for obj in objects]
