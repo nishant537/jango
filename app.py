@@ -258,8 +258,8 @@ def list_page():
 
     return render_template('list.html', image=img, email_list=email_dict, 
         sms_list=sms_dict, call_list=call_dict, data=zip(camera_id_list, 
-        camera_names_list, priority_list, tamper_list, helmet_list, fire_list, 
-        intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+            camera_names_list, priority_list, tamper_list, helmet_list, fire_list, 
+            intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
 #### Data Handling from GUI
 
