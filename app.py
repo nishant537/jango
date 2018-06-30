@@ -113,7 +113,8 @@ def landing_page():
     img = 'Landing.jpeg'
     if license_status: 
         license_message = 'Valid'
-    return render_template('home.html', message=license_message, image=img)
+    return render_template('home.html', message=license_message,
+        license_status=license_status, image=img)
 
 @app.route('/home')
 @server_connection
@@ -122,7 +123,8 @@ def home_page():
     img = 'Landing.jpeg'
     if license_status: 
         license_message = 'Valid'
-    return render_template('home.html', message=license_message, image=img)
+    return render_template('home.html', message=license_message,
+        license_status=license_status, image=img)
 
 # Route Add Camera page
 @app.route('/add')

@@ -40,7 +40,7 @@
                         <div class="card card-signup" style="background-color: rgba(255, 255, 255, 0.9); border-radius: 1rem;">
                             <img src="/static/img/dsal.png" style="padding-top: 20px;">
                             <p style="font-size: 22px; font-weight: 400; margin-top: 0px; padding-top: 20px;" class="card-title text-center"><strong>GoDeep</strong> Platform<p>
-                            {% if 'Valid' in message %}
+                            {% if license_status %}
                             <div style="padding-top: 0px;">
                                 <a href="/view" class="btn btn-success btn-lg"><strong>Launch</strong></a>
                             </div>
@@ -59,7 +59,13 @@
                                         <a class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Cancel</a>
                                         <button class="btn btn-success fileinput-exists">Upload</button>
                                     </div>
-                                    <p style="font-size: 16px; font-weight: 400; margin-top: 0px; padding-top: 0px;" class="card-title text-center">License Status: <strong>{{ message }}</strong><p>
+                                    <p style="font-size: 16px; font-weight: 400; margin-top: 0px; padding-top: 0px;" class="card-title text-center">
+                                        {% if license_status %}
+                                        License Status: <span><strong style="color: rgb(0, 0, 0);">{{ message }}</strong></span>
+                                        {% else %}
+                                        License Status: <span><strong style="color: rgb(200, 0, 0);">{{ message }}</strong></span>
+                                        {% endif %}
+                                    <p>
                                 </form>
                                 {% endif %}
                             </div>
