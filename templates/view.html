@@ -98,6 +98,7 @@
             $('#fullScreenImage').attr('src', '/static/img/loading.gif');
             $('#fullScreenImage').attr('src', $('#stream' + tab + key).text());
             $('#mainNavbar').fadeOut();
+            $('#mainHeader').fadeOut();
             $('#myModal').fadeIn();
             inFullScreen = true;
         }
@@ -107,6 +108,7 @@
             console.log("Exit Full Screen");
             $('#myModal').fadeOut();
             $('#mainNavbar').fadeIn();
+            $('#mainHeader').fadeIn();
             inFullScreen = false;
         }
 
@@ -271,7 +273,7 @@
     </div>
 
     <div class="wrapper" style="padding-top: 7vh; height: 120vh;">
-        <div class="page-header page-header-mini">
+        <div class="page-header page-header-mini" id="mainHeader">
             <div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>
             <div class="content-center">
                 <div class="row">
