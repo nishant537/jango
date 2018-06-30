@@ -65,6 +65,16 @@
                 </ul>
             </div>
         </div>
+        {% if search_mode %}
+        <form class="form form-newsletter" method="POST" action="/list">
+            <div class="form-group">
+                <input value="{{searched_name}}" id="search_name" name="seach_name" type="text" class="form-control" placeholder="Search">
+            </div>
+            <button type="submit" class="btn btn-primary btn-icon btn-round">
+                <i class="fa fa-close"></i>
+            </button>
+        </form>
+        {% else %}
         <form class="form form-newsletter" method="POST" action="/list/search">
             <div class="form-group">
                 <input value="{{searched_name}}" id="search_name" name="seach_name" type="text" class="form-control" placeholder="Search">
@@ -73,6 +83,7 @@
                 <i class="fa fa-search"></i>
             </button>
         </form>
+        {% endif %}
     </nav>
 
     <div class="wrapper" style="padding-top: 7vh; height: 110vh;">

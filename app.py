@@ -220,7 +220,7 @@ def view_page():
         unique_floors=unique_floors, camera_floor=cameras_in_floor_dict)
 
 # Route list page
-@app.route('/list')
+@app.route('/list', methods=['GET', 'POST'])
 @server_connection
 @license_required
 def list_page():
@@ -257,9 +257,10 @@ def list_page():
         helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
     return render_template('list.html', image=img, email_list=email_dict, 
-        sms_list=sms_dict, call_list=call_dict, data=zip(camera_id_list, 
-            camera_names_list, priority_list, tamper_list, helmet_list, fire_list, 
-            intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+        sms_list=sms_dict, call_list=call_dict, search_mode=False,
+        data=zip(camera_id_list, camera_names_list, priority_list, tamper_list, 
+            helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, 
+            floors_list, sound_alarm_list))
 
 #### Data Handling from GUI
 
@@ -446,7 +447,7 @@ def search_list_page():
                 helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
 
     return render_template('list.html', image=img, searched_name=searched_name, 
-        email_list=email_dict, sms_list=sms_dict, call_list=call_dict, 
+        email_list=email_dict, sms_list=sms_dict, call_list=call_dict, search_mode=True,
         data=zip(camera_id_list, camera_names_list, priority_list, tamper_list, helmet_list, fire_list, 
             intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
