@@ -270,10 +270,21 @@
         <img id='fullScreenImage' class='modal_content' src=''>
     </div>
 
-    <div class="wrapper" style="background-image: url('/static/img/{{ image }}'); padding-top: 15vh; height: 100vh;">
+    <div class="wrapper" style="padding-top: 7vh; height: 120vh;">
+        <div class="page-header page-header-mini">
+            <div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>
+            <div class="content-center">
+                <div class="row">
+                    <div class="col-md-8 ml-auto mr-auto text-center">
+                        <h2 class="title">GoDeep Platform</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="container">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-12" style="margin-top: 1vh;">
                     {% if searching is not defined %}
                     <div class="nav-align-center">
                         <ul class="nav nav-pills nav-pills-primary justify-content-center" role="tablist" style="opacity: 1.0;">
@@ -296,7 +307,7 @@
                             {% endfor %}
                         </ul>
                     </div>
-                    <div class="tab-content gallery" style="margin-top: 2vh;">
+                    <div class="tab-content gallery" style="margin-top: 3vh;">
                         <div class="tab-pane" id="favorite" role="tabpanel">
                             <div class="row">
                                 {% for favourited_camera_name in favourites %}
@@ -499,7 +510,8 @@
             </div>
         </div>
     </div>
-    <footer class="footer" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;">
+
+    <footer class="footer"> <!-- style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;"> -->
         <div class="container">
             <nav>
                 <ul>
