@@ -46,6 +46,7 @@ class VideoCamera(object):
         ret, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
 
+# Check if port is alive
 def check_port(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result = False
@@ -56,6 +57,19 @@ def check_port(port):
     sock.close()
     return result
 
+#### Custom Decorators
+
+# Checking for license first before loading any page
+def license_required(func):
+    @wraps(func)
+    def valid_license(*args, **kwargs):
+        # In case we need the validity number too
+        license_status, license_message = get_license()
+        if not license_status:
+            return redirect(url_for('home'))
+        return func(*args, **kwargs)
+    return valid_license
+
 # Check for server connection, if failed redirect every URL to home page. 
 def server_connection(func):
     @wraps(func)
@@ -63,7 +77,6 @@ def server_connection(func):
         # Try to acquire backend port, if successful, backend is not running
         if check_port(int(BACKEND_PORT)):
             return render_template('home.html', image="Landing.jpeg", alert_message='Failed to establish connection with server')
-        
         # If port is in use, then backend is running
         return func(*args, **kwargs)
     return valid_connection
@@ -90,22 +103,9 @@ def get_background():
     background_img = background_payload['image']
     return background_img
 
-#### Custom Decorators
-
-# Checking for license first before loading any page
-def license_required(func):
-    @wraps(func)
-    def valid_license(*args, **kwargs):
-        # In case we need the validity number too
-        license_status, license_message = get_license()
-        if not license_status:
-            return redirect(url_for('home'))
-        return func(*args, **kwargs)
-    return valid_license
-
 #### Flask Routing
 
-# Route / or home page
+# Route / page
 @app.route('/')
 @server_connection
 def landing_page():
@@ -116,6 +116,7 @@ def landing_page():
     return render_template('home.html', message=license_message,
         license_status=license_status, image=img)
 
+# Route home page
 @app.route('/home')
 @server_connection
 def home_page():
@@ -199,10 +200,10 @@ def view_page():
         floors_list.append(str(camera_payload[str(i)]['floor']))
         camera_id_dict.setdefault(str(camera_payload[str(i)]['camera_name']), []).append(str(i))
         unique_floors = list(set(floors_list))
+
         # Save whitespace stripped version of floors for HTML ID tags
         unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
-        print unique_floors
-        
+
         # Adding all Cameras which are favourite to a list
         if str(camera_payload[str(i)]['favourite']) == '1':
             favourites_list.append(str(camera_payload[str(i)]['camera_name']))
@@ -237,13 +238,10 @@ def list_page():
     for i in camera_payload:
         for j in range(0, len(camera_payload[str(i)]['email_list'])):
             email_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['email_list'][j]))
-
         for k in range(0, len(camera_payload[str(i)]['sms_list'])):
             sms_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['sms_list'][k]))
-
         for l in range(0, len(camera_payload[str(i)]['call_list'])):
             call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
-
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
         priority_list.append(str(camera_payload[str(i)]['camera_priority']).title())
@@ -320,13 +318,10 @@ def favourite(camera_id):
     if camera_id in camera_payload:
             for j in range(0, len(camera_payload[camera_id]['email_list'])):
                 favourite_email_list.append(camera_payload[camera_id]['email_list'][j])
-
             for k in range(0, len(camera_payload[camera_id]['sms_list'])):
                 favourite_sms_list.append(camera_payload[camera_id]['sms_list'][k])
-
             for l in range(0, len(camera_payload[camera_id]['call_list'])):
                 favourite_call_list.append(camera_payload[camera_id]['call_list'][l])
-
             favourite_name = camera_payload[camera_id]['camera_name']
             favourite_priority = camera_payload[camera_id]['camera_priority']
             favourite_floor = camera_payload[camera_id]['floor']
@@ -338,7 +333,6 @@ def favourite(camera_id):
             favourite_object_fire = camera_payload[camera_id]['object_detect']['fire']
             favourite_object_helmet = camera_payload[camera_id]['object_detect']['helmet']
             favourite_object_intrusion = camera_payload[camera_id]['object_detect']['intrusion']
-
             favourite_favourite = camera_payload[camera_id]['favourite']
 
     if favourite_favourite == 1:
@@ -424,16 +418,12 @@ def search_list_page():
         searched_name = searched_name[0]
         for i in camera_payload:
             if searched_name.lower() in camera_payload[str(i)]['camera_name'].lower():
-
                 for j in range(0, len(camera_payload[str(i)]['email_list'])):
                     email_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['email_list'][j]))
-                
                 for k in range(0, len(camera_payload[str(i)]['sms_list'])):
                     sms_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['sms_list'][k]))
-                
                 for l in range(0, len(camera_payload[str(i)]['call_list'])):
                     call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
-
                 camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
                 camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
                 priority_list.append(str(camera_payload[str(i)]['camera_priority']).title())
@@ -488,11 +478,8 @@ def license():
         license_file = request.files['license_file']
         # TODO: Check for empty license file
         filename = os.path.join(app.config['UPLOAD_FOLDER'], 'godeep.lic')
-        print 'License file location:', filename
         license_file.save(filename)
-        
         requests.post(url=BACKEND_URL + 'licenseUpdate')
-
     return redirect(url_for('home'))
 
 # Add Camera
@@ -635,8 +622,6 @@ def edit_camera(camera_id):
         edited_camera_dict["floor"] = floor
         edited_camera_dict["sound_alarm"] = sound_alarm_value
         edited_camera_dict["favourite"] = favourite_value
-
-        print 'POST 127.0.0.1:8081 ID:', camera_id, edited_camera_dict
 
         # Making a POST to the Backend - Edited Camera
         post_edited_camera_info = requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, 
