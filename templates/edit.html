@@ -17,7 +17,7 @@
 </head>
 
 <body class="signup-page">
-    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;">
+    <nav class="navbar navbar-expand-sm fixed-top bg-white">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
@@ -64,20 +64,22 @@
 
     <div class="page-header section-image">
         <div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>
-
         <div class="content">
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 ml-auto mr-auto">
-                        <div class="card card-signup" style="background-color: rgba(255, 255, 255, 1.0); border-radius: 1rem;">
+                        <div class="card card-signup">
                             <div class="card-body">
-                                <h3 class="card-title text-center">Edit <strong>{{ current_name }}</strong></h3>
+                                <h3 class="card-title text-center">Edit
+                                    <strong>{{ current_name }}</strong>
+                                </h3>
                                 <br>
                                 <form class="form" method="POST" action="/editCamera/{{ current_id }}">
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6 form-group">
-                                                <input value="{{ current_name }}" id="camera_name" name="camera_name" type="text" class="form-control" placeholder="Camera Name" required>
+                                                <input value="{{ current_name }}" id="camera_name" name="camera_name" type="text" class="form-control" placeholder="Camera Name"
+                                                    required>
                                             </div>
                                             <div class="col-md-6 form-group">
                                                 <input value="{{ current_floor }}" id="floor" name="floor" type="text" class="form-control" placeholder="Floor" required>
@@ -86,7 +88,8 @@
 
                                         <div class="row">
                                             <div class="col-md-12 form-group">
-                                                <input value="{{ current_stream }}" id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Camera Stream URL" required>
+                                                <input value="{{ current_stream }}" id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Camera Stream URL"
+                                                    required>
                                             </div>
                                         </div>
 
@@ -113,7 +116,6 @@
                                             </div>
                                         </div>
 
-                                        <h5 style="font-size: 13px; padding-bottom: 0px; text-align: center;">Select Camera Priority</h5>
                                         <div class="row">
                                             <div class="col-md-12 bootstrap-select show-tick">
                                                 <select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"
@@ -129,9 +131,6 @@
                                             </div>
                                         </div>
 
-                                        <br>
-
-                                        <h5 style="font-size: 13px; padding-bottom: 0px; text-align: center;">Select Objects to Detect</h5>
                                         <div class="row">
                                             <div class="col-md-12 bootstrap-select show-tick">
                                                 <select class="selectpicker show-tick" name="object_detection" id="object_detection" data-style="btn btn-default btn-round"
@@ -161,10 +160,8 @@
                                             <div class="form-check">
                                                 <label class="form-check-label">
                                                     {% if current_sound_alarm == 0 %}
-                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox">
-                                                    {% else %}
-                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" checked>
-                                                    {% endif %}
+                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox"> {% else %}
+                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" checked> {% endif %}
                                                     <span class="form-check-sign"></span>
                                                     Sound Alarm
                                                 </label>
@@ -175,10 +172,8 @@
                                             <div class="form-check">
                                                 <label class="form-check-label">
                                                     {% if current_favourite == 0 %}
-                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox">
-                                                    {% else %}
-                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox" checked>
-                                                    {% endif %}
+                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox"> {% else %}
+                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox" checked> {% endif %}
                                                     <span class="form-check-sign"></span>
                                                     Favourite
                                                 </label>
@@ -199,7 +194,7 @@
         </div>
     </div>
 
-    <footer class="footer"> <!-- style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;"> -->
+    <footer class="footer">
         <div class="container">
             <nav>
                 <ul>
