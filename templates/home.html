@@ -17,8 +17,8 @@
 </head>
 
 <body class="signup-page">
-    <div class="page-header" style="background-image: url('/static/img/{{ image }}'); background-position: center;">
-        <div class="page-header-image"></div>
+    <div class="page-header section-image">
+        <div class="page-header-image" style="background-image: url('/static/img/{{ image }}'); background-position: center;"></div>
         <div class="content-center">
             <div class="container" style="padding-top: 20vh;">
                 {% if alert_message is defined %}
@@ -37,27 +37,27 @@
                 {% endif %}
                 <div class="row">
                     <div class="col-md-6 ml-auto mr-auto mr-center">
-                        <div class="card card-signup" style="background-color: rgba(255, 255, 255, 0.9); border-radius: 1rem;">
+                        <div class="card card-signup">
                             <img src="/static/img/dsal.png" style="padding-top: 20px;">
                             <p style="font-size: 22px; font-weight: 400; margin-top: 0px; padding-top: 20px;" class="card-title text-center"><strong>GoDeep</strong> Platform<p>
                             {% if license_status %}
                             <div style="padding-top: 0px;">
-                                <a href="/view" class="btn btn-success btn-lg"><strong>Launch</strong></a>
+                                <a href="/view" class="btn btn-success btn-lg btn-round"><strong>Launch</strong></a>
                             </div>
                             {% endif %}
                             <div class="card-body" style="padding-top: 10px;">
                                 {% if message is defined %}
                                 <form class="form" method="POST" action="/licenseUpload" enctype="multipart/form-data">
                                     <div class="fileinput fileinput-new" data-provides="fileinput">
-                                        <span class="btn btn-raised btn-default btn-file">
+                                        <span class="btn btn-raised btn-round btn-default btn-file">
                                             <span class="fileinput-new">Add License</span>
                                             <span class="fileinput-exists">Change</span>
                                             <input type="hidden" name="license_file" accept=".lic">
                                             <input type="file" id="license_file" name="license_file" accept=".lic">
                                             <span class="fileinput-filename"></span>
                                         </span>
-                                        <a class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Cancel</a>
-                                        <button class="btn btn-success fileinput-exists">Upload</button>
+                                        <a class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput">Cancel</a>
+                                        <button class="btn btn-success btn-round fileinput-exists">Upload</button>
                                     </div>
                                     <p style="font-size: 16px; font-weight: 400; margin-top: 0px; padding-top: 0px;" class="card-title text-center">
                                         {% if license_status %}
@@ -78,7 +78,7 @@
             </div>
         </div>
     </div>
-    <footer class="footer" style="background-image: url('/static/img/blur1.jpg'); background-size: cover; background-position: center;">
+    <footer class="footer">
         <div class="container">
             <nav>
                 <ul>
