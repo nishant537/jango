@@ -5,7 +5,7 @@ sudo rm -rf /opt/godeep/gui
 sudo mkdir -p /opt/godeep/gui
 
 # Update folder permissions
-sudo chmod 777 -R /opt/godeep
+sudo chmod 777 -R /opt/godeep/gui
 
 # Copy the application folder to GoDeep directory
 cp -R static /opt/godeep/gui
