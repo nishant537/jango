@@ -632,4 +632,4 @@ def edit_camera(camera_id):
 if __name__ == "__main__":
     # Running Flask
     # To access globally - WSGI Server (0.0.0.0)
-    app.run(host='0.0.0.0', debug=True, threaded=True)
+    app.run(host='0.0.0.0', port=5010, debug=True, threaded=True)
