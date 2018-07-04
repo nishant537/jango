@@ -22,7 +22,7 @@ BACKEND_PORT = '8081'
 BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 
 # Setup license folder
-UPLOAD_FOLDER = '/var/www/html/godeep/license'
+UPLOAD_FOLDER = '/opt/godeep'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 class VideoCamera(object):
