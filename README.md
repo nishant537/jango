@@ -1,11 +1,22 @@
-# Flask-GUI
-Flask Implementation of our frontend
+# Flask GUI
+Flask implementation of our frontend.
 
 ## Setup
-`sudo pip install -r requirements.txt`
+To install the dependencies, run the following command, only required once.
+
+```
+bash install.sh
+```
+
+**NOTE: You have to run this following command everytime you pull the repo.**
+
+```
+bash setup.sh
+```
 
 ## Usage
-Please run `python app.py` and open `127.0.0.1:5000/` or `localhost:5000/` on any browser.
+Please run `python app.py` from `/opt/godeep/gui` and open `localhost:5010/` on any browser.
 
 ## Notes
-Use the `flask-gui` branch of `POC` for compatibility.
+1. Use the `flask-gui` branch of `POC` for compatibility.
+2. Use the `flask-gui` branch of `AutoSetup` for compatibility.
