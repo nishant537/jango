@@ -201,7 +201,7 @@
                 },
                 error: function () 
                 {
-                    // window.location = "/";
+                    window.location = "/";
                     console.log('Error');
                 }
             });
@@ -309,7 +309,7 @@
                         <div class="tab-pane" id="favorite" role="tabpanel">
                             <div class="row">
                                 {% for favourited_camera_name in favourites %}
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="card card-profile">
                                         {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} 
                                         {% if stream_camera_name1 in favourited_camera_name %} 
@@ -322,19 +322,19 @@
                                             <h6 class="cardSubtitle{{ id1 }}"></h6>
 
                                             <div class="card-footer" style="margin-top: 0px;">
-                                                <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-openid">
+                                                <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-openid" style="margin: 0px; background-color: #FFFFFF;">
                                                     <i class="fa fa-star"></i>
                                                 </a>
                                                 <p hidden id="streamFav{{ id1 }}">/stream/{{ id1 }}</p>
 
                                                 <div id="playerControls{{ id1 }}" class="playerControls">
-                                                    <a id='playBtnFav{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='playBtnFav{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="playButton({{ id1 }}, 'Fav')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
                                                     </a>
-                                                    <a id='pauseBtnFav{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='pauseBtnFav{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="pauseButton({{ id1 }}, 'Fav')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
                                                     </a>
-                                                    <a id='fullScreenBtnFav{{ id1 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='fullScreenBtnFav{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="showFullScreen({{ id1 }}, 'Fav')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                     </a>
 
@@ -352,7 +352,7 @@
                         <div class="tab-pane active" id="all" role="tabpanel">
                             <div class="row">
                                 {% for all_cameras in camera %}
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="card card-profile">
                                         {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %}
                                         {% if stream_camera_name2 in all_cameras %} 
@@ -366,24 +366,24 @@
 
                                             <div class="card-footer" style="margin-top: 0px;">
                                                 {% if all_cameras in favourites %}
-                                                <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-openid">
+                                                <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-openid" style="margin: 0px; background-color: #FFFFFF;">
                                                     <i class="fa fa-star"></i>
                                                 </a>
                                                 {% else %}
-                                                <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-unfavourite">
+                                                <a href="/favourite/{{ id2 }}" class="btn btn-icon btn-neutral btn-unfavourite" style="margin: 0px; background-color: #FFFFFF;">
                                                     <i class="fa fa-star"></i>
                                                 </a>
                                                 {% endif %}
                                                 <p hidden id="streamAll{{ id2 }}">/stream/{{ id2 }}</p>
 
                                                 <div id="playerControls{{ id2 }}" class="playerControls">
-                                                    <a id='playBtnAll{{ id2 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='playBtnAll{{ id2 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="playButton({{ id2 }}, 'All')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
                                                     </a>
-                                                    <a id='pauseBtnAll{{ id2 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='pauseBtnAll{{ id2 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="pauseButton({{ id2 }}, 'All')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
                                                     </a>
-                                                    <a id='fullScreenBtnAll{{ id2 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='fullScreenBtnAll{{ id2 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="showFullScreen({{ id2 }}, 'All')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                     </a>
 
@@ -404,7 +404,7 @@
                                 {% for floor_camera, camera_name in camera_floor.items() %} 
                                 {% if floor_camera|string() == floors|string() %} 
                                 {% for names in camera_name %}
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="card card-profile">
                                         {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} 
                                         {% if stream_camera_name3 in names %} 
@@ -418,24 +418,24 @@
 
                                             <div class="card-footer" style="margin-top: 0px;">
                                                 {% if names in favourites %}
-                                                <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-openid">
+                                                <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-openid" style="margin: 0px; background-color: #FFFFFF;">
                                                     <i class="fa fa-star"></i>
                                                 </a>
                                                 {% else %}
-                                                <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-unfavourite">
+                                                <a href="/favourite/{{ id3 }}" class="btn btn-icon btn-neutral btn-unfavourite" style="margin: 0px; background-color: #FFFFFF;">
                                                     <i class="fa fa-star"></i>
                                                 </a>
                                                 {% endif %}
                                                 <p hidden id="stream{{ floor_stripped }}{{ id3 }}">/stream/{{ id3 }}</p>
 
                                                 <div id="playerControls{{ floor_stripped }}{{ id3 }}" class="playerControls">
-                                                    <a id='playBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='playBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="playButton({{ id3 }}, '{{ floor_stripped }}')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
                                                     </a>
-                                                    <a id='pauseBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='pauseBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="pauseButton({{ id3 }}, '{{ floor_stripped }}')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
                                                     </a>
-                                                    <a id='fullScreenBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral">
+                                                    <a id='fullScreenBtn{{ floor_stripped }}{{ id3 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                         <i onclick="showFullScreen({{ id3 }}, '{{ floor_stripped }}')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                     </a>
 
@@ -458,7 +458,7 @@
                     </div>
                     <div class="row">
                         {% for searched_names in search_camera_names %}
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card card-profile">
                                 {% for search_camera_name1, search_camera_id1 in search_id_name.iteritems() %} 
                                 {% if search_camera_name1 in searched_names%}
@@ -472,24 +472,24 @@
 
                                     <div class="card-footer" style="margin-top: 0px;">
                                         {% if searched_names in search_favourites %}
-                                        <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-openid" style="margin: 0px; background-color: #EFEFEF;">
+                                        <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-openid" style="margin: 0px; background-color: #FFFFFF;">
                                             <i class="fa fa-star"></i>
                                         </a>
                                         {% else %}
-                                        <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-unfavourite" style="margin: 0px; background-color: #EFEFEF;">
+                                        <a href="/favourite/{{ id1 }}" class="btn btn-icon btn-neutral btn-unfavourite" style="margin: 0px; background-color: #FFFFFF;">
                                             <i class="fa fa-star"></i>
                                         </a>
                                         {% endif %}
                                         <p hidden id="streamSearch{{ id1 }}">/stream/{{ id1 }}</p>
 
                                         <div id="playerControls{{ id1 }}" class="playerControls">
-                                            <a id='playBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #EFEFEF;">
+                                            <a id='playBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                 <i onclick="playButton({{ id1 }}, 'Search')" class='fa fa-play playerIcon playIcon' aria-hidden='true'></i>
                                             </a>
-                                            <a id='pauseBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #EFEFEF;">
+                                            <a id='pauseBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                 <i onclick="pauseButton({{ id1 }}, 'Search')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
                                             </a>
-                                            <a id='fullScreenBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #EFEFEF;">
+                                            <a id='fullScreenBtnSearch{{ id1 }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
                                                 <i onclick="showFullScreen({{ id1 }}, 'Search')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                             </a>
 
