@@ -66,7 +66,7 @@ def license_required(func):
         # In case we need the validity number too
         license_status, license_message = get_license()
         if not license_status:
-            return redirect(url_for('home'))
+            return redirect(url_for('home_page'))
         return func(*args, **kwargs)
     return valid_license
 
@@ -480,7 +480,7 @@ def license():
         filename = os.path.join(app.config['UPLOAD_FOLDER'], 'godeep.lic')
         license_file.save(filename)
         requests.post(url=BACKEND_URL + 'licenseUpdate')
-    return redirect(url_for('home'))
+    return redirect(url_for('home_page'))
 
 # Add Camera
 @app.route('/addCamera', methods=['GET', 'POST'])
