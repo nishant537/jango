@@ -119,7 +119,7 @@ def landing_page():
 # Route home page
 @app.route('/home')
 @server_connection
-def home():
+def home_page():
     license_status, license_message = get_license()
     img = 'Landing.jpeg'
     if license_status: 
