@@ -100,7 +100,10 @@ def get_camera_info():
 def get_background():
     get_background = requests.get(BACKEND_URL + 'getBackground').content
     background_payload = json.loads(get_background)
-    background_img = background_payload['image']
+    try:
+        background_img = background_payload['image']
+    except Exception as e:
+        background_img = 'Landing.jpeg'
     return background_img
 
 #### Flask Routing
