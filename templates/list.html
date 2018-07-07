@@ -152,16 +152,37 @@
                                         {{ priority }}
                                     </td>
                                     <td class="text-center">
-                                        {% if id in email_list %} {% for key1, value1 in email_list.iteritems() if id in key1 %} {% for emails in value1 %} {{ emails
-                                        }}, {% endfor %} {% endfor %} {% else %} None {% endif %}
+                                        {% if id in email_list %} 
+                                            {% for key, value in email_list.iteritems() if id in key %} 
+                                                {% for emails in value %}
+                                                    {{ emails }}{{ "," if not loop.last }}
+                                                {% endfor %}
+                                            {% endfor %}
+                                        {% else %}
+                                            None
+                                        {% endif %}
                                     </td>
                                     <td class="text-center">
-                                        {% if id in sms_list %} {% for key2, value2 in sms_list.iteritems() if id in key2 %} {% for sms in value2 %} {{ sms }}, {%
-                                        endfor %} {% endfor %} {% else %} None {% endif %}
+                                        {% if id in sms_list %} 
+                                            {% for key, value in sms_list.iteritems() if id in key %} 
+                                                {% for sms in value %}
+                                                    {{ sms }}{{ "," if not loop.last }}
+                                                {% endfor %}
+                                            {% endfor %}
+                                        {% else %}
+                                            None
+                                        {% endif %}
                                     </td>
                                     <td class="text-center">
-                                        {% if id in call_list %} {% for key3, value3 in call_list.iteritems() if id in key3 %} {% for calls in value3 %} {{ calls
-                                        }}, {% endfor %} {% endfor %} {% else %} None {% endif %}
+                                        {% if id in call_list %} 
+                                            {% for key, value in call_list.iteritems() if id in key %} 
+                                                {% for calls in value %}
+                                                    {{ calls }}{{ "," if not loop.last }}
+                                                {% endfor %}
+                                            {% endfor %}
+                                        {% else %}
+                                            None
+                                        {% endif %}
                                     </td>
                                     <td class="text-center">
                                         {{ tamper }}
@@ -176,10 +197,10 @@
                                         {{ intrusion }}
                                     </td>
                                     <td class="text-center">
-                                        {{ start_time }}
+                                        {{ start_time or '-'}}
                                     </td>
                                     <td class="text-center">
-                                        {{ end_time }}
+                                        {{ end_time or '-'}}
                                     </td>
                                     <td class="text-center">
                                         {{ sound_alarm }}
