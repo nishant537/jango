@@ -29,9 +29,9 @@ class VideoCamera(object):
 
     def __init__(self, url):
         self.video = cv2.VideoCapture(url)
-        self.width = self.video.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
-        self.height = self.video.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
-        self.fps = self.video.get(cv2.cv.CV_CAP_PROP_FPS)
+        # self.width = self.video.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
+        # self.height = self.video.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
+        # self.fps = self.video.get(cv2.cv.CV_CAP_PROP_FPS)
         self.default_stream = cv2.imread(GUI_PATH + '/static/img/default_stream.jpg')
 
     def __del__(self):
