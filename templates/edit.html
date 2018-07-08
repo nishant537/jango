@@ -16,15 +16,12 @@
     <link href="/static/css/main.css" rel="stylesheet" />
 
     <script type="text/javascript">
-        function objectSelectOnChange()
-        {
-            if ($("#object_detection option[value=intrusion]:selected").length > 0)
-            {
+        function objectSelectOnChange() {
+            if ($("#object_detection option[value=intrusion]:selected").length > 0) {
                 $("#intrusion_start_time").attr('required', '');
                 $("#intrusion_end_time").attr('required', '');
             }
-            else
-            {
+            else {
                 $("#intrusion_start_time").removeAttr('required');
                 $("#intrusion_end_time").removeAttr('required');
             }
@@ -38,11 +35,16 @@
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
-                    <!-- TODO: Need higher quality logo, which can scale -->
                     <img class="dsal_logo" src="/static/img/dsal.png">
                 </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-bar bar1"></span>
+                    <span class="navbar-toggler-bar bar2"></span>
+                    <span class="navbar-toggler-bar bar3"></span>
+                </button>
             </div>
-            <div class="collapse navbar-collapse" id="example-navbar-primary">
+            <div class="collapse navbar-collapse" data-nav-image="/static/img/blur1.jpg" data-color="orange">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/">
@@ -79,130 +81,134 @@
         </div>
     </nav>
 
-    <div class="page-header section-image">
-        <div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>
-        <div class="content">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-8 ml-auto mr-auto">
-                        <div class="card card-signup">
-                            <div class="card-body">
-                                <h3 class="card-title text-center">Edit
-                                    <strong>{{ current_name }}</strong>
-                                </h3>
-                                <br>
-                                <form class="form" method="POST" action="/editCamera/{{ current_id }}">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6 form-group">
-                                                <input value="{{ current_name }}" id="camera_name" name="camera_name" type="text" class="form-control" placeholder="Camera Name"
-                                                    required>
+    <div class="wrapper" style="padding-top: 4vh;">
+        <div class="page-header section-image">
+            <div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>
+            <div class="content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8 ml-auto mr-auto">
+                            <div class="card card-signup">
+                                <div class="card-body">
+                                    <h3 class="card-title text-center">Edit
+                                        <strong>{{ current_name }}</strong>
+                                    </h3>
+                                    <br>
+                                    <form class="form" method="POST" action="/editCamera/{{ current_id }}">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 form-group">
+                                                    <input value="{{ current_name }}" id="camera_name" name="camera_name" type="text" class="form-control" placeholder="Camera Name"
+                                                        required>
+                                                </div>
+                                                <div class="col-md-6 form-group">
+                                                    <input value="{{ current_floor }}" id="floor" name="floor" type="text" class="form-control" placeholder="Floor" required>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6 form-group">
-                                                <input value="{{ current_floor }}" id="floor" name="floor" type="text" class="form-control" placeholder="Floor" required>
+
+                                            <div class="row">
+                                                <div class="col-md-12 form-group">
+                                                    <input value="{{ current_stream }}" id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Camera Stream URL"
+                                                        required>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 form-group">
+                                                    <input value="{{ current_email }}" id="email_id_list" name="email_id_list" type="text" class="form-control" placeholder="Email ID List"
+                                                        pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <input value="{{ current_sms }}" id="sms_list" name="sms_list" type="text" class="form-control" placeholder="SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <input value="{{ current_call }}" id="call_list" name="call_list" type="text" class="form-control" placeholder="Call List"
+                                                        pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6 form-group">
+                                                    <input value="{{ current_start_time }}" id="intrusion_start_time" name="intrusion_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+                                                        type="text" class="form-control" placeholder="Intrusion Start Time (24hrs HH:MM)">
+                                                </div>
+                                                <div class="col-md-6 form-group">
+                                                    <input value="{{ current_end_time }}" id="intrusion_end_time" name="intrusion_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+                                                        type="text" class="form-control" placeholder="Intrusion End Time (24hrs HH:MM)">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 bootstrap-select show-tick">
+                                                    <select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"
+                                                        title="Camera Priority" required>
+                                                        {% if 'high' in current_priority %}
+                                                        <option value="high" selected>High</option>
+                                                        <option value="low">Low</option>
+                                                        {% else %}
+                                                        <option value="high">High</option>
+                                                        <option value="low" selected>Low</option>
+                                                        {% endif %}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 bootstrap-select show-tick">
+                                                    <select class="selectpicker show-tick" name="object_detection" id="object_detection" data-style="btn btn-default btn-round"
+                                                        multiple="" title="Object Detection" onchange="objectSelectOnChange()">
+                                                        {% if current_object_tamper == 0 %}
+                                                        <option value="tamper">Tamper</option>
+                                                        {% else %}
+                                                        <option value="tamper" selected>Tamper</option>
+                                                        {% endif %} {% if current_object_helmet == 0 %}
+                                                        <option value="helmet">Helmet</option>
+                                                        {% else %}
+                                                        <option value="helmet" selected>Helmet</option>
+                                                        {% endif %} {% if current_object_fire == 0 %}
+                                                        <option value="fire">Fire</option>
+                                                        {% else %}
+                                                        <option value="fire" selected>Fire</option>
+                                                        {% endif %} {% if current_object_intrusion == 0 %}
+                                                        <option value="intrusion">Intrusion</option>
+                                                        {% else %}
+                                                        <option value="intrusion" selected>Intrusion</option>
+                                                        {% endif %}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-check">
+                                                    <label class="form-check-label">
+                                                        {% if current_sound_alarm == 0 %}
+                                                        <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox"> {% else %}
+                                                        <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" checked> {% endif %}
+                                                        <span class="form-check-sign"></span>
+                                                        Sound Alarm
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-check">
+                                                    <label class="form-check-label">
+                                                        {% if current_favourite == 0 %}
+                                                        <input id="favourite" name="favourite" class="form-check-input" type="checkbox"> {% else %}
+                                                        <input id="favourite" name="favourite" class="form-check-input" type="checkbox" checked> {% endif %}
+                                                        <span class="form-check-sign"></span>
+                                                        Favourite
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div class="row">
-                                            <div class="col-md-12 form-group">
-                                                <input value="{{ current_stream }}" id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Camera Stream URL"
-                                                    required>
-                                            </div>
+                                        <div class="text-center">
+                                            <a href="/list" class="btn btn-round btn-default">Cancel</a>
+                                            <button type="submit" class="btn btn-round btn-success">Done</button>
                                         </div>
-
-                                        <div class="row">
-                                            <div class="col-md-12 form-group">
-                                                <input value="{{ current_email }}" id="email_id_list" name="email_id_list" type="text" class="form-control" placeholder="Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
-                                            </div>
-                                            <div class="col-md-12 form-group">
-                                                <input value="{{ current_sms }}" id="sms_list" name="sms_list" type="text" class="form-control" placeholder="SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                            </div>
-                                            <div class="col-md-12 form-group">
-                                                <input value="{{ current_call }}" id="call_list" name="call_list" type="text" class="form-control" placeholder="Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-6 form-group">
-                                                <input value="{{ current_start_time }}" id="intrusion_start_time" name="intrusion_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-                                                    type="text" class="form-control" placeholder="Intrusion Start Time (24hrs HH:MM)">
-                                            </div>
-                                            <div class="col-md-6 form-group">
-                                                <input value="{{ current_end_time }}" id="intrusion_end_time" name="intrusion_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-                                                    type="text" class="form-control" placeholder="Intrusion End Time (24hrs HH:MM)">
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-12 bootstrap-select show-tick">
-                                                <select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"
-                                                    title="Camera Priority" required>
-                                                    {% if 'high' in current_priority %}
-                                                    <option value="high" selected>High</option>
-                                                    <option value="low">Low</option>
-                                                    {% else %}
-                                                    <option value="high">High</option>
-                                                    <option value="low" selected>Low</option>
-                                                    {% endif %}
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-12 bootstrap-select show-tick">
-                                                <select class="selectpicker show-tick" name="object_detection" id="object_detection" data-style="btn btn-default btn-round"
-                                                    multiple="" title="Object Detection" onchange="objectSelectOnChange()">
-                                                    {% if current_object_tamper == 0 %}
-                                                    <option value="tamper">Tamper</option>
-                                                    {% else %}
-                                                    <option value="tamper" selected>Tamper</option>
-                                                    {% endif %} {% if current_object_helmet == 0 %}
-                                                    <option value="helmet">Helmet</option>
-                                                    {% else %}
-                                                    <option value="helmet" selected>Helmet</option>
-                                                    {% endif %} {% if current_object_fire == 0 %}
-                                                    <option value="fire">Fire</option>
-                                                    {% else %}
-                                                    <option value="fire" selected>Fire</option>
-                                                    {% endif %} {% if current_object_intrusion == 0 %}
-                                                    <option value="intrusion">Intrusion</option>
-                                                    {% else %}
-                                                    <option value="intrusion" selected>Intrusion</option>
-                                                    {% endif %}
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="form-check">
-                                                <label class="form-check-label">
-                                                    {% if current_sound_alarm == 0 %}
-                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox"> {% else %}
-                                                    <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" checked> {% endif %}
-                                                    <span class="form-check-sign"></span>
-                                                    Sound Alarm
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="form-check">
-                                                <label class="form-check-label">
-                                                    {% if current_favourite == 0 %}
-                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox"> {% else %}
-                                                    <input id="favourite" name="favourite" class="form-check-input" type="checkbox" checked> {% endif %}
-                                                    <span class="form-check-sign"></span>
-                                                    Favourite
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="text-center">
-                                        <a href="/list" class="btn btn-round btn-default">Cancel</a>
-                                        <button type="submit" class="btn btn-round btn-success">Done</button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -237,5 +243,6 @@
 <script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
 <script src="/static/js/bootstrap-selectpicker.js" type="text/javascript"></script>
 <script src="/static/js/jasny-bootstrap.min.js"></script>
+<script src="/static/js/main.js"></script>
 
 </html>
