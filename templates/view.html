@@ -129,8 +129,7 @@
         }
 
         function alertFunc() {
-            var sound_dict = {{ sound_dict| safe
-        }};
+            var sound_dict = {{ sound_dict|safe }};
 
         for (var key in alerts) {
             alerts[key] = alerts[key] + interval;
