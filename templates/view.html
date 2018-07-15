@@ -27,22 +27,27 @@
         // HTTP Player
         var playStatus = {};
 
-        function onLoad() {
+        function onLoad() 
+        {
             startTimer();
         }
 
-        function sleep(ms) {
+        function sleep(ms) 
+        {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function playerOnLoad(key, tab) {
+        function playerOnLoad(key, tab) 
+        {
             console.log("On Load " + tab + " " + key + " " + playStatus[key]);
-            if (playStatus[key]) {
+            if (playStatus[key]) 
+            {
                 $('#playBtn' + tab + key).hide();
                 $('#pauseBtn' + tab + key).show();
                 $('#fullScreenBtn' + tab + key).show();
             }
-            else {
+            else 
+            {
                 $('#playBtn' + tab + key).show();
                 $('#pauseBtn' + tab + key).hide();
                 $('#fullScreenBtn' + tab + key).hide();
@@ -51,37 +56,43 @@
             $('.cardSubtitle' + key).hide();
         }
 
-        function playButton(key, tab) {
+        function playButton(key, tab) 
+        {
             console.log("Play " + tab + " " + key + " " + playStatus[key]);
             console.log('Stream: ' + $('#stream' + tab + key).text())
 
             $('#playBtn' + tab + key).hide();
             $('#pauseBtn' + tab + key).fadeIn(300);
             $('#fullScreenBtn' + tab + key).fadeIn(300);
-            $('#cameraView' + tab + key).fadeOut(500, function () {
+            $('#cameraView' + tab + key).fadeOut(500, function () 
+            {
                 $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
                 $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
             }.bind(this)).fadeIn(500);
-            $('#cameraView' + tab + key).fadeOut(500, function () {
+            $('#cameraView' + tab + key).fadeOut(500, function () 
+            {
                 $('#cameraView' + tab + key).attr('src', $('#stream' + tab + key).text());
             }.bind(this)).fadeIn(500);
 
             playStatus[key] = true;
         }
 
-        function pauseButton(key, tab) {
+        function pauseButton(key, tab) 
+        {
             console.log("Pause " + tab + " " + key + " " + playStatus[key]);
             $('#playBtn' + tab + key).fadeIn(300);
             $('#pauseBtn' + tab + key).hide();
             $('#fullScreenBtn' + tab + key).hide();
-            $('#cameraView' + tab + key).fadeOut(500, function () {
+            $('#cameraView' + tab + key).fadeOut(500, function () 
+            {
                 $('#cameraView' + tab + key).attr('src', '/static/img/default_view.jpg');
             }.bind(this)).fadeIn(500);
 
             playStatus[key] = false;
         }
 
-        function showFullScreen(key, tab) {
+        function showFullScreen(key, tab) 
+        {
             console.log("Enter Full Screen");
             $('#fullScreenImage').attr('src', '/static/img/loading.gif');
             $('#fullScreenImage').attr('src', $('#stream' + tab + key).text());
@@ -91,7 +102,8 @@
             inFullScreen = true;
         }
 
-        function exitFullScreen() {
+        function exitFullScreen() 
+        {
             console.log("Exit Full Screen");
             $('#myModal').fadeOut();
             $('#mainNavbar').fadeIn();
@@ -99,68 +111,85 @@
             inFullScreen = false;
         }
 
-        window.onclick = function (event) {
+        window.onclick = function (event) 
+        {
             var modal = document.getElementById('myModal');
-            if (event.target == modal) {
+            if (event.target == modal) 
+            {
                 exitFullScreen();
             }
         }
 
-        $(document).keyup(function (event) {
-            if ((event.keyCode == 27) && inFullScreen) {
+        $(document).keyup(function (event) 
+        {
+            if ((event.keyCode == 27) && inFullScreen) 
+            {
                 exitFullScreen();
             }
         });
 
-        function playAlarm() {
-            audio.addEventListener('ended', function () {
+        function playAlarm() 
+        {
+            audio.addEventListener('ended', function () 
+            {
                 this.currentTime = 0;
                 this.play();
             }, false);
             audio.play();
         }
 
-        function pauseAlarm() {
+        function pauseAlarm() 
+        {
             audio.pause();
         }
 
-        function startTimer() {
+        function startTimer() 
+        {
             setInterval(alertFunc, interval);
         }
 
-        function alertFunc() {
+        function alertFunc() 
+        {
             var sound_dict = {{ sound_dict|safe }};
 
-        for (var key in alerts) {
-            alerts[key] = alerts[key] + interval;
-            if (alerts[key] >= alertShowTime) {
-                // Remove
-                if ($(".cardBody" + key) != undefined) {
-                    $('.cardSubtitle' + key).hide();
-                    $('.cardSubtitle' + key).html('');
-                    $('.cardBody' + key).removeClass('bg-danger');
-                    $('.cardTitle' + key).css('color', 'initial');
+            for (var key in alerts) 
+            {
+                alerts[key] = alerts[key] + interval;
+                if (alerts[key] >= alertShowTime) 
+                {
+                    // Remove
+                    if ($(".cardBody" + key) != undefined) 
+                    {
+                        $('.cardSubtitle' + key).hide();
+                        $('.cardSubtitle' + key).html('');
+                        $('.cardBody' + key).removeClass('bg-danger');
+                        $('.cardTitle' + key).css('color', 'initial');
 
-                    pauseAlarm();
-                    delete alerts[key];
+                        pauseAlarm();
+                        delete alerts[key];
+                    }
+                }
+                else if (sound_dict[key] == 1)
+                {
+                    playAlarm();
                 }
             }
-            else if (sound_dict[key] == 1) {
-                playAlarm();
-            }
-        }
 
-        $.ajax(
+            $.ajax(
             {
                 url: '/getAlerts',
                 type: 'POST',
                 dataType: "json",
-                success: function (response) {
+                success: function (response) 
+                {
                     console.log(response);
-                    $.each(response, function (key, val) {
-                        if ($(".cardBody" + key) != undefined) {
+                    $.each(response, function (key, val) 
+                    {
+                        if ($(".cardBody" + key) != undefined) 
+                        {
                             alerts[key] = 0;
-                            if (sound_dict[key] == 1) {
+                            if (sound_dict[key] == 1) 
+                            {
                                 playAlarm();
                             }
 
@@ -172,7 +201,8 @@
                         }
                     });
                 },
-                error: function () {
+                error: function () 
+                {
                     window.location = "/";
                     console.log('Error');
                 }
@@ -183,7 +213,7 @@
 </head>
 
 <body class="profile-page" onload="onLoad()">
-    <nav class="navbar navbar-expand-sm navbar-absolute fixed-top bg-white">
+    <nav id="mainNavbar" class="navbar navbar-expand-sm navbar-absolute fixed-top bg-white">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
@@ -245,7 +275,7 @@
         <img id='fullScreenImage' class='modal_content' src=''>
     </div>
 
-    <div class="wrapper" style="padding-top: 2vh;">
+    <div id="mainHeader" class="wrapper" style="padding-top: 2vh;">
         <div class="page-header page-header-mini">
             <div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>
             <div class="content-center">
@@ -288,8 +318,9 @@
                                 {% for favourited_camera_name in favourites %}
                                 <div class="col-md-3">
                                     <div class="card card-profile">
-                                        {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} {% if stream_camera_name1 in favourited_camera_name
-                                        %} {% for id1 in stream_camera_id1 %}
+                                        {% for stream_camera_name1, stream_camera_id1 in camera_url.iteritems() %} 
+                                        {% if stream_camera_name1 in favourited_camera_name %} 
+                                        {% for id1 in stream_camera_id1 %}
                                         <div class="card-image">
                                             <img id="cameraViewFav{{ id1 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                         </div>
@@ -330,8 +361,9 @@
                                 {% for all_cameras in camera %}
                                 <div class="col-md-3">
                                     <div class="card card-profile">
-                                        {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} {% if stream_camera_name2 in all_cameras %} {%
-                                        for id2 in stream_camera_id2 %}
+                                        {% for stream_camera_name2, stream_camera_id2 in camera_url.iteritems() %} 
+                                        {% if stream_camera_name2 in all_cameras %}
+                                        {% for id2 in stream_camera_id2 %}
                                         <div class="card-image">
                                             <img id="cameraViewAll{{ id2 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                         </div>
@@ -376,12 +408,14 @@
                         {% for floors, floor_stripped in unique_floors %}
                         <div class="tab-pane" id="{{ floor_stripped }}" role="tabpanel">
                             <div class="row">
-                                {% for floor_camera, camera_name in camera_floor.items() %} {% if floor_camera|string() == floors|string() %} {% for names
-                                in camera_name %}
+                                {% for floor_camera, camera_name in camera_floor.items() %} 
+                                {% if floor_camera|string() == floors|string() %} 
+                                {% for names in camera_name %}
                                 <div class="col-md-3">
                                     <div class="card card-profile">
-                                        {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} {% if stream_camera_name3 in names %} {% for id3
-                                        in stream_camera_id3 %}
+                                        {% for stream_camera_name3, stream_camera_id3 in camera_url.iteritems() %} 
+                                        {% if stream_camera_name3 in names %} 
+                                        {% for id3 in stream_camera_id3 %}
                                         <div class="card-image">
                                             <img id="cameraView{{ floor_stripped }}{{ id3 }}" class="img rounded loading" src="/static/img/default_view.jpg">
                                         </div>
@@ -433,7 +467,8 @@
                         {% for searched_names in search_camera_names %}
                         <div class="col-md-3">
                             <div class="card card-profile">
-                                {% for search_camera_name1, search_camera_id1 in search_id_name.iteritems() %} {% if search_camera_name1 in searched_names%}
+                                {% for search_camera_name1, search_camera_id1 in search_id_name.iteritems() %} 
+                                {% if search_camera_name1 in searched_names %}
                                 {% for id1 in search_camera_id1 %}
                                 <div class="card-image">
                                     <img id="cameraViewSearch{{ id1 }}" class="img rounded loading" src="/static/img/default_view.jpg">
