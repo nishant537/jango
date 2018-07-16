@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from requests.exceptions import ConnectionError
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file
 
-#### Initiate Flask
+# Initiate Flask
 app = Flask(__name__)
 
 # GoDeep GUI Path
@@ -26,41 +26,75 @@ UPLOAD_FOLDER = '/opt/godeep'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 class VideoCamera(object):
-
+    '''Class for handling VideoCapture object'''
     def __init__(self, url):
+        '''Constructor creates vcap object with stream URL'''
         self.video = cv2.VideoCapture(url)
-        # self.width = self.video.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
-        # self.height = self.video.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
-        # self.fps = self.video.get(cv2.cv.CV_CAP_PROP_FPS)
         self.default_stream = cv2.imread(GUI_PATH + '/static/img/default_stream.jpg')
 
     def __del__(self):
+        '''Destructor releases vcap object'''
         self.video.release()
     
     def get_frame(self):
+        '''Return JPEG encoded byte stream'''
         ret, image = self.video.read()
 
         # If stream load to fail, display default stream
         if not ret: image = self.default_stream
         
+        # Encode to jpeg and then byte stream
         ret, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
 
-# Check if port is alive
-def check_port(port):
+#### Custom Decorators
+
+def check_port(port=BACKEND_PORT):
+    '''Check if port is alive'''
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result = False
     try:
-        sock.bind(("0.0.0.0", port))
+        sock.bind((BACKEND_IP, int(port)))
         result = True
     except: pass
     sock.close()
     return result
 
-#### Custom Decorators
+def server_connection(func):
+    '''Check for server connection, if failed redirect every URL to home page'''
+    @wraps(func)
+    def valid_connection(*args, **kwargs):
+        # Try to acquire backend port, if successful, backend is not running
+        if check_port(BACKEND_PORT):
+            return render_template('home.html', image="Landing.jpeg", 
+                alert_message='Failed to establish connection with server')
+        # If port is in use, then backend is running
+        return func(*args, **kwargs)
+    return valid_connection
 
-# Checking for license first before loading any page
+@server_connection
+def get_license():
+    '''Get license info from backend'''
+    try:
+        get_license = requests.get(BACKEND_URL + 'getLicense', timeout=5).content
+        license_payload = json.loads(get_license)
+        license_status = license_payload['status']
+        license_message = license_payload['reason']
+    
+    # Handle the situation when backend server is running but hanged
+    except requests.exceptions.RequestException as e:
+        license_status = None
+        license_message = 'Failed to establish connection with server'
+
+    # Handle other failures with getLicense request
+    except Exception as e:
+        license_status = None
+        license_message = 'Failed to retrieve license from the server'
+    
+    return license_status, license_message
+
 def license_required(func):
+    '''Checking for license first before loading any page'''
     @wraps(func)
     def valid_license(*args, **kwargs):
         # In case we need the validity number too
@@ -70,34 +104,14 @@ def license_required(func):
         return func(*args, **kwargs)
     return valid_license
 
-# Check for server connection, if failed redirect every URL to home page. 
-def server_connection(func):
-    @wraps(func)
-    def valid_connection(*args, **kwargs):
-        # Try to acquire backend port, if successful, backend is not running
-        if check_port(int(BACKEND_PORT)):
-            return render_template('home.html', image="Landing.jpeg", alert_message='Failed to establish connection with server')
-        # If port is in use, then backend is running
-        return func(*args, **kwargs)
-    return valid_connection
-
-# Get License info from backend
-@server_connection
-def get_license():
-    get_license = requests.get(BACKEND_URL + 'getLicense').content
-    license_payload = json.loads(get_license)
-    license_status = license_payload['status']
-    license_message = license_payload['reason']
-    return license_status, license_message
-
-# Get Camera info from backend
 def get_camera_info():
+    '''Get camera info from backend'''
     all_camera_info = requests.get(BACKEND_URL + 'getAllCameraInfo').content
     camera_info = json.loads(all_camera_info)
     return camera_info
     
-# Get Background info from backend
 def get_background():
+    '''Get background info from backend'''
     get_background = requests.get(BACKEND_URL + 'getBackground').content
     background_payload = json.loads(get_background)
     try:
@@ -108,41 +122,39 @@ def get_background():
 
 #### Flask Routing
 
-# Route / page
 @app.route('/')
-@server_connection
-def landing_page():
-    license_status, license_message = get_license()
-    img = 'Landing.jpeg'
-    if license_status: 
-        license_message = 'Valid'
-    return render_template('home.html', message=license_message,
-        license_status=license_status, image=img)
-
-# Route home page
 @app.route('/home')
 @server_connection
 def home_page():
+    '''Route / or home page'''
     license_status, license_message = get_license()
     img = 'Landing.jpeg'
+
+    # Backend running but hanged
+    if license_status is None:
+        return render_template('home.html', image=img,
+            alert_message=license_message)
+
+    # License valid
     if license_status: 
         license_message = 'Valid'
+
     return render_template('home.html', message=license_message,
         license_status=license_status, image=img)
 
-# Route Add Camera page
 @app.route('/add')
 @server_connection
 @license_required
 def add_camera_page():
+    '''Route Add Camera page'''
     img = get_background()
     return render_template('add.html', image=img)
 
-# Route Edit Camera page
 @app.route('/edit/<camera_id>')
 @server_connection
 @license_required
 def edit_camera_page(camera_id):
+    '''Route Edit Camera page'''
     img = get_background()
     camera_payload = get_camera_info()
     current_email_list, current_sms_list, current_call_list = ([] for i in range(3))
@@ -153,6 +165,7 @@ def edit_camera_page(camera_id):
     # Match camera_id from camera_payload and load it's details.
     for i in camera_payload:
         if camera_id == i:
+            
             for j in range(0, len(camera_payload[str(i)]['email_list'])):
                 current_email_list.append(camera_payload[str(i)]['email_list'][j])
                 current_email = ', '.join(current_email_list)
@@ -168,11 +181,14 @@ def edit_camera_page(camera_id):
             current_name = camera_payload[str(i)]['camera_name']
             current_priority = camera_payload[str(i)]['camera_priority']
             current_floor = camera_payload[str(i)]['floor']
+            
             current_start_time = camera_payload[str(i)]['intrusion_start_time']
             current_end_time = camera_payload[str(i)]['intrusion_end_time']
+            
             current_stream = camera_payload[str(i)]['rtsp_url']
             current_sound_alarm = camera_payload[str(i)]['sound_alarm']
             current_favourite = camera_payload[str(i)]['favourite']
+            
             current_object_tamper = camera_payload[str(i)]['object_detect']['tamper']
             current_object_fire = camera_payload[str(i)]['object_detect']['fire']
             current_object_helmet = camera_payload[str(i)]['object_detect']['helmet']
@@ -186,11 +202,11 @@ def edit_camera_page(camera_id):
         current_object_fire=current_object_fire, current_object_tamper=current_object_tamper, 
         current_object_helmet=current_object_helmet, current_object_intrusion=current_object_intrusion)
 
-# Route view page
 @app.route('/view')
 @server_connection
 @license_required
 def view_page():
+    '''Route view page'''
     img = get_background()
     camera_payload = get_camera_info()
     camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
@@ -225,11 +241,11 @@ def view_page():
         camera=camera_names_list, favourites=favourites_list, sound_dict=json.dumps(sound_dict),
         unique_floors=unique_floors, camera_floor=cameras_in_floor_dict)
 
-# Route list page
 @app.route('/list', methods=['GET', 'POST'])
 @server_connection
 @license_required
 def list_page():
+    '''Route list page'''
     img = get_background()
     camera_payload = get_camera_info()
     camera_names_list, camera_id_list, priority_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, tamper_list, intrusion_list, fire_list, helmet_list = ([] for i in range(13))
@@ -239,21 +255,28 @@ def list_page():
 
     # Adding form data to lists - Lists are easier for Jinja Templating
     for i in camera_payload:
+        
         for j in range(0, len(camera_payload[str(i)]['email_list'])):
             email_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['email_list'][j]))
+        
         for k in range(0, len(camera_payload[str(i)]['sms_list'])):
             sms_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['sms_list'][k]))
+        
         for l in range(0, len(camera_payload[str(i)]['call_list'])):
             call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
+        
         camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
         camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
         priority_list.append(str(camera_payload[str(i)]['camera_priority']).title())
         floors_list.append(str(camera_payload[str(i)]['floor']))
         favourites_list.append(str(camera_payload[str(i)]['favourite']))
+        
         start_time_list.append(str(camera_payload[str(i)]['intrusion_start_time']))
         end_time_list.append(str(camera_payload[str(i)]['intrusion_end_time']))
+        
         sound_alarm_list.append(str(camera_payload[str(i)]['sound_alarm']))
         rtsp_url_list.append(str(camera_payload[str(i)]['rtsp_url']))
+        
         tamper_list.append(str(camera_payload[str(i)]['object_detect']['tamper']))
         intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
         fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
@@ -267,10 +290,10 @@ def list_page():
 
 #### Data Handling from GUI
 
-# Get Alerts from backend, also no need for license check here
 @app.route('/getAlerts', methods=['GET', 'POST'])
 @server_connection
 def get_alerts():
+    '''Get Alerts from backend, also no need for license check here'''
     alert_payload = requests.get(BACKEND_URL + 'alertInfo').content
     alert_dict = json.loads(alert_payload)
 
@@ -279,64 +302,71 @@ def get_alerts():
 
     return json.dumps(alert_dict)
 
-# Return alarm.mp3 file
 @app.route('/getAlarmAudio')
 def send_alarm_file():
+    '''Return alarm.mp3 file'''
     return send_file('alarm.mp3')
 
-# Handling delete camera
 @app.route('/deleteCamera/<camera_id>')
 @server_connection
 @license_required
 def delete_camera(camera_id):
+    '''Handling delete camera'''
     post_delete_camera = requests.post(url=BACKEND_URL + 'deleteCamera/' + camera_id)
     return redirect(url_for('list_page'))
 
-# HTTP stream generation
 def generate_http_stream(camera):
+    '''HTTP stream generation'''
     while True:
         frame = camera.get_frame()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-# Support Streaming, license check not required
 @app.route('/stream/<camera_id>')
 @server_connection
 def streaming_url(camera_id):
+    '''Support Streaming, license check not required'''
     camera_payload = get_camera_info()
     if camera_id in camera_payload:
         feed = str(camera_payload[camera_id]['rtsp_url'])
     return Response(generate_http_stream(VideoCamera(feed)), 
         mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# Support Favourites
 @app.route('/favourite/<camera_id>')
 @server_connection
 @license_required
 def favourite(camera_id):
+    '''Support Favourites'''
     camera_payload = get_camera_info()
     favourite_email_list, favourite_sms_list, favourite_call_list = ([] for i in range(3))
 
     # Match camera_id from camera_payload and load it's details.
     if camera_id in camera_payload:
+            
             for j in range(0, len(camera_payload[camera_id]['email_list'])):
                 favourite_email_list.append(camera_payload[camera_id]['email_list'][j])
+            
             for k in range(0, len(camera_payload[camera_id]['sms_list'])):
                 favourite_sms_list.append(camera_payload[camera_id]['sms_list'][k])
+            
             for l in range(0, len(camera_payload[camera_id]['call_list'])):
                 favourite_call_list.append(camera_payload[camera_id]['call_list'][l])
+            
             favourite_name = camera_payload[camera_id]['camera_name']
             favourite_priority = camera_payload[camera_id]['camera_priority']
             favourite_floor = camera_payload[camera_id]['floor']
+            favourite_favourite = camera_payload[camera_id]['favourite']
+            
             favourite_start_time = camera_payload[camera_id]['intrusion_start_time']
             favourite_end_time = camera_payload[camera_id]['intrusion_end_time']
+            
             favourite_stream = camera_payload[camera_id]['rtsp_url']
             favourite_sound_alarm = camera_payload[camera_id]['sound_alarm']
+            
             favourite_object_tamper = camera_payload[camera_id]['object_detect']['tamper']
             favourite_object_fire = camera_payload[camera_id]['object_detect']['fire']
             favourite_object_helmet = camera_payload[camera_id]['object_detect']['helmet']
             favourite_object_intrusion = camera_payload[camera_id]['object_detect']['intrusion']
-            favourite_favourite = camera_payload[camera_id]['favourite']
 
     if favourite_favourite == 1:
         favourite_favourite = 0
@@ -368,11 +398,11 @@ def favourite(camera_id):
 
     return redirect(url_for('view_page'))
 
-# Handling search for view page
 @app.route('/view/search', methods=['GET', 'POST'])
 @server_connection
 @license_required
 def search_view_page():
+    '''Handling search for view page'''
     img = get_background()
     camera_payload = get_camera_info()
     search_camera_names_list, search_camera_id_list, search_favourites_list = ([] for i in range(3))
@@ -403,11 +433,11 @@ def search_view_page():
         search_camera_id=search_camera_id_list, search_camera_names=search_camera_names_list, 
         search_favourites=search_favourites_list, sound_dict=sound_dict)
 
-# Handling search for list page
 @app.route('/list/search', methods=['GET', 'POST'])
 @server_connection
 @license_required
 def search_list_page():
+    '''Handling search for list page'''
     img = get_background()
     camera_payload = get_camera_info()
     camera_names_list, camera_id_list, priority_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, tamper_list, intrusion_list, fire_list, helmet_list = ([] for i in range(13))
@@ -421,21 +451,28 @@ def search_list_page():
         searched_name = searched_name[0]
         for i in camera_payload:
             if searched_name.lower() in camera_payload[str(i)]['camera_name'].lower():
+                
                 for j in range(0, len(camera_payload[str(i)]['email_list'])):
                     email_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['email_list'][j]))
+                
                 for k in range(0, len(camera_payload[str(i)]['sms_list'])):
                     sms_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['sms_list'][k]))
+                
                 for l in range(0, len(camera_payload[str(i)]['call_list'])):
                     call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
+                
                 camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
                 camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
                 priority_list.append(str(camera_payload[str(i)]['camera_priority']).title())
                 floors_list.append(str(camera_payload[str(i)]['floor']))
                 favourites_list.append(str(camera_payload[str(i)]['favourite']))
+                
                 start_time_list.append(str(camera_payload[str(i)]['intrusion_start_time']))
                 end_time_list.append(str(camera_payload[str(i)]['intrusion_end_time']))
+                
                 sound_alarm_list.append(str(camera_payload[str(i)]['sound_alarm']))
                 rtsp_url_list.append(str(camera_payload[str(i)]['rtsp_url']))
+                
                 tamper_list.append(str(camera_payload[str(i)]['object_detect']['tamper']))
                 intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
                 fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
@@ -446,11 +483,11 @@ def search_list_page():
         data=zip(camera_id_list, camera_names_list, priority_list, tamper_list, helmet_list, fire_list, 
             intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
 
-# Send background information to backend
 @app.route('/background/<background_image>/<page_redirect>')
 @server_connection
 @license_required
 def background_image(background_image, page_redirect):
+    '''Send background information to backend'''
     if background_image == 'retail':
         img = 'Retail.jpeg'
     if background_image == 'bank':
@@ -462,8 +499,6 @@ def background_image(background_image, page_redirect):
     if background_image == 'pixel':
         img = 'Pixel.jpeg'
 
-    #TODO: Need to find better background images
-
     # Making a POST to the Backend - Background information
     background_dict = OrderedDict()
     background_dict["image"] = img
@@ -472,24 +507,25 @@ def background_image(background_image, page_redirect):
 
     return redirect(url_for(page_redirect + '_page'))
     
-# Handle license upload 
 @app.route('/licenseUpload', methods=['GET', 'POST'])
 @server_connection
 def license():
+    '''Handle license upload'''
+
     # Upload license
     if request.method == 'POST':
         license_file = request.files['license_file']
-        # TODO: Check for empty license file
         filename = os.path.join(app.config['UPLOAD_FOLDER'], 'godeep.lic')
         license_file.save(filename)
         requests.post(url=BACKEND_URL + 'licenseUpdate')
     return redirect(url_for('home_page'))
 
-# Add Camera
 @app.route('/addCamera', methods=['GET', 'POST'])
 @server_connection
 @license_required
 def add_camera():
+    '''Add Camera'''
+
     # Get new camera data from form
     if request.method == 'POST':
         name = request.form['camera_name']
@@ -558,11 +594,12 @@ def add_camera():
 
     return redirect(url_for('list_page'))
 
-# Edit Camera
 @app.route('/editCamera/<camera_id>', methods=['GET', 'POST'])
 @server_connection
 @license_required
 def edit_camera(camera_id):
+    '''Edit Camera'''
+
     # Get edited camera data from form
     if request.method == 'POST':
         name = request.form['camera_name']
