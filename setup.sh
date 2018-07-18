@@ -17,7 +17,26 @@ cp app.py /var/www/godeep
 cp wsgi/godeep.wsgi /var/www/godeep
 sudo cp wsgi/godeep.conf /etc/apache2/sites-available
 
-# Switch to Apache default to virtual host
+# Update hosts file
+address="127.0.0.1"
+host_name="godeep"
+
+matches_in_hosts="$(grep -n $host_name /etc/hosts | cut -f1 -d:)"
+host_entry="${address}	${host_name}"
+
+if [ ! -z "$matches_in_hosts" ]
+then
+    echo "Updating existing hosts entry in /etc/hosts"
+    while read -r line_number; do
+        sudo sed -i "${line_number}s/.*/${host_entry}/" /etc/hosts
+    done <<< "$matches_in_hosts"
+else
+    echo "Adding new hosts entry in /etc/hosts"
+    echo "$host_entry" | sudo tee -a /etc/hosts > /dev/null
+fi
+echo $host_entry
+
+# Switch Apache default host to virtual host
 sudo a2dissite 000-default
 sudo a2ensite godeep
 
