@@ -2,6 +2,7 @@ import os
 import json
 import socket
 import requests
+import ConfigParser
 from functools import wraps
 from operator import itemgetter
 
@@ -14,13 +15,17 @@ app = Flask(__name__)
 # GoDeep GUI Path
 GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
+# Config file
+config = ConfigParser.ConfigParser()
+config.readfp(open('/var/www/godeep/gui_settings.conf'))
+
 # GoDeep backend server settings
-BACKEND_IP = '127.0.0.1'
-BACKEND_PORT = '8081'
+BACKEND_IP = config.get('global', 'BACKEND_IP')
+BACKEND_PORT = config.get('global', 'BACKEND_PORT')
 BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 
 # Setup license folder
-UPLOAD_FOLDER = '/opt/godeep'
+UPLOAD_FOLDER = config.get('global', 'UPLOAD_FOLDER')
 
 class VideoCamera(object):
     '''Class for handling VideoCapture object'''
