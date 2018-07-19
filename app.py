@@ -1,13 +1,12 @@
 import os
-import cv2
 import json
-import time
 import socket
 import requests
+import ConfigParser
 from functools import wraps
-from collections import OrderedDict
-from werkzeug.utils import secure_filename
-from requests.exceptions import ConnectionError
+from operator import itemgetter
+
+import cv2
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file
 
 # Initiate Flask
@@ -16,14 +15,17 @@ app = Flask(__name__)
 # GoDeep GUI Path
 GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
+# Config file
+config = ConfigParser.ConfigParser()
+config.readfp(open('/var/www/godeep/gui_settings.conf'))
+
 # GoDeep backend server settings
-BACKEND_IP = '127.0.0.1'
-BACKEND_PORT = '8081'
+BACKEND_IP = config.get('global', 'BACKEND_IP')
+BACKEND_PORT = config.get('global', 'BACKEND_PORT')
 BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 
 # Setup license folder
-UPLOAD_FOLDER = '/opt/godeep'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+UPLOAD_FOLDER = config.get('global', 'UPLOAD_FOLDER')
 
 class VideoCamera(object):
     '''Class for handling VideoCapture object'''
@@ -103,12 +105,6 @@ def license_required(func):
             return redirect(url_for('home_page'))
         return func(*args, **kwargs)
     return valid_license
-
-def get_camera_info():
-    '''Get camera info from backend'''
-    all_camera_info = requests.get(BACKEND_URL + 'getAllCameraInfo').content
-    camera_info = json.loads(all_camera_info)
-    return camera_info
     
 def get_background():
     '''Get background info from backend'''
@@ -119,6 +115,84 @@ def get_background():
     except Exception as e:
         background_img = 'Landing.jpeg'
     return background_img
+
+def get_objects_list():
+    '''Get lsit of object from backend'''
+    objects_dict = json.loads(requests.get(BACKEND_URL + 'getObjectsList').content)
+    return sorted([str(i) for i in objects_dict['objects']])
+
+def get_camera_info():
+    '''Get camera info from backend'''
+    all_camera_info = requests.get(BACKEND_URL + 'getAllCameraInfo').content
+    camera_info = json.loads(all_camera_info)
+    return camera_info
+
+def list_to_csv(data, separator=','):
+    if data:
+        return str(separator.join(data))
+    else:
+        return 'None'
+
+def zip_data(data, objects_allowed, separator=','):
+    # Mandatory parameters
+    camera_name = str(data['camera_name'])
+    rtsp_url = str(data['rtsp_url'])
+    priority = str(data['camera_priority'])
+    floor = str(data['floor'])
+
+    # Optional parameters
+    start_time = str(data['intrusion_start_time'])
+    end_time = str(data['intrusion_end_time'])
+    sound_alarm = str(data['sound_alarm'])
+    favourite = str(data['favourite'])
+
+    # Notifications
+    email_string = list_to_csv(data['email_list'], separator)
+    sms_string = list_to_csv(data['sms_list'], separator)
+    call_string = list_to_csv(data['call_list'], separator)
+    
+    # Object detection
+    objects = []
+    object_detect = data['object_detect']
+    for object_allowed in objects_allowed:
+        # Display only if backend permits
+        if object_allowed in object_detect:
+            objects.append((object_allowed, object_detect[object_allowed]))
+        # If certain object doesn't exist for the camera, disable and display it
+        else:
+            objects.append((object_allowed, 0))
+
+    return [camera_name, rtsp_url, priority, floor, start_time, end_time,
+        sound_alarm, favourite, email_string, sms_string, call_string, objects]
+
+def form_to_json(form):
+    camera_dict = {}
+    objects_allowed = get_objects_list()
+
+    # Mandatory parameters
+    camera_dict['camera_name'] = form['camera_name'].strip()
+    camera_dict['rtsp_url'] = form['rtsp_url'].strip()
+    camera_dict['camera_priority'] = form['camera_priority'].strip()
+    camera_dict['floor'] = form['floor'].strip()
+
+    # Optional parameters
+    camera_dict['intrusion_start_time'] = form['intrusion_start_time']
+    camera_dict['intrusion_end_time'] = form['intrusion_end_time']
+    camera_dict['sound_alarm'] = 1 if form.getlist('sound_alarm') else 0
+    camera_dict['favourite'] = 1 if form.getlist('favourite') else 0
+
+    # Notifications
+    camera_dict['email_list'] = [i.strip() for i in form['email_list'].split(',')]
+    camera_dict['sms_list'] = [i.strip() for i in form['sms_list'].split(',')]
+    camera_dict['call_list'] = [i.strip() for i in form['call_list'].split(',')]
+    
+    # Object detection
+    camera_dict['object_detect'] = {}
+    objects_selected = form.getlist('object_detect')
+    for object_allowed in objects_allowed:
+        camera_dict['object_detect'][object_allowed] = 1 if (object_allowed in objects_selected) else 0
+
+    return json.dumps(camera_dict)
 
 #### Flask Routing
 
@@ -148,7 +222,8 @@ def home_page():
 def add_camera_page():
     '''Route Add Camera page'''
     img = get_background()
-    return render_template('add.html', image=img)
+    objects_allowed = get_objects_list()
+    return render_template('add.html', image=img, objects=objects_allowed)
 
 @app.route('/edit/<camera_id>')
 @server_connection
@@ -157,50 +232,11 @@ def edit_camera_page(camera_id):
     '''Route Edit Camera page'''
     img = get_background()
     camera_payload = get_camera_info()
-    current_email_list, current_sms_list, current_call_list = ([] for i in range(3))
-    current_email = ''
-    current_sms = ''
-    current_call = ''
+    objects_allowed = get_objects_list()
 
-    # Match camera_id from camera_payload and load it's details.
-    for i in camera_payload:
-        if camera_id == i:
-            
-            for j in range(0, len(camera_payload[str(i)]['email_list'])):
-                current_email_list.append(camera_payload[str(i)]['email_list'][j])
-                current_email = ', '.join(current_email_list)
-
-            for k in range(0, len(camera_payload[str(i)]['sms_list'])):
-                current_sms_list.append(camera_payload[str(i)]['sms_list'][k])
-                current_sms = ', '.join(current_sms_list)
-
-            for l in range(0, len(camera_payload[str(i)]['call_list'])):
-                current_call_list.append(camera_payload[str(i)]['call_list'][l])
-                current_call = ', '.join(current_call_list)
-
-            current_name = camera_payload[str(i)]['camera_name']
-            current_priority = camera_payload[str(i)]['camera_priority']
-            current_floor = camera_payload[str(i)]['floor']
-            
-            current_start_time = camera_payload[str(i)]['intrusion_start_time']
-            current_end_time = camera_payload[str(i)]['intrusion_end_time']
-            
-            current_stream = camera_payload[str(i)]['rtsp_url']
-            current_sound_alarm = camera_payload[str(i)]['sound_alarm']
-            current_favourite = camera_payload[str(i)]['favourite']
-            
-            current_object_tamper = camera_payload[str(i)]['object_detect']['tamper']
-            current_object_fire = camera_payload[str(i)]['object_detect']['fire']
-            current_object_helmet = camera_payload[str(i)]['object_detect']['helmet']
-            current_object_intrusion = camera_payload[str(i)]['object_detect']['intrusion']
-
-    return render_template('edit.html', image=img, current_name=current_name, current_id=camera_id,
-        current_floor=current_floor, current_priority=current_priority, current_stream=current_stream, 
-        current_email=current_email, current_sms=current_sms, current_favourite=current_favourite,
-        current_call=current_call, current_start_time=current_start_time, 
-        current_end_time=current_end_time, current_sound_alarm=current_sound_alarm, 
-        current_object_fire=current_object_fire, current_object_tamper=current_object_tamper, 
-        current_object_helmet=current_object_helmet, current_object_intrusion=current_object_intrusion)
+    # Match camera_id from camera_payload and load it's details
+    data = [zip_data(camera_payload[str(camera_id)], objects_allowed)]
+    return render_template('edit.html', image=img, data=data, camera_id=camera_id)
 
 @app.route('/view')
 @server_connection
@@ -214,30 +250,33 @@ def view_page():
     camera_id_dict = {}
     sound_dict = {}
          
-    for i in camera_payload:
-        camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
-        floors_list.append(str(camera_payload[str(i)]['floor']))
-        camera_id_dict.setdefault(str(camera_payload[str(i)]['camera_name']), []).append(str(i))
+    for cam_id in camera_payload:
+        cam_id = str(cam_id)
+        camera_names_list.append(str(camera_payload[cam_id]['camera_name']))
+        floors_list.append(str(camera_payload[cam_id]['floor']))
+        camera_id_dict.setdefault(str(camera_payload[cam_id]['camera_name']), []).append(cam_id)
         unique_floors = list(set(floors_list))
 
         # Save whitespace stripped version of floors for HTML ID tags
         unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
 
-        # Adding all Cameras which are favourite to a list
-        if str(camera_payload[str(i)]['favourite']) == '1':
-            favourites_list.append(str(camera_payload[str(i)]['camera_name']))
+        # Adding all cameras which are favourite to a list
+        if str(camera_payload[cam_id]['favourite']) == '1':
+            favourites_list.append(str(camera_payload[cam_id]['camera_name']))
 
-        # Adding all Cameras for which sound alarm is enabled to a dict
-        if str(camera_payload[str(i)]['sound_alarm']) == '1':
-            sound_dict[str(i)] = camera_payload[str(i)]['sound_alarm']
+        # Adding all cameras for which sound alarm is enabled to a dict
+        if str(camera_payload[cam_id]['sound_alarm']) == '1':
+            sound_dict[cam_id] = camera_payload[cam_id]['sound_alarm']
 
     # Sorting all cameras based on the floor - Storing in a dictionary to make it easier for Jinja Templating
     for i, _ in unique_floors:
         for k in camera_payload:
             if str(camera_payload[str(k)]['floor']) == i:
-                cameras_in_floor_dict.setdefault(str(i), []).append(str(camera_payload[str(k)]['camera_name']))
+                cameras_in_floor_dict.setdefault(cam_id, []).append(str(camera_payload[str(k)]['camera_name']))
 
-    return render_template('view.html', image=img, camera_url=camera_id_dict,
+    # TODO: Sort cameras alphabetically
+    # TODO: Implement using camera ID instead of names
+    return render_template('view.html', image=img, camera_url=camera_id_dict, searching=False,
         camera=camera_names_list, favourites=favourites_list, sound_dict=json.dumps(sound_dict),
         unique_floors=unique_floors, camera_floor=cameras_in_floor_dict)
 
@@ -248,45 +287,20 @@ def list_page():
     '''Route list page'''
     img = get_background()
     camera_payload = get_camera_info()
-    camera_names_list, camera_id_list, priority_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, tamper_list, intrusion_list, fire_list, helmet_list = ([] for i in range(13))
-    email_dict = {}
-    sms_dict = {}
-    call_dict = {}
+    objects_allowed = get_objects_list()
 
-    # Adding form data to lists - Lists are easier for Jinja Templating
-    for i in camera_payload:
-        
-        for j in range(0, len(camera_payload[str(i)]['email_list'])):
-            email_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['email_list'][j]))
-        
-        for k in range(0, len(camera_payload[str(i)]['sms_list'])):
-            sms_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['sms_list'][k]))
-        
-        for l in range(0, len(camera_payload[str(i)]['call_list'])):
-            call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
-        
-        camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
-        camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
-        priority_list.append(str(camera_payload[str(i)]['camera_priority']).title())
-        floors_list.append(str(camera_payload[str(i)]['floor']))
-        favourites_list.append(str(camera_payload[str(i)]['favourite']))
-        
-        start_time_list.append(str(camera_payload[str(i)]['intrusion_start_time']))
-        end_time_list.append(str(camera_payload[str(i)]['intrusion_end_time']))
-        
-        sound_alarm_list.append(str(camera_payload[str(i)]['sound_alarm']))
-        rtsp_url_list.append(str(camera_payload[str(i)]['rtsp_url']))
-        
-        tamper_list.append(str(camera_payload[str(i)]['object_detect']['tamper']))
-        intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
-        fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
-        helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
+    # Parse all camera info and zip data
+    data_list = []
+    for cam_id in camera_payload:
+        zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed, separator=', ')
+        zipped_data.insert(0, str(cam_id))
+        data_list.append(zipped_data)
 
-    return render_template('list.html', image=img, email_list=email_dict, 
-        sms_list=sms_dict, call_list=call_dict, search_mode=False,
-        data=zip(camera_id_list, camera_names_list, priority_list, tamper_list, 
-            helmet_list, fire_list, intrusion_list, start_time_list, end_time_list, 
-            floors_list, sound_alarm_list))
+    # Sort data alphabetically
+    data_list = sorted(data_list, key=itemgetter(1))
+
+    return render_template('list.html', image=img, search_mode=False,
+        objects=objects_allowed, data=data_list)
 
 #### Data Handling from GUI
 
@@ -315,8 +329,8 @@ def delete_camera(camera_id):
     post_delete_camera = requests.post(url=BACKEND_URL + 'deleteCamera/' + camera_id)
     return redirect(url_for('list_page'))
 
-def generate_http_stream(camera):
-    '''HTTP stream generation'''
+def generate_mjpeg_stream(camera):
+    '''This function generates the mjpeg stream using OpenCV'''
     while True:
         frame = camera.get_frame()
         yield (b'--frame\r\n'
@@ -325,76 +339,32 @@ def generate_http_stream(camera):
 @app.route('/stream/<camera_id>')
 @server_connection
 def streaming_url(camera_id):
-    '''Support Streaming, license check not required'''
+    '''This function generates publishes the stream for a given camera'''
     camera_payload = get_camera_info()
     if camera_id in camera_payload:
         feed = str(camera_payload[camera_id]['rtsp_url'])
-    return Response(generate_http_stream(VideoCamera(feed)), 
+    return Response(generate_mjpeg_stream(VideoCamera(feed)), 
         mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/favourite/<camera_id>')
 @server_connection
 @license_required
-def favourite(camera_id):
-    '''Support Favourites'''
+def toggle_favourite(camera_id):
+    '''Toggle favourite parameter'''
     camera_payload = get_camera_info()
-    favourite_email_list, favourite_sms_list, favourite_call_list = ([] for i in range(3))
 
-    # Match camera_id from camera_payload and load it's details.
-    if camera_id in camera_payload:
-            
-            for j in range(0, len(camera_payload[camera_id]['email_list'])):
-                favourite_email_list.append(camera_payload[camera_id]['email_list'][j])
-            
-            for k in range(0, len(camera_payload[camera_id]['sms_list'])):
-                favourite_sms_list.append(camera_payload[camera_id]['sms_list'][k])
-            
-            for l in range(0, len(camera_payload[camera_id]['call_list'])):
-                favourite_call_list.append(camera_payload[camera_id]['call_list'][l])
-            
-            favourite_name = camera_payload[camera_id]['camera_name']
-            favourite_priority = camera_payload[camera_id]['camera_priority']
-            favourite_floor = camera_payload[camera_id]['floor']
-            favourite_favourite = camera_payload[camera_id]['favourite']
-            
-            favourite_start_time = camera_payload[camera_id]['intrusion_start_time']
-            favourite_end_time = camera_payload[camera_id]['intrusion_end_time']
-            
-            favourite_stream = camera_payload[camera_id]['rtsp_url']
-            favourite_sound_alarm = camera_payload[camera_id]['sound_alarm']
-            
-            favourite_object_tamper = camera_payload[camera_id]['object_detect']['tamper']
-            favourite_object_fire = camera_payload[camera_id]['object_detect']['fire']
-            favourite_object_helmet = camera_payload[camera_id]['object_detect']['helmet']
-            favourite_object_intrusion = camera_payload[camera_id]['object_detect']['intrusion']
+    # Match camera_id from camera_payload
+    camera_dict = camera_payload[str(camera_id)]
+    # TODO: Delete this
+    del camera_dict['camera_id']
+    fav = camera_dict['favourite']
 
-    if favourite_favourite == 1:
-        favourite_favourite = 0
-    else:
-        favourite_favourite = 1
-
-    object_detection_dict = OrderedDict()
-    object_detection_dict["tamper"] = favourite_object_tamper
-    object_detection_dict["helmet"] = favourite_object_helmet
-    object_detection_dict["fire"] = favourite_object_fire
-    object_detection_dict["intrusion"] = favourite_object_intrusion
-
-    favourited_camera_dict = OrderedDict()
-    favourited_camera_dict["camera_name"] = favourite_name
-    favourited_camera_dict["camera_priority"] = favourite_priority
-    favourited_camera_dict["email_list"] = favourite_email_list
-    favourited_camera_dict["sms_list"] = favourite_sms_list
-    favourited_camera_dict["call_list"] = favourite_call_list
-    favourited_camera_dict["rtsp_url"] = favourite_stream
-    favourited_camera_dict["object_detect"] = object_detection_dict
-    favourited_camera_dict["intrusion_start_time"] = favourite_start_time
-    favourited_camera_dict["intrusion_end_time"] = favourite_end_time
-    favourited_camera_dict["floor"] = favourite_floor
-    favourited_camera_dict["sound_alarm"] = favourite_sound_alarm
-    favourited_camera_dict["favourite"] = favourite_favourite
+    # Toggle favourite parameter
+    camera_dict['favourite'] = 0 if (fav == 1) else 1
 
     # Making a POST to the Backend - Favourited / Unfavourited Camera
-    post_favourited_camera_info = requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, data=json.dumps(favourited_camera_dict))
+    requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, 
+        data=json.dumps(camera_dict))
 
     return redirect(url_for('view_page'))
 
@@ -408,28 +378,31 @@ def search_view_page():
     search_camera_names_list, search_camera_id_list, search_favourites_list = ([] for i in range(3))
     searched_camera_id_dict = {}
     sound_dict = {}
-    searching = True
 
     # Searching through all camera names
     if request.method == 'POST':
         searched_name = request.form.values()
         searched_name = searched_name[0]
-        for i in camera_payload:
-            if searched_name.lower() in camera_payload[str(i)]['camera_name'].lower():
-                search_camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
-                search_camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
-                searched_camera_id_dict.setdefault(str(camera_payload[str(i)]['camera_name']), []).append(str(i))
+        for cam_id in camera_payload:
+            cam_id = str(cam_id)
+            # TODO: Handle search failure
+            if searched_name.lower() in camera_payload[cam_id]['camera_name'].lower():
+                search_camera_names_list.append(str(camera_payload[cam_id]['camera_name']))
+                search_camera_id_list.append(str(camera_payload[cam_id]['camera_id']))
+                searched_camera_id_dict.setdefault(str(camera_payload[cam_id]['camera_name']), []).append(cam_id)
 
                 # Adding all searched cameras which are favourite to a list
-                if str(camera_payload[str(i)]['favourite']) == '1':
-                    search_favourites_list.append(str(camera_payload[str(i)]['camera_name']))
+                if str(camera_payload[cam_id]['favourite']) == '1':
+                    search_favourites_list.append(str(camera_payload[cam_id]['camera_name']))
 
                 # Adding all Cameras for which sound alarm is enabled to a dict
-                if str(camera_payload[str(i)]['sound_alarm']) == '1':
-                    sound_dict[str(i)] = camera_payload[str(i)]['sound_alarm']
+                if str(camera_payload[cam_id]['sound_alarm']) == '1':
+                    sound_dict[cam_id] = camera_payload[cam_id]['sound_alarm']
 
+    # TODO: Sort cameras alphabetically
+    # TODO: Implement using camera ID instead of names
     return render_template('view.html', searched_name=searched_name, image=img, 
-        searching=searching, search_id_name=searched_camera_id_dict, 
+        searching=True, search_id_name=searched_camera_id_dict, 
         search_camera_id=search_camera_id_list, search_camera_names=search_camera_names_list, 
         search_favourites=search_favourites_list, sound_dict=sound_dict)
 
@@ -440,82 +413,44 @@ def search_list_page():
     '''Handling search for list page'''
     img = get_background()
     camera_payload = get_camera_info()
-    camera_names_list, camera_id_list, priority_list, floors_list, favourites_list, start_time_list, end_time_list, sound_alarm_list, rtsp_url_list, tamper_list, intrusion_list, fire_list, helmet_list = ([] for i in range(13))
-    email_dict = {}
-    sms_dict = {}
-    call_dict = {}
+    objects_allowed = get_objects_list()
 
     # Searching through all camera names
     if request.method == 'POST':
-        searched_name = request.form.values()
-        searched_name = searched_name[0]
-        for i in camera_payload:
-            if searched_name.lower() in camera_payload[str(i)]['camera_name'].lower():
-                
-                for j in range(0, len(camera_payload[str(i)]['email_list'])):
-                    email_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['email_list'][j]))
-                
-                for k in range(0, len(camera_payload[str(i)]['sms_list'])):
-                    sms_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['sms_list'][k]))
-                
-                for l in range(0, len(camera_payload[str(i)]['call_list'])):
-                    call_dict.setdefault(str(i), []).append(str(camera_payload[str(i)]['call_list'][l]))
-                
-                camera_names_list.append(str(camera_payload[str(i)]['camera_name']))
-                camera_id_list.append(str(camera_payload[str(i)]['camera_id']))
-                priority_list.append(str(camera_payload[str(i)]['camera_priority']).title())
-                floors_list.append(str(camera_payload[str(i)]['floor']))
-                favourites_list.append(str(camera_payload[str(i)]['favourite']))
-                
-                start_time_list.append(str(camera_payload[str(i)]['intrusion_start_time']))
-                end_time_list.append(str(camera_payload[str(i)]['intrusion_end_time']))
-                
-                sound_alarm_list.append(str(camera_payload[str(i)]['sound_alarm']))
-                rtsp_url_list.append(str(camera_payload[str(i)]['rtsp_url']))
-                
-                tamper_list.append(str(camera_payload[str(i)]['object_detect']['tamper']))
-                intrusion_list.append(str(camera_payload[str(i)]['object_detect']['intrusion']))
-                fire_list.append(str(camera_payload[str(i)]['object_detect']['fire']))
-                helmet_list.append(str(camera_payload[str(i)]['object_detect']['helmet']))
+        searched_name = request.form.values()[0]
+        data_list = []
+        for cam_id in camera_payload:
+            if searched_name.lower() in camera_payload[str(cam_id)]['camera_name'].lower():
+                zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed, separator=', ')
+                zipped_data.insert(0, str(cam_id))
+                data_list.append(zipped_data)
+
+    # Sort data alphabetically
+    data_list = sorted(data_list, key=itemgetter(1))
 
     return render_template('list.html', image=img, searched_name=searched_name, 
-        email_list=email_dict, sms_list=sms_dict, call_list=call_dict, search_mode=True,
-        data=zip(camera_id_list, camera_names_list, priority_list, tamper_list, helmet_list, fire_list, 
-            intrusion_list, start_time_list, end_time_list, floors_list, sound_alarm_list))
+        search_mode=True, data=data_list, objects=objects_allowed)
 
 @app.route('/background/<background_image>/<page_redirect>')
+@app.route('/background/<background_image>/<page_redirect>/<camera_id>')
 @server_connection
 @license_required
-def background_image(background_image, page_redirect):
+def background_image(background_image, page_redirect, camera_id=None):
     '''Send background information to backend'''
-    if background_image == 'retail':
-        img = 'Retail.jpeg'
-    if background_image == 'bank':
-        img = 'Bank.jpeg'
-    if background_image == 'hospital':
-        img = 'Hospital.jpeg'
-    if background_image == 'insurance':
-        img = 'Insurance.jpeg'
-    if background_image == 'pixel':
-        img = 'Pixel.jpeg'
-
-    # Making a POST to the Backend - Background information
-    background_dict = OrderedDict()
-    background_dict["image"] = img
-    post_background_info = requests.post(url=BACKEND_URL + 'sendBackground', 
-        data=json.dumps(background_dict))
-
-    return redirect(url_for(page_redirect + '_page'))
+    background_dict = {'image': background_image.title() + '.jpeg'}
+    requests.post(url=BACKEND_URL + 'sendBackground', data=json.dumps(background_dict))
+    if camera_id is None: 
+        return redirect(url_for(page_redirect + '_page'))
+    else:
+        return redirect(url_for('edit_camera_page', camera_id=camera_id))
     
 @app.route('/licenseUpload', methods=['GET', 'POST'])
 @server_connection
 def license():
     '''Handle license upload'''
-
-    # Upload license
     if request.method == 'POST':
         license_file = request.files['license_file']
-        filename = os.path.join(app.config['UPLOAD_FOLDER'], 'godeep.lic')
+        filename = os.path.join(UPLOAD_FOLDER, 'godeep.lic')
         license_file.save(filename)
         requests.post(url=BACKEND_URL + 'licenseUpdate')
     return redirect(url_for('home_page'))
@@ -525,72 +460,10 @@ def license():
 @license_required
 def add_camera():
     '''Add Camera'''
-
-    # Get new camera data from form
     if request.method == 'POST':
-        name = request.form['camera_name']
-        floor = request.form['floor']
-        main_url = request.form['rtsp_url']
-        camera_priority = request.form['camera_priority']
-        email = request.form['email_id_list']
-        sms = request.form['sms_list']
-        call = request.form['call_list']
-        start_time = request.form['intrusion_start_time']
-        end_time = request.form['intrusion_end_time']
-        favourite = request.form.getlist('favourite')
-        sound_alarm = request.form.getlist('sound_alarm')
-        object_detection = request.form.getlist('object_detection')
-
-        email_list = [i.strip() for i in email.split(',')]
-        sms_list = [i.strip() for i in sms.split(',')]
-        call_list = [i.strip() for i in call.split(',')]
-
-        object_tamper = 0
-        object_helmet = 0
-        object_fire = 0
-        object_intrusion = 0
-        favourite_value = 0
-        sound_alarm_value = 0
-        
-        if favourite:
-            favourite_value = 1
-
-        if sound_alarm:
-            sound_alarm_value = 1
-
-        for i in range(0, len(object_detection)):
-            if object_detection[i] == 'fire':
-                object_fire = 1
-            if object_detection[i] == 'helmet':
-                object_helmet = 1
-            if object_detection[i] == 'tamper':
-                object_tamper = 1
-            if object_detection[i] == 'intrusion':
-                object_intrusion = 1
-
-        object_detection_dict = OrderedDict()
-        object_detection_dict["tamper"] = object_tamper
-        object_detection_dict["helmet"] = object_helmet
-        object_detection_dict["fire"] = object_fire
-        object_detection_dict["intrusion"] = object_intrusion
-
-        new_camera_dict = OrderedDict()
-        new_camera_dict["camera_name"] = name
-        new_camera_dict["camera_priority"] = camera_priority
-        new_camera_dict["email_list"] = email_list
-        new_camera_dict["sms_list"] = sms_list
-        new_camera_dict["call_list"] = call_list
-        new_camera_dict["rtsp_url"] = main_url
-        new_camera_dict["object_detect"] = object_detection_dict
-        new_camera_dict["intrusion_start_time"] = start_time
-        new_camera_dict["intrusion_end_time"] = end_time
-        new_camera_dict["floor"] = floor
-        new_camera_dict["sound_alarm"] = sound_alarm_value
-        new_camera_dict["favourite"] = favourite_value
-
         # Making a POST to the Backend - New Camera
-        post_new_camera_info = requests.post(url=BACKEND_URL + 'createCamera', 
-            data=json.dumps(new_camera_dict))
+        requests.post(url=BACKEND_URL + 'createCamera', 
+            data=form_to_json(request.form))
 
     return redirect(url_for('list_page'))
 
@@ -599,77 +472,13 @@ def add_camera():
 @license_required
 def edit_camera(camera_id):
     '''Edit Camera'''
-
-    # Get edited camera data from form
     if request.method == 'POST':
-        name = request.form['camera_name']
-        floor = request.form['floor']
-        main_url = request.form['rtsp_url']
-        camera_priority = request.form['camera_priority']
-        email = request.form['email_id_list']
-        sms = request.form['sms_list']
-        call = request.form['call_list']
-        start_time = request.form['intrusion_start_time']
-        end_time = request.form['intrusion_end_time']
-        favourite = request.form.getlist('favourite')
-        sound_alarm = request.form.getlist('sound_alarm')
-        object_detection = request.form.getlist('object_detection')
-
-        email_list = [i.strip() for i in email.split(',')]
-        sms_list = [i.strip() for i in sms.split(',')]
-        call_list = [i.strip() for i in call.split(',')]
-
-        object_tamper = 0
-        object_helmet = 0
-        object_fire = 0
-        object_intrusion = 0
-
-        favourite_value = 0
-        sound_alarm_value = 0
-
-        if favourite:
-            favourite_value = 1
-
-        if sound_alarm:
-            sound_alarm_value = 1
-
-        for i in range(0,len(object_detection)):
-            if object_detection[i] == 'fire':
-                object_fire = 1
-            if object_detection[i] == 'helmet':
-                object_helmet = 1
-            if object_detection[i] == 'tamper':
-                object_tamper = 1
-            if object_detection[i] == 'intrusion':
-                object_intrusion = 1
-
-        object_detection_dict = OrderedDict()
-        object_detection_dict["tamper"] = object_tamper
-        object_detection_dict["helmet"] = object_helmet
-        object_detection_dict["fire"] = object_fire
-        object_detection_dict["intrusion"] = object_intrusion
-
-        edited_camera_dict = OrderedDict()
-        edited_camera_dict["camera_name"] = name
-        edited_camera_dict["camera_priority"] = camera_priority
-        edited_camera_dict["email_list"] = email_list
-        edited_camera_dict["sms_list"] = sms_list
-        edited_camera_dict["call_list"] = call_list
-        edited_camera_dict["rtsp_url"] = main_url
-        edited_camera_dict["object_detect"] = object_detection_dict
-        edited_camera_dict["intrusion_start_time"] = start_time
-        edited_camera_dict["intrusion_end_time"] = end_time
-        edited_camera_dict["floor"] = floor
-        edited_camera_dict["sound_alarm"] = sound_alarm_value
-        edited_camera_dict["favourite"] = favourite_value
-
-        # Making a POST to the Backend - Edited Camera
-        post_edited_camera_info = requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, 
-            data=json.dumps(edited_camera_dict))
+        # Making a POST to the Backend - Edit Camera
+        requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, 
+            data=form_to_json(request.form))
     
     return redirect(url_for('list_page'))
 
 if __name__ == "__main__":
-    # Running Flask
-    # To access globally - WSGI Server (0.0.0.0)
+    # Run flask app
     app.run(host='0.0.0.0', port=5010, debug=True, threaded=True)
