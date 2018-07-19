@@ -118,18 +118,11 @@
                                     <th class="text-center">
                                         Call List
                                     </th>
+                                    {% for object in objects %}
                                     <th class="text-center">
-                                        Tamper
+                                        {{ object.split('_') | join(' ') | title }}
                                     </th>
-                                    <th class="text-center">
-                                        Helmet
-                                    </th>
-                                    <th class="text-center">
-                                        Fire
-                                    </th>
-                                    <th class="text-center">
-                                        Intrusion
-                                    </th>
+                                    {% endfor %}
                                     <th class="text-center">
                                         Start Time
                                     </th>
@@ -145,7 +138,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for id, name, priority, tamper, helmet, fire, intrusion, start_time, end_time, floor, sound_alarm in data %}
+                                {% for id, name, rtsp_url, priority, floor, start_time, end_time, sound_alarm,
+                                    favourite, email_string, sms_string, call_string, objects_list in data %}
                                 <tr>
                                     <td class="text-center">
                                         {{ name }}
@@ -154,32 +148,22 @@
                                         {{ floor }}
                                     </td>
                                     <td class="text-center">
-                                        {{ priority }}
+                                        {{ priority|title }}
                                     </td>
                                     <td class="text-center">
-                                        {% if id in email_list %} {% for key, value in email_list.iteritems() if id in key %} {% for emails in value %} {{ emails
-                                        }}{{ "," if not loop.last }} {% endfor %} {% endfor %} {% else %} None {% endif %}
+                                        {{ email_string }}
                                     </td>
                                     <td class="text-center">
-                                        {% if id in sms_list %} {% for key, value in sms_list.iteritems() if id in key %} {% for sms in value %} {{ sms }}{{ ","
-                                        if not loop.last }} {% endfor %} {% endfor %} {% else %} None {% endif %}
+                                        {{ sms_string }}
                                     </td>
                                     <td class="text-center">
-                                        {% if id in call_list %} {% for key, value in call_list.iteritems() if id in key %} {% for calls in value %} {{ calls }}{{
-                                        "," if not loop.last }} {% endfor %} {% endfor %} {% else %} None {% endif %}
+                                        {{ call_string }}
                                     </td>
+                                    {% for object, enabled in objects_list %}
                                     <td class="text-center">
-                                        {{ tamper }}
+                                        {{ enabled }}
                                     </td>
-                                    <td class="text-center">
-                                        {{ helmet }}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ fire }}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ intrusion }}
-                                    </td>
+                                    {% endfor %}
                                     <td class="text-center">
                                         {{ start_time or '-'}}
                                     </td>
@@ -190,12 +174,12 @@
                                         {{ sound_alarm }}
                                     </td>
                                     <td class="text-center">
-                                        <a class="btn btn-default btn-icon btn-sm" data-original-title="Edit" title="Edit" href="/edit/{{id}}">
+                                        <a class="btn btn-default btn-icon btn-sm" data-original-title="Edit" title="Edit" href="/edit/{{ id }}">
                                             <i class="fa fa-pencil"></i>
                                         </a>
                                     </td>
                                     <td>
-                                        <a class="btn btn-danger btn-icon btn-sm" data-original-title="Delete" title="Delete" href="/deleteCamera/{{id}}">
+                                        <a class="btn btn-danger btn-icon btn-sm" data-original-title="Delete" title="Delete" href="/deleteCamera/{{ id }}">
                                             <i class="fa fa-times"></i>
                                         </a>
                                     </td>
