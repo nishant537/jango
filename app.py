@@ -4,6 +4,7 @@ import json
 import time
 import socket
 import requests
+import ConfigParser
 from functools import wraps
 from collections import OrderedDict
 from werkzeug.utils import secure_filename
@@ -16,14 +17,17 @@ app = Flask(__name__)
 # GoDeep GUI Path
 GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
+# Config file
+config = ConfigParser.ConfigParser()
+config.readfp(open('/var/www/godeep/gui_settings.conf'))
+
 # GoDeep backend server settings
-BACKEND_IP = '127.0.0.1'
-BACKEND_PORT = '8081'
+BACKEND_IP = config.get('global', 'BACKEND_IP')
+BACKEND_PORT = config.get('global', 'BACKEND_PORT')
 BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 
 # Setup license folder
-UPLOAD_FOLDER = '/opt/godeep'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+UPLOAD_FOLDER = config.get('global', 'UPLOAD_FOLDER')
 
 class VideoCamera(object):
     '''Class for handling VideoCapture object'''
@@ -515,7 +519,7 @@ def license():
     # Upload license
     if request.method == 'POST':
         license_file = request.files['license_file']
-        filename = os.path.join(app.config['UPLOAD_FOLDER'], 'godeep.lic')
+        filename = os.path.join(UPLOAD_FOLDER, 'godeep.lic')
         license_file.save(filename)
         requests.post(url=BACKEND_URL + 'licenseUpdate')
     return redirect(url_for('home_page'))
