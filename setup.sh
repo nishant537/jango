@@ -12,6 +12,7 @@ cp -R static /var/www/godeep
 cp -R templates /var/www/godeep
 cp alarm.mp3 /var/www/godeep/alarm.mp3
 cp app.py /var/www/godeep
+cp gui_settings.conf /var/www/godeep
 
 # Copy necessary WSGI files
 cp wsgi/godeep.wsgi /var/www/godeep
