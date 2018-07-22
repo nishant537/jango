@@ -7,12 +7,19 @@ sudo mkdir -p /var/www/godeep
 # Update folder permissions
 sudo chmod 777 -R /var/www/godeep
 
+# Unzip fontawesome
+cd static
+echo "Unzipping fontawesome.zip..."
+unzip -qq -o fontawesome.zip
+cd ..
+
 # Copy the application folder to GoDeep directory
 cp -R static /var/www/godeep
 cp -R templates /var/www/godeep
 cp alarm.mp3 /var/www/godeep/alarm.mp3
 cp app.py /var/www/godeep
 cp gui_settings.conf /var/www/godeep
+rm /var/www/godeep/static/fontawesome.zip
 
 # Copy necessary WSGI files
 cp wsgi/godeep.wsgi /var/www/godeep
