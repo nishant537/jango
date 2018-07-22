@@ -127,13 +127,13 @@ def get_camera_info():
     camera_info = json.loads(all_camera_info)
     return camera_info
 
-def list_to_csv(data, separator=','):
-    if data:
-        return str(separator.join(data))
+def list_to_string(data, is_list_page=False):
+    if is_list_page:
+        return str(', '.join(data)) if data else 'None'
     else:
-        return 'None'
+        return str(','.join(data)) if data else ''
 
-def zip_data(data, objects_allowed, separator=','):
+def zip_data(data, objects_allowed, is_list_page=False):
     # Mandatory parameters
     camera_name = str(data['camera_name'])
     rtsp_url = str(data['rtsp_url'])
@@ -147,9 +147,9 @@ def zip_data(data, objects_allowed, separator=','):
     favourite = str(data['favourite'])
 
     # Notifications
-    email_string = list_to_csv(data['email_list'], separator)
-    sms_string = list_to_csv(data['sms_list'], separator)
-    call_string = list_to_csv(data['call_list'], separator)
+    email_string = list_to_string(data['email_list'], is_list_page)
+    sms_string = list_to_string(data['sms_list'], is_list_page)
+    call_string = list_to_string(data['call_list'], is_list_page)
     
     # Object detection
     objects = []
@@ -292,7 +292,7 @@ def list_page():
     # Parse all camera info and zip data
     data_list = []
     for cam_id in camera_payload:
-        zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed, separator=', ')
+        zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed, is_list_page=True)
         zipped_data.insert(0, str(cam_id))
         data_list.append(zipped_data)
 
@@ -421,7 +421,7 @@ def search_list_page():
         data_list = []
         for cam_id in camera_payload:
             if searched_name.lower() in camera_payload[str(cam_id)]['camera_name'].lower():
-                zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed, separator=', ')
+                zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed, is_list_page=True)
                 zipped_data.insert(0, str(cam_id))
                 data_list.append(zipped_data)
 
