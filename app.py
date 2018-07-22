@@ -304,7 +304,7 @@ def get_alerts():
     alert_dict = json.loads(alert_payload)
 
     for key, objects in alert_dict.iteritems():
-        alert_dict[key] = [obj.title() for obj in objects]
+        alert_dict[key] = [' '.join(obj.split('_')).title() for obj in objects]
 
     return json.dumps(alert_dict)
 
