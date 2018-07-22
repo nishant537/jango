@@ -385,7 +385,7 @@ def search_view_page():
         data_list = sorted(data_list, key=itemgetter(1))
 
         return render_template('view.html', image=img, searched_name=searched_name,
-            search_mode=False, data=data_list, objects=objects_allowed, sound_dict=sound_dict)
+            search_mode=True, data=data_list, objects=objects_allowed, sound_dict=sound_dict)
 
     else:
         return redirect(url_for('view_page'))
