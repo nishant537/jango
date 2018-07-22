@@ -26,6 +26,7 @@ BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 
 # Setup license folder
 UPLOAD_FOLDER = config.get('global', 'UPLOAD_FOLDER')
+STREAMING_JPEG_QUALITY = int(config.get('global', 'STREAMING_JPEG_QUALITY'))
 
 class VideoCamera(object):
     '''Class for handling VideoCapture object'''
@@ -46,7 +47,7 @@ class VideoCamera(object):
         if not ret: image = self.default_stream
         
         # Encode to jpeg and then byte stream
-        ret, jpeg = cv2.imencode('.jpg', image)
+        ret, jpeg = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), STREAMING_JPEG_QUALITY])
         return jpeg.tobytes()
 
 #### Custom Decorators
@@ -121,11 +122,12 @@ def get_objects_list():
     objects_dict = json.loads(requests.get(BACKEND_URL + 'getObjectsList').content)
     return sorted([str(i) for i in objects_dict['objects']])
 
-def get_camera_info():
+def get_camera_info(camera_id=None):
     '''Get camera info from backend'''
-    all_camera_info = requests.get(BACKEND_URL + 'getAllCameraInfo').content
-    camera_info = json.loads(all_camera_info)
-    return camera_info
+    if camera_id is None:
+        return json.loads(requests.get(BACKEND_URL + 'getAllCameraInfo').content)
+    else:
+        return {camera_id: json.loads(requests.get(BACKEND_URL + 'getCameraInfo/' + camera_id).content)}
 
 def list_to_string(data, is_list_page=False):
     if is_list_page:
@@ -143,8 +145,8 @@ def zip_data(data, objects_allowed, is_list_page=False):
     # Optional parameters
     start_time = str(data['intrusion_start_time'])
     end_time = str(data['intrusion_end_time'])
-    sound_alarm = str(data['sound_alarm'])
-    favourite = str(data['favourite'])
+    sound_alarm = data['sound_alarm']
+    favourite = data['favourite']
 
     # Notifications
     email_string = list_to_string(data['email_list'], is_list_page)
@@ -158,7 +160,7 @@ def zip_data(data, objects_allowed, is_list_page=False):
         # Display only if backend permits
         if object_allowed in object_detect:
             objects.append((object_allowed, object_detect[object_allowed]))
-        # If certain object doesn't exist for the camera, disable and display it
+        # If certain object previously didnt't exist in the camera database, disable and display it
         else:
             objects.append((object_allowed, 0))
 
@@ -231,7 +233,7 @@ def add_camera_page():
 def edit_camera_page(camera_id):
     '''Route Edit Camera page'''
     img = get_background()
-    camera_payload = get_camera_info()
+    camera_payload = get_camera_info(camera_id)
     objects_allowed = get_objects_list()
 
     # Match camera_id from camera_payload and load it's details
@@ -245,40 +247,30 @@ def view_page():
     '''Route view page'''
     img = get_background()
     camera_payload = get_camera_info()
-    camera_names_list, favourites_list, floors_list, unique_floors = ([] for i in range(4))
-    cameras_in_floor_dict = {}
-    camera_id_dict = {}
+    objects_allowed = [] # Not required for view page
     sound_dict = {}
-         
+
+    # Parse all camera info and zip data
+    data_list = []
+    unique_floors = []
     for cam_id in camera_payload:
-        cam_id = str(cam_id)
-        camera_names_list.append(str(camera_payload[cam_id]['camera_name']))
-        floors_list.append(str(camera_payload[cam_id]['floor']))
-        camera_id_dict.setdefault(str(camera_payload[cam_id]['camera_name']), []).append(cam_id)
-        unique_floors = list(set(floors_list))
+        unique_floors.append(str(camera_payload[str(cam_id)]['floor']))
+        sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+        zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
+        zipped_data.insert(0, str(cam_id))
+        data_list.append(zipped_data)
 
-        # Save whitespace stripped version of floors for HTML ID tags
-        unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
+    # Sort floors alphabetically
+    unique_floors = sorted(list(set(unique_floors)))
 
-        # Adding all cameras which are favourite to a list
-        if str(camera_payload[cam_id]['favourite']) == '1':
-            favourites_list.append(str(camera_payload[cam_id]['camera_name']))
+    # Save whitespace stripped version of floors for HTML ID tags
+    unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
 
-        # Adding all cameras for which sound alarm is enabled to a dict
-        if str(camera_payload[cam_id]['sound_alarm']) == '1':
-            sound_dict[cam_id] = camera_payload[cam_id]['sound_alarm']
+    # Sort data alphabetically
+    data_list = sorted(data_list, key=itemgetter(1))
 
-    # Sorting all cameras based on the floor - Storing in a dictionary to make it easier for Jinja Templating
-    for i, _ in unique_floors:
-        for k in camera_payload:
-            if str(camera_payload[str(k)]['floor']) == i:
-                cameras_in_floor_dict.setdefault(cam_id, []).append(str(camera_payload[str(k)]['camera_name']))
-
-    # TODO: Sort cameras alphabetically
-    # TODO: Implement using camera ID instead of names
-    return render_template('view.html', image=img, camera_url=camera_id_dict, searching=False,
-        camera=camera_names_list, favourites=favourites_list, sound_dict=json.dumps(sound_dict),
-        unique_floors=unique_floors, camera_floor=cameras_in_floor_dict)
+    return render_template('view.html', image=img, search_mode=False, sound_dict=sound_dict,
+        objects=objects_allowed, data=data_list, unique_floors=unique_floors)
 
 @app.route('/list', methods=['GET', 'POST'])
 @server_connection
@@ -351,12 +343,10 @@ def streaming_url(camera_id):
 @license_required
 def toggle_favourite(camera_id):
     '''Toggle favourite parameter'''
-    camera_payload = get_camera_info()
+    camera_payload = get_camera_info(camera_id)
 
     # Match camera_id from camera_payload
     camera_dict = camera_payload[str(camera_id)]
-    # TODO: Delete this
-    del camera_dict['camera_id']
     fav = camera_dict['favourite']
 
     # Toggle favourite parameter
@@ -373,63 +363,62 @@ def toggle_favourite(camera_id):
 @license_required
 def search_view_page():
     '''Handling search for view page'''
-    img = get_background()
-    camera_payload = get_camera_info()
-    search_camera_names_list, search_camera_id_list, search_favourites_list = ([] for i in range(3))
-    searched_camera_id_dict = {}
-    sound_dict = {}
-
-    # Searching through all camera names
     if request.method == 'POST':
-        searched_name = request.form.values()
-        searched_name = searched_name[0]
+        img = get_background()
+        camera_payload = get_camera_info()
+        objects_allowed = []
+        sound_dict = {}
+
+        # Get searched name from form
+        searched_name = str(request.form.values()[0])
+
+        # Parse all camera info and zip data
+        data_list = []
         for cam_id in camera_payload:
-            cam_id = str(cam_id)
-            # TODO: Handle search failure
-            if searched_name.lower() in camera_payload[cam_id]['camera_name'].lower():
-                search_camera_names_list.append(str(camera_payload[cam_id]['camera_name']))
-                search_camera_id_list.append(str(camera_payload[cam_id]['camera_id']))
-                searched_camera_id_dict.setdefault(str(camera_payload[cam_id]['camera_name']), []).append(cam_id)
+            if searched_name.lower() in str(camera_payload[str(cam_id)]['camera_name']).lower():
+                sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+                zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
+                zipped_data.insert(0, str(cam_id))
+                data_list.append(zipped_data)
 
-                # Adding all searched cameras which are favourite to a list
-                if str(camera_payload[cam_id]['favourite']) == '1':
-                    search_favourites_list.append(str(camera_payload[cam_id]['camera_name']))
+        # Sort data alphabetically
+        data_list = sorted(data_list, key=itemgetter(1))
 
-                # Adding all Cameras for which sound alarm is enabled to a dict
-                if str(camera_payload[cam_id]['sound_alarm']) == '1':
-                    sound_dict[cam_id] = camera_payload[cam_id]['sound_alarm']
+        return render_template('view.html', image=img, searched_name=searched_name,
+            search_mode=False, data=data_list, objects=objects_allowed, sound_dict=sound_dict)
 
-    # TODO: Sort cameras alphabetically
-    # TODO: Implement using camera ID instead of names
-    return render_template('view.html', searched_name=searched_name, image=img, 
-        searching=True, search_id_name=searched_camera_id_dict, 
-        search_camera_id=search_camera_id_list, search_camera_names=search_camera_names_list, 
-        search_favourites=search_favourites_list, sound_dict=sound_dict)
+    else:
+        return redirect(url_for('view_page'))
 
 @app.route('/list/search', methods=['GET', 'POST'])
 @server_connection
 @license_required
 def search_list_page():
     '''Handling search for list page'''
-    img = get_background()
-    camera_payload = get_camera_info()
-    objects_allowed = get_objects_list()
-
-    # Searching through all camera names
     if request.method == 'POST':
-        searched_name = request.form.values()[0]
+        img = get_background()
+        camera_payload = get_camera_info()
+        objects_allowed = get_objects_list()
+    
+        # Get searched name from form
+        searched_name = str(request.form.values()[0])
+
+        # Parse all camera info and zip data
         data_list = []
         for cam_id in camera_payload:
-            if searched_name.lower() in camera_payload[str(cam_id)]['camera_name'].lower():
+            if searched_name.lower() in str(camera_payload[str(cam_id)]['camera_name']).lower():
                 zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed, is_list_page=True)
                 zipped_data.insert(0, str(cam_id))
                 data_list.append(zipped_data)
 
-    # Sort data alphabetically
-    data_list = sorted(data_list, key=itemgetter(1))
+        # Sort data alphabetically
+        data_list = sorted(data_list, key=itemgetter(1))
 
-    return render_template('list.html', image=img, searched_name=searched_name, 
-        search_mode=True, data=data_list, objects=objects_allowed)
+        return render_template('list.html', image=img, searched_name=searched_name, 
+            search_mode=True, data=data_list, objects=objects_allowed)
+
+    else:
+        return redirect(url_for('list_page'))
 
 @app.route('/background/<background_image>/<page_redirect>')
 @app.route('/background/<background_image>/<page_redirect>/<camera_id>')

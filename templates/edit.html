@@ -166,9 +166,7 @@
                                             <div class="row">
                                                 <div class="form-check">
                                                     <label class="form-check-label">
-                                                        {% if sound_alarm == 0 %}
-                                                        <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox"> {% else %}
-                                                        <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" checked> {% endif %}
+                                                        <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if sound_alarm == 1 }}>
                                                         <span class="form-check-sign"></span>
                                                         Sound Alarm
                                                     </label>
@@ -178,9 +176,7 @@
                                             <div class="row">
                                                 <div class="form-check">
                                                     <label class="form-check-label">
-                                                        {% if favourite == 0 %}
-                                                        <input id="favourite" name="favourite" class="form-check-input" type="checkbox"> {% else %}
-                                                        <input id="favourite" name="favourite" class="form-check-input" type="checkbox" checked> {% endif %}
+                                                        <input id="favourite" name="favourite" class="form-check-input" type="checkbox" {{ 'checked' if favourite == 1 }}>
                                                         <span class="form-check-sign"></span>
                                                         Favourite
                                                     </label>
