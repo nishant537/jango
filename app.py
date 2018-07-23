@@ -1,5 +1,5 @@
-import re
 import os
+import re
 import json
 import socket
 import requests
@@ -7,7 +7,6 @@ import ConfigParser
 from functools import wraps
 from operator import itemgetter
 
-import cv2
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file
 
 # Initiate Flask
@@ -27,29 +26,6 @@ BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 
 # Setup license folder
 UPLOAD_FOLDER = config.get('global', 'UPLOAD_FOLDER')
-STREAMING_JPEG_QUALITY = int(config.get('global', 'STREAMING_JPEG_QUALITY'))
-
-class VideoCamera(object):
-    '''Class for handling VideoCapture object'''
-    def __init__(self, url):
-        '''Constructor creates vcap object with stream URL'''
-        self.video = cv2.VideoCapture(url)
-        self.default_stream = cv2.imread(GUI_PATH + '/static/img/default_stream.jpg')
-
-    def __del__(self):
-        '''Destructor releases vcap object'''
-        self.video.release()
-    
-    def get_frame(self):
-        '''Return JPEG encoded byte stream'''
-        ret, image = self.video.read()
-
-        # If stream load to fail, display default stream
-        if not ret: image = self.default_stream
-        
-        # Encode to jpeg and then byte stream
-        ret, jpeg = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), STREAMING_JPEG_QUALITY])
-        return jpeg.tobytes()
 
 #### Custom Decorators
 
@@ -327,23 +303,6 @@ def delete_camera(camera_id):
     '''Handling delete camera'''
     post_delete_camera = requests.post(url=BACKEND_URL + 'deleteCamera/' + camera_id)
     return redirect(url_for('list_page'))
-
-def generate_mjpeg_stream(camera):
-    '''This function generates the mjpeg stream using OpenCV'''
-    while True:
-        frame = camera.get_frame()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
-@app.route('/stream/<camera_id>')
-@server_connection
-def streaming_url(camera_id):
-    '''This function generates publishes the stream for a given camera'''
-    camera_payload = get_camera_info()
-    if camera_id in camera_payload:
-        feed = str(camera_payload[camera_id]['rtsp_url'])
-    return Response(generate_mjpeg_stream(VideoCamera(feed)), 
-        mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/favourite/<camera_id>')
 @server_connection
