@@ -113,12 +113,14 @@ def natural_sort(list, key):
     return sorted(list, key=alphanum_key)
 
 def list_to_string(data, is_list_page=False):
+    '''Converts list of data to comma separated string'''
     if is_list_page:
         return str(', '.join(data)) if data else 'None'
     else:
         return str(','.join(data)) if data else ''
 
 def zip_data(data, objects_allowed, is_list_page=False):
+    '''Appends all data to a list for Jinja templating'''
     # Mandatory parameters
     camera_name = str(data['camera_name'])
     rtsp_url = str(data['rtsp_url'])
@@ -151,6 +153,7 @@ def zip_data(data, objects_allowed, is_list_page=False):
         sound_alarm, favourite, email_string, sms_string, call_string, objects]
 
 def form_to_json(form):
+    '''Convert the requests.form data to JSON'''
     camera_dict = {}
     objects_allowed = get_objects_list()
 
@@ -243,19 +246,19 @@ def view_page():
         zipped_data.insert(0, str(cam_id))
         data_list.append(zipped_data)
 
-    # Sort floors alphabetically
+    # Sort floors alphanumerically
     unique_floors = natural_sort(list(set(unique_floors)), key=itemgetter(0))
 
     # Save whitespace stripped version of floors for HTML ID tags
     unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
 
-    # Sort data alphabetically
+    # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
 
     return render_template('view.html', image=img, search_mode=False, sound_dict=sound_dict,
         objects=objects_allowed, data=data_list, unique_floors=unique_floors)
 
-@app.route('/list', methods=['GET', 'POST'])
+@app.route('/list')
 @server_connection
 @license_required
 def list_page():
@@ -271,7 +274,7 @@ def list_page():
         zipped_data.insert(0, str(cam_id))
         data_list.append(zipped_data)
 
-    # Sort data alphabetically
+    # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
 
     return render_template('list.html', image=img, search_mode=False,
@@ -279,7 +282,7 @@ def list_page():
 
 #### Data Handling from GUI
 
-@app.route('/getAlerts', methods=['GET', 'POST'])
+@app.route('/getAlerts', methods=['GET'])
 @server_connection
 def get_alerts():
     '''Get Alerts from backend, also no need for license check here'''
@@ -347,7 +350,7 @@ def search_view_page():
                 zipped_data.insert(0, str(cam_id))
                 data_list.append(zipped_data)
 
-        # Sort data alphabetically
+        # Sort data alphanumerically
         data_list = natural_sort(data_list, key=itemgetter(1))
 
         return render_template('view.html', image=img, searched_name=searched_name,
@@ -376,7 +379,7 @@ def search_list_page():
                 zipped_data.insert(0, str(cam_id))
                 data_list.append(zipped_data)
 
-        # Sort data alphabetically
+        # Sort data alphanumerically
         data_list = natural_sort(data_list, key=itemgetter(1))
 
         return render_template('list.html', image=img, searched_name=searched_name, 
@@ -397,7 +400,7 @@ def background_image(background_image, page_redirect, camera_id=None):
     else:
         return redirect(url_for('edit_camera_page', camera_id=camera_id))
     
-@app.route('/licenseUpload', methods=['GET', 'POST'])
+@app.route('/licenseUpload', methods=['POST'])
 @server_connection
 def license():
     '''Handle license upload'''
@@ -408,7 +411,7 @@ def license():
         requests.post(url=BACKEND_URL + 'licenseUpdate')
     return redirect(url_for('home_page'))
 
-@app.route('/addCamera', methods=['GET', 'POST'])
+@app.route('/addCamera', methods=['POST'])
 @server_connection
 @license_required
 def add_camera():
@@ -420,7 +423,7 @@ def add_camera():
 
     return redirect(url_for('list_page'))
 
-@app.route('/editCamera/<camera_id>', methods=['GET', 'POST'])
+@app.route('/editCamera/<camera_id>', methods=['POST'])
 @server_connection
 @license_required
 def edit_camera(camera_id):
