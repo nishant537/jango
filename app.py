@@ -1,3 +1,4 @@
+import re
 import os
 import json
 import socket
@@ -120,7 +121,7 @@ def get_background():
 def get_objects_list():
     '''Get lsit of object from backend'''
     objects_dict = json.loads(requests.get(BACKEND_URL + 'getObjectsList').content)
-    return sorted([str(i) for i in objects_dict['objects']])
+    return natural_sort([str(i) for i in objects_dict['objects']], key=itemgetter(0))
 
 def get_camera_info(camera_id=None):
     '''Get camera info from backend'''
@@ -128,6 +129,12 @@ def get_camera_info(camera_id=None):
         return json.loads(requests.get(BACKEND_URL + 'getAllCameraInfo').content)
     else:
         return {camera_id: json.loads(requests.get(BACKEND_URL + 'getCameraInfo/' + camera_id).content)}
+
+def natural_sort(list, key):
+    '''Sort the list into natural alphanumeric order'''
+    convert = lambda text: int(text) if text.isdigit() else text
+    alphanum_key = lambda item: [convert(c) for c in re.split('([0-9]+)', key(item))]
+    return sorted(list, key=alphanum_key)
 
 def list_to_string(data, is_list_page=False):
     if is_list_page:
@@ -261,13 +268,13 @@ def view_page():
         data_list.append(zipped_data)
 
     # Sort floors alphabetically
-    unique_floors = sorted(list(set(unique_floors)))
+    unique_floors = natural_sort(list(set(unique_floors)), key=itemgetter(0))
 
     # Save whitespace stripped version of floors for HTML ID tags
     unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
 
     # Sort data alphabetically
-    data_list = sorted(data_list, key=itemgetter(1))
+    data_list = natural_sort(data_list, key=itemgetter(1))
 
     return render_template('view.html', image=img, search_mode=False, sound_dict=sound_dict,
         objects=objects_allowed, data=data_list, unique_floors=unique_floors)
@@ -289,7 +296,7 @@ def list_page():
         data_list.append(zipped_data)
 
     # Sort data alphabetically
-    data_list = sorted(data_list, key=itemgetter(1))
+    data_list = natural_sort(data_list, key=itemgetter(1))
 
     return render_template('list.html', image=img, search_mode=False,
         objects=objects_allowed, data=data_list)
@@ -382,11 +389,10 @@ def search_view_page():
                 data_list.append(zipped_data)
 
         # Sort data alphabetically
-        data_list = sorted(data_list, key=itemgetter(1))
+        data_list = natural_sort(data_list, key=itemgetter(1))
 
         return render_template('view.html', image=img, searched_name=searched_name,
             search_mode=True, data=data_list, objects=objects_allowed, sound_dict=sound_dict)
-
     else:
         return redirect(url_for('view_page'))
 
@@ -412,11 +418,10 @@ def search_list_page():
                 data_list.append(zipped_data)
 
         # Sort data alphabetically
-        data_list = sorted(data_list, key=itemgetter(1))
+        data_list = natural_sort(data_list, key=itemgetter(1))
 
         return render_template('list.html', image=img, searched_name=searched_name, 
             search_mode=True, data=data_list, objects=objects_allowed)
-
     else:
         return redirect(url_for('list_page'))
 
