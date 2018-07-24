@@ -15,20 +15,23 @@
     <!-- CSS Files -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="/static/css/main.css" rel="stylesheet"/>
-    <link href="/static/vxg/vxgplayer.css" rel="stylesheet"/> 
+    <link href="/static/vxg/vxgplayer-1.8.40.css" rel="stylesheet"/> 
     <!-- Javascript -->
-    <script type="text/javascript" src="/static/vxg/vxgplayer.js"></script>
     <script src="/static/js/jquery.3.2.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/static/vxg/vxgplayer-1.8.40.js"></script>
     <script type="text/javascript">
         // Alerts
         var alerts = [];
         var interval = 1000; // Polling interval
         var alertShowTime = 10000; // Alert show interval
         var audio = new Audio('/getAlarmAudio');
-        var inFullScreen = false;
+        var lastKey = null;
+        var lastTab = null;
 
         // HTTP Player
         var playStatus = {};
+
+        /******************* General Functions *******************/
 
         function onLoad() 
         {
@@ -39,6 +42,20 @@
         {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+
+        $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e)
+        {
+            var tab = $(e.target).attr("href");
+            console.log(tab);
+        });
+
+        $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e)
+        {
+            var tab = $(e.target).attr("href");
+            console.log(tab);
+        });
+
+        /******************* Player Functions *******************/
 
         function playerOnLoad(key, tab) 
         {
@@ -55,81 +72,121 @@
                 $('#pauseBtn' + tab + key).hide();
                 $('#fullScreenBtn' + tab + key).hide();
             }
-
-            $('.cardSubtitle' + key).hide();
         }
 
         function playButton(key, tab) 
         {
             console.log("Play " + tab + " " + key + " " + playStatus[key]);
-            console.log('Stream: ' + $('#stream' + tab + key).text())
+            console.log('Stream: ' + $('#stream' + tab + key).text());
 
+            // Update player controls
             $('#playBtn' + tab + key).hide();
             $('#pauseBtn' + tab + key).fadeIn(300);
             $('#fullScreenBtn' + tab + key).fadeIn(300);
-            $('#cameraView' + tab + key).fadeOut(500, function () 
-            {
-                $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
-                $('#cameraView' + tab + key).attr('src', '/static/img/loading.gif');
-            }.bind(this)).fadeIn(500);
-            $('#cameraView' + tab + key).fadeOut(500, function () 
-            {
-                $('#cameraView' + tab + key).attr('src', $('#stream' + tab + key).text());
-            }.bind(this)).fadeIn(500);
+            $('#defaultImage' + tab + key).hide();
 
+            // Get player properties
+            var playerId = 'vxg' + tab + key;
+            var rtsp_url = $('#stream' + tab + key).text();
+            var playerWidth = parseInt($('#defaultImage' + tab + key).width());
+            var playerHeight = parseInt($('#defaultImage' + tab + key).height());
+
+            // Create VXG player div element and append to DOM
+            var div = document.createElement('div');
+            div.setAttribute("id", playerId);
+            div.setAttribute("class", "vxgplayer img rounded");
+            var cardDiv = document.getElementById('card-image-div-' + tab + '-' + key);
+            cardDiv.appendChild(div);
+
+            // Init VXG media player
+            vxgplayer(playerId,
+            {
+                url: rtsp_url,
+                nmf_path: 'media_player.nmf',
+                nmf_src: '/static/vxg/pnacl/Release/media_player.nmf',
+                width: playerWidth,
+                height: playerHeight,
+                latency: 10000,
+                aspect_ratio_mode: 1,
+                avsync: false,
+                controls: false,
+                autoreconnect: true,
+                connection_timeout: 5000,
+                connection_udp: 0,
+                custom_digital_zoom: true
+            }).ready(function()
+            {   
+                // Trigger VXG play
+                vxgplayer(playerId).play();
+            });
+
+            // Update play status
             playStatus[key] = true;
         }
 
         function pauseButton(key, tab) 
         {
             console.log("Pause " + tab + " " + key + " " + playStatus[key]);
+
+            // Stop playing and delete player instance
+            var player = vxgplayer('vxg' + tab + key);
+            try
+            {
+                player.stop();
+                player.dispose();
+            }
+            catch (err)
+            {
+                console.log(err);
+            }
+
+            // Delete VXG player div element
+            $('#vxg' + tab + key).remove();
+
+            // Update player controls
             $('#playBtn' + tab + key).fadeIn(300);
             $('#pauseBtn' + tab + key).hide();
             $('#fullScreenBtn' + tab + key).hide();
-            $('#cameraView' + tab + key).fadeOut(500, function () 
-            {
-                $('#cameraView' + tab + key).attr('src', '/static/img/default_view.jpg');
-            }.bind(this)).fadeIn(500);
+            $('#defaultImage' + tab + key).fadeIn(500);
 
+            // Update play status
             playStatus[key] = false;
         }
 
-        function showFullScreen(key, tab) 
+        function toggleFullScreen(key, tab) 
         {
-            console.log("Enter Full Screen");
-            $('#fullScreenImage').attr('src', '/static/img/loading.gif');
-            $('#fullScreenImage').attr('src', $('#stream' + tab + key).text());
-            $('#mainNavbar').fadeOut();
-            $('#mainHeader').fadeOut();
-            $('#myModal').fadeIn();
-            inFullScreen = true;
+            console.log("Full Screen Toggle");
+            var player = vxgplayer('vxg' + tab + key);
+            player.fullscreen();
+            lastKey = key;
+            lastTab = tab;
         }
 
-        function exitFullScreen() 
+        /* NOT STABLE
+        $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
         {
-            console.log("Exit Full Screen");
-            $('#myModal').fadeOut();
-            $('#mainNavbar').fadeIn();
-            $('#mainHeader').fadeIn();
-            inFullScreen = false;
-        }
+            console.log("Event Full Screen Change: " + lastTab + lastKey);
+            var player = vxgplayer('vxg' + lastTab + lastKey);
 
-        window.onclick = function (event) 
-        {
-            var modal = document.getElementById('myModal');
-            if (event.target == modal) 
+            // TODO: Change loader type
+            if (document.webkitIsFullScreen == true)
             {
-                exitFullScreen();
+                console.log("ENTER");
+                player.controls(true);
+                player.custom_digital_zoom(true);
             }
-        }
-
-        $(document).keyup(function (event) 
-        {
-            if ((event.keyCode == 27) && inFullScreen) 
+            else
             {
-                exitFullScreen();
+                console.log("EXIT");
+                player.controls(false);
+                player.custom_digital_zoom(false);
+                $('#vxg' + lastTab + lastKey).find(".vxgplayer-controls").remove();
+                $('#vxg' + lastTab + lastKey).find(".vxgplayer-controls-zoom").remove();
+                $('#vxg' + lastTab + lastKey).find(".vxgplayer-controls-zoom-position").remove();
             }
-        });
+        });*/
+
+        /******************* Sound Alarm Functions *******************/
 
         function playAlarm() 
         {
@@ -145,6 +202,8 @@
         {
             audio.pause();
         }
+
+        /******************* Alerts Functions *******************/
 
         function startTimer() 
         {
@@ -212,11 +271,14 @@
             });
         }
 
+        // Start polling for alerts
+        startTimer();
+
     </script>
 </head>
 
 <body class="profile-page" onload="onLoad()">
-    <nav id="mainNavbar" class="navbar navbar-expand-sm navbar-absolute fixed-top bg-white">
+    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
@@ -324,8 +386,8 @@
                                 {% if favourite == 1 %}
                                 <div class="col-md-3">
                                     <div class="card card-profile">
-                                        <div class="card-image">
-                                            <img id="cameraViewFav{{ id }}" class="img rounded loading" src="/static/img/default_view.jpg">
+                                        <div class="card-image" id="card-image-div-Fav-{{ id }}">
+                                            <img id="defaultImageFav{{ id }}" class="img rounded" src="/static/img/default_view.jpg">
                                         </div>
                                         <div class="card-body cardBody{{ id }}" style="padding: 0.4rem;">
                                             <h5 style="margin-bottom: 4px; margin-top: 2px;" class="card-title cardTitle{{ id }}">{{ name }}</h5>
@@ -335,7 +397,7 @@
                                                 <a href="/favourite/{{ id }}" class="btn btn-icon btn-neutral btn-openid" style="margin: 0px; background-color: #FFFFFF;">
                                                     <i class="fa fa-star"></i>
                                                 </a>
-                                                <p hidden id="streamFav{{ id }}">/stream/{{ id }}</p>
+                                                <p hidden id="streamFav{{ id }}">{{ rtsp_url }}</p>
 
                                                 <div id="playerControls{{ id }}" class="playerControls">
                                                     <a id='playBtnFav{{ id }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
@@ -345,7 +407,7 @@
                                                         <i onclick="pauseButton({{ id }}, 'Fav')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
                                                     </a>
                                                     <a id='fullScreenBtnFav{{ id }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
-                                                        <i onclick="showFullScreen({{ id }}, 'Fav')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
+                                                        <i onclick="toggleFullScreen({{ id }}, 'Fav')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                     </a>
 
                                                     <!-- Dummy image for onload event trigger -->
@@ -365,25 +427,8 @@
                                     favourite, email_string, sms_string, call_string, objects_list in data %}
                                 <div class="col-md-3">
                                     <div class="card card-profile">
-                                        <div class="card-image">
-                                            <!-- <img id="cameraViewAll{{ id }}" class="img rounded loading" src="/static/img/default_view.jpg"> -->
-                                            <div class="vxgplayer img rounded loading"
-                                                id="vxgAll{{ id }}" 
-                                                width="255"
-                                                height="143"
-                                                url="{{ rtsp_url }}"
-                                                nmf-src="/static/vxg/pnacl/Release/media_player.nmf"
-                                                nmf-path="media_player.nmf"
-                                                useragent-prefix="MMP/3.0"
-                                                latency="10000"
-                                                autohide="1"
-                                                volume="0"
-                                                controls
-                                                mute
-                                                aspect-ratio
-                                                aspect-ratio-mode="1"
-                                                auto-reconnect>  
-                                            </div>
+                                        <div class="card-image" id="card-image-div-All-{{ id }}">
+                                            <img id="defaultImageAll{{ id }}" class="img rounded" src="/static/img/default_view.jpg">
                                         </div>
                                         <div class="card-body cardBody{{ id }}" style="padding: 0.4rem;">
                                             <h5 style="margin-bottom: 4px; margin-top: 2px;" class="card-title cardTitle{{ id }}">{{ name }}</h5>
@@ -394,7 +439,7 @@
                                                     <i class="fa fa-star"></i>
                                                 </a>
                                                 
-                                                <p hidden id="streamAll{{ id }}">/stream/{{ id }}</p>
+                                                <p hidden id="streamAll{{ id }}">{{ rtsp_url }}</p>
 
                                                 <div id="playerControls{{ id }}" class="playerControls">
                                                     <a id='playBtnAll{{ id }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
@@ -404,7 +449,7 @@
                                                         <i onclick="pauseButton({{ id }}, 'All')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
                                                     </a>
                                                     <a id='fullScreenBtnAll{{ id }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
-                                                        <i onclick="showFullScreen({{ id }}, 'All')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
+                                                        <i onclick="toggleFullScreen({{ id }}, 'All')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                     </a>
 
                                                     <!-- Dummy image for onload event trigger -->
@@ -425,8 +470,8 @@
                                 {% if unique_floor|string() == floor|string() %}
                                 <div class="col-md-3">
                                     <div class="card card-profile">
-                                        <div class="card-image">
-                                            <img id="cameraView{{ floor_stripped }}{{ id }}" class="img rounded loading" src="/static/img/default_view.jpg">
+                                        <div class="card-image" id="card-image-div-{{ floor_stripped }}-{{ id }}">
+                                            <img id="defaultImage{{ floor_stripped }}{{ id }}" class="img rounded" src="/static/img/default_view.jpg">
                                         </div>
                                         <div class="card-body cardBody{{ id }}" style="padding: 0.4rem;">
                                             <h5 style="margin-bottom: 4px; margin-top: 2px;" class="card-title cardTitle{{ id }}">{{ name }}</h5>
@@ -437,7 +482,7 @@
                                                     <i class="fa fa-star"></i>
                                                 </a>
 
-                                                <p hidden id="stream{{ floor_stripped }}{{ id }}">/stream/{{ id }}</p>
+                                                <p hidden id="stream{{ floor_stripped }}{{ id }}">{{ rtsp_url }}</p>
 
                                                 <div id="playerControls{{ floor_stripped }}{{ id }}" class="playerControls">
                                                     <a id='playBtn{{ floor_stripped }}{{ id }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
@@ -447,7 +492,7 @@
                                                         <i onclick="pauseButton({{ id }}, '{{ floor_stripped }}')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
                                                     </a>
                                                     <a id='fullScreenBtn{{ floor_stripped }}{{ id }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
-                                                        <i onclick="showFullScreen({{ id }}, '{{ floor_stripped }}')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
+                                                        <i onclick="toggleFullScreen({{ id }}, '{{ floor_stripped }}')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                                     </a>
 
                                                     <!-- Dummy image for onload event trigger -->
@@ -474,8 +519,8 @@
                             favourite, email_string, sms_string, call_string, objects_list in data %}
                         <div class="col-md-3">
                             <div class="card card-profile">
-                                <div class="card-image">
-                                    <img id="cameraViewSearch{{ id }}" class="img rounded loading" src="/static/img/default_view.jpg">
+                                <div class="card-image" id="card-image-div-Search-{{ id }}">
+                                    <img id="defaultImageSearch{{ id }}" class="img rounded" src="/static/img/default_view.jpg">
                                 </div>
                                 <div class="card-body cardBody{{ id }}" style="padding: 0.4rem;">
                                     <h5 style="margin-bottom: 4px; margin-top: 2px;" class="card-title cardTitle{{ id }}">{{ name }}</h5>
@@ -486,7 +531,7 @@
                                             <i class="fa fa-star"></i>
                                         </a>
 
-                                        <p hidden id="streamSearch{{ id }}">/stream/{{ id }}</p>
+                                        <p hidden id="streamSearch{{ id }}">{{ rtsp_url }}</p>
 
                                         <div id="playerControls{{ id }}" class="playerControls">
                                             <a id='playBtnSearch{{ id }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
@@ -496,7 +541,7 @@
                                                 <i onclick="pauseButton({{ id }}, 'Search')" class='fa fa-pause playerIcon pauseIcon' aria-hidden='true'></i>
                                             </a>
                                             <a id='fullScreenBtnSearch{{ id }}' class="btn btn-icon btn-neutral" style="margin: 0px; background-color: #FFFFFF;">
-                                                <i onclick="showFullScreen({{ id }}, 'Search')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
+                                                <i onclick="toggleFullScreen({{ id }}, 'Search')" class='fa fa-expand playerIcon fullScreenIcon' aria-hidden='true'></i>
                                             </a>
 
                                             <!-- Dummy image for onload event trigger -->
