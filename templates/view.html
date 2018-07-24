@@ -43,40 +43,35 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e)
-        {
-            var tab = $(e.target).attr("href");
-            console.log(tab);
-        });
-
-        $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e)
-        {
-            var tab = $(e.target).attr("href");
-            console.log(tab);
-        });
-
         /******************* Player Functions *******************/
 
         function playerOnLoad(key, tab) 
         {
-            console.log("On Load " + tab + " " + key + " " + playStatus[key]);
-            if (playStatus[key]) 
+            if (key in playStatus && playStatus[key][tab]) 
             {
                 $('#playBtn' + tab + key).hide();
                 $('#pauseBtn' + tab + key).show();
                 $('#fullScreenBtn' + tab + key).show();
+                playStatus[key][tab] = true;
             }
             else 
             {
                 $('#playBtn' + tab + key).show();
                 $('#pauseBtn' + tab + key).hide();
                 $('#fullScreenBtn' + tab + key).hide();
+
+                if (!(key in playStatus))
+                {
+                    playStatus[key] = {};
+                }
+                playStatus[key][tab] = false;
             }
+            console.log("On Load " + tab + " " + key + " " + playStatus[key][tab]);
         }
 
-        function playButton(key, tab) 
+        function playButton(key, tab, modStatus=true) 
         {
-            console.log("Play " + tab + " " + key + " " + playStatus[key]);
+            console.log("Play " + tab + " " + key + " " + playStatus[key][tab]);
             console.log('Stream: ' + $('#stream' + tab + key).text());
 
             // Update player controls
@@ -97,6 +92,10 @@
             div.setAttribute("class", "vxgplayer img rounded");
             var cardDiv = document.getElementById('card-image-div-' + tab + '-' + key);
             cardDiv.appendChild(div);
+
+            // Correct padding offsets
+            var _padding = $('#card-image-div-' + tab + '-' + key).parent().closest('div').find('.card-body').css('padding');
+            $('#card-image-div-' + tab + '-' + key).parent().closest('div').find('.card-body').css('margin-top', '-' + _padding);
 
             // Init VXG media player
             vxgplayer(playerId,
@@ -121,27 +120,24 @@
             });
 
             // Update play status
-            playStatus[key] = true;
+            if (modStatus) { playStatus[key][tab] = true; }
+            console.log("Play " + tab + " " + key + " " + playStatus[key][tab]);
         }
 
-        function pauseButton(key, tab) 
+        function pauseButton(key, tab, modStatus=true) 
         {
-            console.log("Pause " + tab + " " + key + " " + playStatus[key]);
+            console.log("Pause " + tab + " " + key + " " + playStatus[key][tab]);
 
             // Stop playing and delete player instance
             var player = vxgplayer('vxg' + tab + key);
-            try
-            {
-                player.stop();
-                player.dispose();
-            }
-            catch (err)
-            {
-                console.log(err);
-            }
+            player.stop();
+            player.dispose();
 
             // Delete VXG player div element
             $('#vxg' + tab + key).remove();
+
+            // Correct padding offsets
+            $('#card-image-div-' + tab + '-' + key).parent().closest('div').find('.card-body').css('margin-top', '0px');
 
             // Update player controls
             $('#playBtn' + tab + key).fadeIn(300);
@@ -150,7 +146,84 @@
             $('#defaultImage' + tab + key).fadeIn(500);
 
             // Update play status
-            playStatus[key] = false;
+            if (modStatus) { playStatus[key][tab] = false; }
+            console.log("Pause " + tab + " " + key + " " + playStatus[key][tab]);
+        }
+
+        $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e)
+        {
+            var tab = $(e.target).attr("href").substring(1);
+            var prevtab = $(e.relatedTarget).attr("href").substring(1);
+            console.log(prevtab + ' >>> ' + tab);
+
+            // Stop all players in the last tab, but dont change play status
+            for (var key in playStatus)
+            {
+                for (var _tab in playStatus[key])
+                {   
+                    if (prevtab == _tab && playStatus[key][prevtab])
+                    {
+                        pauseButton(key, prevtab, false);
+                    }
+                }
+            }
+        });
+
+        $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e)
+        {
+            var tab = $(e.target).attr("href").substring(1);
+            var prevtab = $(e.relatedTarget).attr("href").substring(1);
+            console.log(prevtab + ' >>> ' + tab);
+
+            // Start all previously stopped players in new tab
+            for (var key in playStatus)
+            {
+                for (var _tab in playStatus[key])
+                {
+                    if (tab == _tab && playStatus[key][tab])
+                    {
+                        playButton(key, tab, false);
+                    }
+                }
+            }
+        });
+
+        window.onresize = function() 
+        {
+            console.log("Window Resize Event");
+
+            // Resize all VXG players
+            for (var key in playStatus)
+            {
+                for (var tab in playStatus[key])
+                {
+                    if (playStatus[key][tab])
+                    {
+                        console.log('Resize: ' + 'vxg' + tab + key);
+                        try
+                        {
+                            // Create player object
+                            var player = vxgplayer('vxg' + tab + key);
+                            
+                            // Enable the default image temporarily just to get size
+                            $('#defaultImage' + tab + key).show();
+
+                            // Update player size
+                            var playerWidth = parseInt($('#defaultImage' + tab + key).width());
+                            var playerHeight = parseInt($('#defaultImage' + tab + key).height());
+                            player.size(playerWidth, playerHeight);
+                            console.log(player.size());
+
+                            // Disable the default image
+                            $('#defaultImage' + tab + key).hide();
+                        }
+                        catch (err)
+                        {
+                            console.log(err);
+                        }
+                    }
+                }
+            }
         }
 
         function toggleFullScreen(key, tab) 
@@ -162,7 +235,7 @@
             lastTab = tab;
         }
 
-        /* NOT STABLE
+        /* FEATURE NOT STABLE
         $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
         {
             console.log("Event Full Screen Change: " + lastTab + lastKey);
@@ -219,7 +292,6 @@
                 alerts[key] = alerts[key] + interval;
                 if (alerts[key] >= alertShowTime) 
                 {
-                    // Remove
                     if ($(".cardBody" + key) != undefined) 
                     {
                         $('.cardSubtitle' + key).hide();
@@ -359,12 +431,12 @@
                     <div class="nav-align-center">
                         <ul class="nav nav-pills nav-pills-primary justify-content-center" role="tablist">
                             <li class="nav-item" style="padding-top: 1vh">
-                                <a class="nav-link" data-toggle="tab" href="#favorite" role="tablist">
+                                <a class="nav-link" data-toggle="tab" href="#Fav" role="tablist">
                                     Favourites
                                 </a>
                             </li>
                             <li class="nav-item" style="padding-top: 1vh">
-                                <a class="nav-link active" data-toggle="tab" href="#all" role="tablist">
+                                <a class="nav-link active" data-toggle="tab" href="#All" role="tablist">
                                     All
                                 </a>
                             </li>
@@ -379,7 +451,7 @@
                     </div>
 
                     <div class="tab-content gallery">
-                        <div class="tab-pane" id="favorite" role="tabpanel">
+                        <div class="tab-pane" id="Fav" role="tabpanel">
                             <div class="row">
                                 {% for id, name, rtsp_url, priority, floor, start_time, end_time, sound_alarm,
                                     favourite, email_string, sms_string, call_string, objects_list in data %}
@@ -421,7 +493,7 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        <div class="tab-pane active" id="all" role="tabpanel">
+                        <div class="tab-pane active" id="All" role="tabpanel">
                             <div class="row">
                                 {% for id, name, rtsp_url, priority, floor, start_time, end_time, sound_alarm,
                                     favourite, email_string, sms_string, call_string, objects_list in data %}

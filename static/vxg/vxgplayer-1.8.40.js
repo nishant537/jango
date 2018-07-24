@@ -81,8 +81,8 @@ window.vxgplayer = function(id, options_){
 			/* init options */
 			window.vxgplayer.initOptions(self, opts);
 
-			self.playerWidth=self.options.width || 640;
-			self.playerHeight=self.options.height || 480;
+			self.playerWidth=self.options.width || 255;
+			self.playerHeight=self.options.height || 143;
 			self.playerWidth = parseInt(self.player.getAttribute('width'),10) || self.playerWidth;
 			self.playerHeight = parseInt(self.player.getAttribute('height'),10) || self.playerHeight;
 			self.player.style.width = self.playerWidth + 'px';
@@ -1113,8 +1113,8 @@ window.vxgplayer.browserSupportsPluginPnacl = function() {
 
 window.vxgplayer.showGlobalErrorMessage = function(id, html){
 	var player = document.getElementById(id);
-	var width=640;
-	var height=480;
+	var width=255;
+	var height=143;
 	width = parseInt(player.width,10) || width;
 	height = parseInt(player.height,10) || height;
 	player.style.width = width + 'px';
