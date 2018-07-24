@@ -282,7 +282,7 @@ def list_page():
 
 #### Data Handling from GUI
 
-@app.route('/getAlerts', methods=['GET'])
+@app.route('/getAlerts', methods=['GET', 'POST'])
 @server_connection
 def get_alerts():
     '''Get Alerts from backend, also no need for license check here'''
