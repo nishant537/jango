@@ -1,12 +1,13 @@
 import os
 import re
 import json
+import logging
 import requests
 import ConfigParser
 from functools import wraps
 from operator import itemgetter
 
-from flask import Flask, render_template, request, redirect, url_for, Response, send_file
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort
 
 # Initiate Flask
 app = Flask(__name__)
@@ -25,6 +26,9 @@ BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 
 # Setup license folder
 UPLOAD_FOLDER = config.get('global', 'UPLOAD_FOLDER')
+
+# TODO: Setup logger
+# logger = logging.FileHandler(filename='error.log')
 
 #### Functions
 
@@ -52,11 +56,21 @@ def license_required(func):
                     license_status=license_status, image='Landing.jpeg')
 
             # Return the decorated function
-            else: return func(*args, **kwargs)
+            else:
+                return func(*args, **kwargs)                    
 
-        except Exception as e:
+        # Handle backend server exceptions
+        except requests.exceptions.RequestException as e:
+            # logger.error(e)
             return render_template('home.html', image="Landing.jpeg", 
                 alert_message='Failed to establish connection with server')
+
+        # Catch WSGI internal server errors
+        # TODO: Letting it pass currently so that default logging works
+        #       Custom error logging is failing
+        # except Exception as e:
+        #     logger.error(e)
+        #     abort(500)
 
     return valid_license
     
@@ -236,14 +250,8 @@ def list_page():
     # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
 
-    return render_template('list.html', image=img, search_mode=False,
+    return render_template('list.html', image=ims, search_mode=False,
         objects=objects_allowed, data=data_list)
-
-@app.errorhandler(404)
-def page_not_found(e):
-    '''Handle 404 page not found'''
-    return render_template('home.html', image="Landing.jpeg", license_status=True,
-        alert_message='The page you were looking for was not found on this server')
 
 #### Data Handling from GUI
 
@@ -253,6 +261,7 @@ def get_alerts():
     try:
         alert_dict = requests.get(BACKEND_URL + 'alertInfo', timeout=5).json()
     except Exception as e:
+        # logger.error(e)
         return render_template('home.html', image="Landing.jpeg", 
             alert_message='Failed to establish connection with server')
 
@@ -394,6 +403,24 @@ def edit_camera(camera_id):
             data=form_to_json(request.form))
     
     return redirect(url_for('list_page'))
+
+#### Error handlers
+
+# TODO: Fix error logger first to handle errors
+# @app.errorhandler(404)
+# def page_not_found(e):
+#     '''Handle 404 page not found'''
+#     # logger.error(e)
+#     return render_template('home.html', image="Landing.jpeg", license_status=True,
+#         alert_message='The page you were looking for was not found on this server'), 404
+
+# TODO: Fix error logger first to handle errors
+# @app.errorhandler(500)
+# def internal_server_error(e):
+#     '''Handle 500 internal server error'''
+#     # logger.error(e)
+#     return render_template('home.html', image="Landing.jpeg",
+#         alert_message='Internal server error occured, please contact Customer Support'), 500
 
 if __name__ == "__main__":
     # Run flask app
