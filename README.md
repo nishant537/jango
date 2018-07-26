@@ -15,8 +15,7 @@ bash setup.sh
 ```
 
 ## Usage
-Please run `python app.py` from `/opt/godeep/gui` and open `localhost:5010/` on any browser.
+Open `http://godeep/` on any browser.
 
 ## Notes
-1. Use the `flask-gui` branch of `POC` for compatibility.
-2. Use the `flask-gui` branch of `AutoSetup` for compatibility.
+None
