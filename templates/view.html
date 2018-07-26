@@ -25,11 +25,16 @@
         var interval = 1000; // Polling interval
         var alertShowTime = 10000; // Alert show interval
         var audio = new Audio('/getAlarmAudio');
+        var getAlertsAJAX = null;
+        var alertsIntervalHandler = null;
+
+        // Fullscreen
         var lastKey = null;
         var lastTab = null;
 
         // HTTP Player
         var playStatus = {};
+        var playerIconOnClick = false;
 
         /******************* General Functions *******************/
 
@@ -38,6 +43,57 @@
             // startTimer moved to end of script tag here since onLoad takes time
             // startTimer();
         }
+
+        window.onbeforeunload = function (e) 
+        {
+            console.log("Before Unload Event");
+
+            // onbeforeunload gets trigged on play button, ignore that case
+            if (playerIconOnClick)
+            {
+                console.log("Ignore Event:", playerIconOnClick);
+            }
+            else
+            {
+                // Stop alerts polling
+                stopTimer();
+                getAlertsAJAX.abort();
+
+                // Remove all VXG players
+                for (var key in playStatus)
+                {
+                    for (var tab in playStatus[key])
+                    {   
+                        if (playStatus[key][tab])
+                        {
+                            pauseButton(key, tab, true);
+                        }
+                    }
+                }
+            }
+        };
+
+        function resetPlayerIconOnClick()
+        {
+            playerIconOnClick = false;
+            console.log("Reset playerIconOnClick:", playerIconOnClick);
+        }
+
+        $(function () 
+        {
+            $(window).click(function (e) 
+            {
+                playerIconOnClick = false;
+                if ($(e.target).hasClass('playerIcon'))
+                {
+                    console.log(".playerIcon clicked");
+                    playerIconOnClick = true;
+                    // Wait for onbeforeunload to complete then reset playerIconOnClick
+                    setTimeout(resetPlayerIconOnClick, 500);
+                }
+                console.log("playerIconOnClick:", playerIconOnClick);
+            });
+        });
 
         function sleep(ms) 
         {
@@ -67,13 +123,12 @@
                 }
                 playStatus[key][tab] = false;
             }
-            console.log("On Load " + tab + " " + key + " " + playStatus[key][tab]);
+            console.log("playerOnLoad:", tab, key, playStatus[key][tab]);
         }
 
         function playButton(key, tab, modStatus=true) 
         {
-            console.log("Play " + tab + " " + key + " " + playStatus[key][tab]);
-            console.log('Stream: ' + $('#stream' + tab + key).text());
+            console.log('Stream:', $('#stream' + tab + key).text());
 
             // Update player controls
             $('#playBtn' + tab + key).hide();
@@ -122,13 +177,11 @@
 
             // Update play status
             if (modStatus) { playStatus[key][tab] = true; }
-            console.log("Play " + tab + " " + key + " " + playStatus[key][tab]);
+            console.log("Play >>> playStatus:", tab, key, playStatus[key][tab]);
         }
 
         function pauseButton(key, tab, modStatus=true) 
         {
-            console.log("Pause " + tab + " " + key + " " + playStatus[key][tab]);
-
             // Stop playing and delete player instance
             var player = vxgplayer('vxg' + tab + key);
             player.stop();
@@ -148,7 +201,7 @@
 
             // Update play status
             if (modStatus) { playStatus[key][tab] = false; }
-            console.log("Pause " + tab + " " + key + " " + playStatus[key][tab]);
+            console.log("Pause >>> playStatus:", tab, key, playStatus[key][tab]);
         }
 
         $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e)
@@ -156,7 +209,7 @@
             /* Function called before tab changed */
             var tab = $(e.target).attr("href").substring(1);
             var prevtab = $(e.relatedTarget).attr("href").substring(1);
-            console.log(prevtab + ' >>> ' + tab);
+            console.log(prevtab, '>>>', tab);
 
             // Stop all players in the last tab, also change play status
             for (var key in playStatus)
@@ -176,7 +229,7 @@
             /* Function called after tab changed */
             var tab = $(e.target).attr("href").substring(1);
             var prevtab = $(e.relatedTarget).attr("href").substring(1);
-            console.log(prevtab + ' >>> ' + tab);
+            console.log(prevtab, '>>>', tab);
 
             /* Removing this feature now
             // Start all previously stopped players in new tab
@@ -203,7 +256,7 @@
                 {
                     if (playStatus[key][tab])
                     {
-                        console.log('Resize: ' + 'vxg' + tab + key);
+                        console.log('Resize Player:', tab, key);
                         try
                         {
                             // Create player object
@@ -232,7 +285,7 @@
 
         function toggleFullScreen(key, tab) 
         {
-            console.log("Full Screen Toggle");
+            console.log("toggleFullScreen:", key, tab);
             var player = vxgplayer('vxg' + tab + key);
             player.fullscreen();
             lastKey = key;
@@ -292,7 +345,14 @@
 
         function startTimer() 
         {
-            setInterval(alertFunc, interval);
+            console.log("Start Alerts Poll");
+            alertsIntervalHandler = setInterval(alertFunc, interval);
+        }
+
+        function stopTimer()
+        {
+            console.log("Stop Alerts Poll");
+            clearInterval(alertsIntervalHandler);
         }
 
         function alertFunc() 
@@ -321,14 +381,14 @@
                 }
             }
 
-            $.ajax(
+            getAlertsAJAX = $.ajax(
             {
                 url: '/getAlerts',
                 type: 'POST',
                 dataType: "json",
                 success: function (response) 
                 {
-                    console.log(response);
+                    console.log('Alerts:', response);
                     $.each(response, function (key, val) 
                     {
                         if ($(".cardBody" + key) != undefined) 
@@ -365,7 +425,7 @@
     <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
         <div class="container">
             <div class="navbar-translate">
-                <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom" target="_blank">
+                <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">
                     <img class="dsal_logo" src="/static/img/dsal.png">
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"
