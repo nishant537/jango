@@ -239,6 +239,12 @@ def list_page():
     return render_template('list.html', image=img, search_mode=False,
         objects=objects_allowed, data=data_list)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    '''Handle 404 page not found'''
+    return render_template('home.html', image="Landing.jpeg", license_status=True,
+        alert_message='The page you were looking for was not found on this server')
+
 #### Data Handling from GUI
 
 @app.route('/getAlerts', methods=['GET', 'POST'])
