@@ -152,18 +152,19 @@
 
         $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e)
         {
+            /* Function called before tab changed */
             var tab = $(e.target).attr("href").substring(1);
             var prevtab = $(e.relatedTarget).attr("href").substring(1);
             console.log(prevtab + ' >>> ' + tab);
 
-            // Stop all players in the last tab, but dont change play status
+            // Stop all players in the last tab, also change play status
             for (var key in playStatus)
             {
                 for (var _tab in playStatus[key])
                 {   
                     if (prevtab == _tab && playStatus[key][prevtab])
                     {
-                        pauseButton(key, prevtab, false);
+                        pauseButton(key, prevtab, true);
                     }
                 }
             }
@@ -171,10 +172,12 @@
 
         $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e)
         {
+            /* Function called after tab changed */
             var tab = $(e.target).attr("href").substring(1);
             var prevtab = $(e.relatedTarget).attr("href").substring(1);
             console.log(prevtab + ' >>> ' + tab);
 
+            /* Removing this feature now
             // Start all previously stopped players in new tab
             for (var key in playStatus)
             {
@@ -185,7 +188,7 @@
                         playButton(key, tab, false);
                     }
                 }
-            }
+            }*/
         });
 
         window.onresize = function() 
