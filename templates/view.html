@@ -35,7 +35,8 @@
 
         function onLoad() 
         {
-            startTimer();
+            // startTimer moved to end of script tag here since onLoad takes time
+            // startTimer();
         }
 
         function sleep(ms) 
@@ -222,7 +223,7 @@
                         }
                         catch (err)
                         {
-                            console.log(err);
+                            // console.log(err);
                         }
                     }
                 }
@@ -239,6 +240,14 @@
         }
 
         /* FEATURE NOT STABLE
+         *
+         * This feature enables the native VXG player controls in fullscreen mode and
+         * VXG features like digital zoom and snapshot and then disables these features
+         * when full screen is exited. 
+         * 
+         * TODO: The playStatus must be updated when native VXG player controls are used
+         * TODO: VXG controls not getting disabled on fullscreen exit
+         *
         $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
         {
             console.log("Event Full Screen Change: " + lastTab + lastKey);
