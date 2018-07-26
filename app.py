@@ -246,7 +246,7 @@ def get_alerts():
     '''Get Alerts from backend, also no need for license check here'''
     try:
         alert_dict = requests.get(BACKEND_URL + 'alertInfo', timeout=5).json()
-    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+    except Exception as e:
         return render_template('home.html', image="Landing.jpeg", 
             alert_message='Failed to establish connection with server')
 
