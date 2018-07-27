@@ -27,8 +27,12 @@ BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 # Setup license folder
 UPLOAD_FOLDER = config.get('global', 'UPLOAD_FOLDER')
 
-# TODO: Setup logger
-# logger = logging.FileHandler(filename='error.log')
+# Setup logger
+logger = logging.getLogger()
+logger.setLevel(logging.NOTSET)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('[%(filename)s:%(lineno)s %(funcName)s %(module)s] %(message)s'))
+logger.addHandler(handler)
 
 #### Functions
 
@@ -61,16 +65,9 @@ def license_required(func):
 
         # Handle backend server exceptions
         except requests.exceptions.RequestException as e:
-            # logger.error(e)
+            logger.error(e)
             return render_template('home.html', image="Landing.jpeg", 
                 alert_message='Failed to establish connection with server')
-
-        # Catch WSGI internal server errors
-        # TODO: Letting it pass currently so that default logging works
-        #       Custom error logging is failing
-        # except Exception as e:
-        #     logger.error(e)
-        #     abort(500)
 
     return valid_license
     
@@ -250,7 +247,7 @@ def list_page():
     # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
 
-    return render_template('list.html', image=ims, search_mode=False,
+    return render_template('list.html', image=img, search_mode=False,
         objects=objects_allowed, data=data_list)
 
 #### Data Handling from GUI
@@ -261,7 +258,7 @@ def get_alerts():
     try:
         alert_dict = requests.get(BACKEND_URL + 'alertInfo', timeout=5).json()
     except Exception as e:
-        # logger.error(e)
+        logger.error(e)
         return render_template('home.html', image="Landing.jpeg", 
             alert_message='Failed to establish connection with server')
 
@@ -372,7 +369,7 @@ def background_image(background_image, page_redirect, camera_id=None):
     else:
         return redirect(url_for('edit_camera_page', camera_id=camera_id))
     
-@app.route('/licenseUpload', methods=['POST'])
+@app.route('/licenseUpload', methods=['GET', 'POST'])
 def license():
     '''Handle license upload'''
     if request.method == 'POST':
@@ -382,7 +379,7 @@ def license():
         requests.post(url=BACKEND_URL + 'licenseUpdate')
     return redirect(url_for('home_page'))
 
-@app.route('/addCamera', methods=['POST'])
+@app.route('/addCamera', methods=['GET', 'POST'])
 @license_required
 def add_camera():
     '''Add Camera'''
@@ -390,10 +387,11 @@ def add_camera():
         # Making a POST to the Backend - New Camera
         requests.post(url=BACKEND_URL + 'createCamera', 
             data=form_to_json(request.form))
+        return redirect(url_for('list_page'))
+    else:
+        return redirect(url_for('add_camera_page'))
 
-    return redirect(url_for('list_page'))
-
-@app.route('/editCamera/<camera_id>', methods=['POST'])
+@app.route('/editCamera/<camera_id>', methods=['GET', 'POST'])
 @license_required
 def edit_camera(camera_id):
     '''Edit Camera'''
@@ -401,26 +399,33 @@ def edit_camera(camera_id):
         # Making a POST to the Backend - Edit Camera
         requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, 
             data=form_to_json(request.form))
-    
     return redirect(url_for('list_page'))
 
 #### Error handlers
 
-# TODO: Fix error logger first to handle errors
-# @app.errorhandler(404)
-# def page_not_found(e):
-#     '''Handle 404 page not found'''
-#     # logger.error(e)
-#     return render_template('home.html', image="Landing.jpeg", license_status=True,
-#         alert_message='The page you were looking for was not found on this server'), 404
+@app.errorhandler(404)
+def page_not_found(e):
+    '''Handle 404 page not found'''
+    logger.error('[Client %s] [404 Page Not Found] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, request.path))
+    return render_template('home.html', image="Landing.jpeg", license_status=True,
+        alert_message='The page you were looking for was not found on this server'), 404
 
-# TODO: Fix error logger first to handle errors
-# @app.errorhandler(500)
-# def internal_server_error(e):
-#     '''Handle 500 internal server error'''
-#     # logger.error(e)
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Internal server error occured, please contact Customer Support'), 500
+@app.errorhandler(500)
+def internal_server_error(e):
+    '''Handle 500 internal server error'''
+    logger.error('[Client %s] [500 Internal Server Error] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Internal server error occured, please contact Customer Support'), 500
+
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    '''Unhandled exception'''
+    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Unhandled exception occured, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app
