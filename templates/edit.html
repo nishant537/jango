@@ -91,8 +91,9 @@
                         <div class="col-md-8 ml-auto mr-auto">
                             <div class="card card-signup">
                                 <div class="card-body">
-                                    {% for name, rtsp_url, priority, floor, start_time, end_time, sound_alarm,
-                                        favourite, email_string, sms_string, call_string, objects_list in data %}
+                                    {% for id, name, rtsp_url, priority, floor, start_time, end_time, favourite, objects_list, obj_alerts_list in data %}
+                                    {% for id, name, rtsp_url, priority, floor, start_time, end_time, favourite, objects_list, obj_alerts_list in data %}
+                                    [camera_name, rtsp_url, priority, floor, start_time, end_time, favourite, objects, obj_alerts_list]
                                     <h3 class="card-title text-center">Edit
                                         <strong>{{ name }}</strong>
                                     </h3>
@@ -183,6 +184,28 @@
                                                     </label>
                                                 </div>
                                             </div>
+                                             <div class="row">
+                                                <div class="col-md-12 form-group">
+                                                    <input value="{{ intrusion_email_string }}" id="intrusion_email_list" name="email_list" type="text" class="form-control" placeholder="Intrusion Email ID List"
+                                                        pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <input value="{{ intrusion_sms_string }}" id="intrusion_sms_list" name="sms_list" type="text" class="form-control" placeholder="Intrusion SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <input value="{{ intrusion_call_string }}" id="intrusion_call_list" name="call_list" type="text" class="form-control" placeholder="Intrusion Call List"
+                                                        pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                </div>
+                                                 <div class="form-check">
+                                                    <label class="form-check-label">
+                                                        <input id="intrusion_sound_alarm" name="intrusion_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if sound_alarm == 1 }}>
+                                                        <span class="form-check-sign"></span>
+                                                        Sound Alarm
+                                                    </label>
+                                                </div>
+                                            </div>
+
+
                                         </div>
 
                                         <div class="text-center">

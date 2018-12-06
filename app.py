@@ -90,6 +90,7 @@ def get_camera_info(camera_id=None):
     if camera_id is None:
         return requests.get(BACKEND_URL + 'getAllCameraInfo').json()
     else:
+        print {camera_id: requests.get(BACKEND_URL + 'getCameraInfo/' + camera_id).json()}
         return {camera_id: requests.get(BACKEND_URL + 'getCameraInfo/' + camera_id).json()}
 
 def natural_sort(list, key):
@@ -116,13 +117,19 @@ def zip_data(data, objects_allowed, is_list_page=False):
     # Optional parameters
     start_time = str(data['intrusion_start_time'])
     end_time = str(data['intrusion_end_time'])
-    sound_alarm = data['sound_alarm']
+    # sound_alarm = data['sound_alarm']
     favourite = data['favourite']
 
     # Notifications
-    email_string = list_to_string(data['email_list'], is_list_page)
-    sms_string = list_to_string(data['sms_list'], is_list_page)
-    call_string = list_to_string(data['call_list'], is_list_page)
+    # try:
+    #     email_string = list_to_string(data['email_list'], is_list_page)
+    #     sms_string = list_to_string(data['sms_list'], is_list_page)
+    #     call_string = list_to_string(data['call_list'], is_list_page)
+    # except:
+    #     email_string = ""
+    #     sms_string = ""
+    #     call_string = ""
+
     
     # Object detection
     objects = []
@@ -135,8 +142,30 @@ def zip_data(data, objects_allowed, is_list_page=False):
         else:
             objects.append((object_allowed, 0))
 
+    obj_alerts = data['obj_alerts']
+    obj_alerts_list = []
+    for object_allowed in objects_allowed:
+        if object_allowed in object_detect:
+            try:
+                alert_dictionary = obj_alerts[object_allowed]
+
+                details = []    # details mean the collection of email, sms, call lists
+                for alert in alert_dictionary:
+                    if alert == "sound_alarm":
+                        details.append((str(alert), alert_dictionary[alert]))
+                    else:
+                        list_for_this_alert = list_to_string(alert_dictionary[alert], is_list_page)
+                        details.append((str(alert), list_for_this_alert))
+                obj_alerts_list.append((object_allowed, details))
+            except KeyError, e:
+                print 'I got a KeyError - reason "%s"' % str(e)
+
+    print obj_alerts_list
+    # return [camera_name, rtsp_url, priority, floor, start_time, end_time,
+    #         sound_alarm, favourite, email_string, sms_string, call_string, objects, obj_alerts_list]
+
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
-        sound_alarm, favourite, email_string, sms_string, call_string, objects]
+            favourite, objects, obj_alerts_list]
 
 def form_to_json(form):
     '''Convert the requests.form data to JSON'''
@@ -152,19 +181,33 @@ def form_to_json(form):
     # Optional parameters
     camera_dict['intrusion_start_time'] = form['intrusion_start_time']
     camera_dict['intrusion_end_time'] = form['intrusion_end_time']
-    camera_dict['sound_alarm'] = 1 if form.getlist('sound_alarm') else 0
-    camera_dict['favourite'] = 1 if form.getlist('favourite') else 0
+    # camera_dict['sound_alarm'] = 1 if form.getlist('sound_alarm') else 0
+    # camera_dict['favourite'] = 1 if form.getlist('favourite') else 0
 
     # Notifications
-    camera_dict['email_list'] = [i.strip() for i in form['email_list'].split(',')]
-    camera_dict['sms_list'] = [i.strip() for i in form['sms_list'].split(',')]
-    camera_dict['call_list'] = [i.strip() for i in form['call_list'].split(',')]
+    # camera_dict['email_list'] = [i.strip() for i in form['email_list'].split(',')]
+    # camera_dict['sms_list'] = [i.strip() for i in form['sms_list'].split(',')]
+    # camera_dict['call_list'] = [i.strip() for i in form['call_list'].split(',')]
     
     # Object detection
     camera_dict['object_detect'] = {}
     objects_selected = form.getlist('object_detect')
     for object_allowed in objects_allowed:
         camera_dict['object_detect'][object_allowed] = 1 if (object_allowed in objects_selected) else 0
+
+    camera_dict['obj_alerts'] = {}
+    for object_allowed in objects_allowed:
+        object_dict = {}
+        index_email = '%s_email_list' % str(object_allowed)
+        index_sms = '%s_sms_list' % str(object_allowed)
+        index_call = '%s_call_list' % str(object_allowed)
+        index_alarm = '%s_sound_alarm' % str(object_allowed)
+        object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
+        object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
+        object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
+        object_dict['sound_alarm'] = 1 if form.getlist(index_alarm) else 0
+        camera_dict['obj_alerts'][object_allowed] = object_dict
+
 
     return json.dumps(camera_dict)
 
@@ -212,7 +255,11 @@ def view_page():
     unique_floors = []
     for cam_id in camera_payload:
         unique_floors.append(str(camera_payload[str(cam_id)]['floor']))
-        sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+        try:
+            sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+        except KeyError as e:
+            print 'I got a KeyError in view_page - reason "%s"' % str(e)
+            sound_dict[str(cam_id)] = 0
         zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
         zipped_data.insert(0, str(cam_id))
         data_list.append(zipped_data)
@@ -316,7 +363,11 @@ def search_view_page():
         data_list = []
         for cam_id in camera_payload:
             if searched_name.lower() in str(camera_payload[str(cam_id)]['camera_name']).lower():
-                sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+                try:
+                    sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+                except KeyError as e:
+                    print 'I got a KeyError in search_view_page - reason "%s"' % str(e)
+                    sound_dict[str(cam_id)] = 0
                 zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
                 zipped_data.insert(0, str(cam_id))
                 data_list.append(zipped_data)
@@ -419,13 +470,13 @@ def internal_server_error(e):
     return render_template('home.html', image="Landing.jpeg",
         alert_message='Internal server error occured, please contact Customer Support'), 500
 
-@app.errorhandler(Exception)
-def unhandled_exception(e):
-    '''Unhandled exception'''
-    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-        (request.remote_addr, e.__class__.__name__, e))
-    return render_template('home.html', image="Landing.jpeg",
-        alert_message='Unhandled exception occured, please contact Customer Support'), 520
+# @app.errorhandler(Exception)
+# def unhandled_exception(e):
+#     '''Unhandled exception'''
+#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+#         (request.remote_addr, e.__class__.__name__, e))
+#     return render_template('home.html', image="Landing.jpeg",
+#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app

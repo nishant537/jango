@@ -173,7 +173,24 @@
                                                 </div>
                                             </div>
                                         </div>
-
+                                        {% for object in objects %}
+                                            <div>
+                                                <input id = "{{object}}_email_list" name="{{object}}_email_list" type="text" class="form-control" placeholder="{{ object }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                            </div>
+                                            <div>
+                                                <input id = "{{object}}_sms_list" name="{{object}}_sms_list" type="text" class="form-control" placeholder="{{ object }} SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                            </div>
+                                            <div>
+                                                <input id = "{{object}}_call_list" name="{{object}}_call_list" type="text" class="form-control" placeholder="{{ object }} Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                            </div>
+                                            <div class="form-check">
+                                                <label class="form-check-label">
+                                                    <input id="{{object}}_sound_alarm" name="{{object}}_sound_alarm" class="form-check-input" type="checkbox">
+                                                    <span class="form-check-sign"></span>
+                                                    Sound Alarm
+                                                </label>
+                                            </div>
+                                        {% endfor %}
                                         <div class="text-center">
                                             <a href="/list" class="btn btn-round btn-default">Cancel</a>
                                             <button type="submit" class="btn btn-round btn-success">Done</button>

@@ -139,8 +139,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for id, name, rtsp_url, priority, floor, start_time, end_time, sound_alarm,
-                                    favourite, email_string, sms_string, call_string, objects_list in data %}
+                                {% for id, name, rtsp_url, priority, floor, start_time, end_time, favourite, objects_list, obj_alerts_list in data %}
                                 <tr>
                                     <td class="text-center">
                                         {{ name }}
