@@ -91,9 +91,7 @@
                         <div class="col-md-8 ml-auto mr-auto">
                             <div class="card card-signup">
                                 <div class="card-body">
-                                    {% for id, name, rtsp_url, priority, floor, start_time, end_time, favourite, objects_list, obj_alerts_list in data %}
-                                    {% for id, name, rtsp_url, priority, floor, start_time, end_time, favourite, objects_list, obj_alerts_list in data %}
-                                    [camera_name, rtsp_url, priority, floor, start_time, end_time, favourite, objects, obj_alerts_list]
+                                    {% for name, rtsp_url, priority, floor, start_time, end_time, favourite, objects_list, obj_alerts_list in data %}
                                     <h3 class="card-title text-center">Edit
                                         <strong>{{ name }}</strong>
                                     </h3>
@@ -117,19 +115,19 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row">
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ email_string }}" id="email_list" name="email_list" type="text" class="form-control" placeholder="Email ID List"
-                                                        pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
-                                                </div>
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ sms_string }}" id="sms_list" name="sms_list" type="text" class="form-control" placeholder="SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                                </div>
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ call_string }}" id="call_list" name="call_list" type="text" class="form-control" placeholder="Call List"
-                                                        pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                                </div>
-                                            </div>
+                                            <!--<div class="row">-->
+                                                <!--<div class="col-md-12 form-group">-->
+                                                    <!--<input value="{{ email_string }}" id="email_list" name="email_list" type="text" class="form-control" placeholder="Email ID List"-->
+                                                        <!--pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">-->
+                                                <!--</div>-->
+                                                <!--<div class="col-md-12 form-group">-->
+                                                    <!--<input value="{{ sms_string }}" id="sms_list" name="sms_list" type="text" class="form-control" placeholder="SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">-->
+                                                <!--</div>-->
+                                                <!--<div class="col-md-12 form-group">-->
+                                                    <!--<input value="{{ call_string }}" id="call_list" name="call_list" type="text" class="form-control" placeholder="Call List"-->
+                                                        <!--pattern="^[0-9]{10}(,[0-9]{10})*$">-->
+                                                <!--</div>-->
+                                            <!--</div>-->
 
                                             <div class="row">
                                                 <div class="col-md-6 form-group">
@@ -165,15 +163,15 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row">
-                                                <div class="form-check">
-                                                    <label class="form-check-label">
-                                                        <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if sound_alarm == 1 }}>
-                                                        <span class="form-check-sign"></span>
-                                                        Sound Alarm
-                                                    </label>
-                                                </div>
-                                            </div>
+                                            <!--<div class="row">-->
+                                                <!--<div class="form-check">-->
+                                                    <!--<label class="form-check-label">-->
+                                                        <!--<input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if sound_alarm == 1 }}>-->
+                                                        <!--<span class="form-check-sign"></span>-->
+                                                        <!--Sound Alarm-->
+                                                    <!--</label>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
 
                                             <div class="row">
                                                 <div class="form-check">
@@ -184,26 +182,49 @@
                                                     </label>
                                                 </div>
                                             </div>
-                                             <div class="row">
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ intrusion_email_string }}" id="intrusion_email_list" name="email_list" type="text" class="form-control" placeholder="Intrusion Email ID List"
-                                                        pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+
+                                            {% for object, details in obj_alerts_list %}
+                                                <div class="row">
+                                                    {% for alert, list in details %}
+                                                        {% if alert == "sound_alarm" %}
+                                                            <div class="form-check">
+                                                                <label class="form-check-label">
+                                                                    <input id="{{ object }}_sound_alarm" name="{{ object }}sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
+                                                                    <span class="form-check-sign"></span>
+                                                                    {{ object }} Sound Alarm
+                                                                </label>
+                                                            </div>
+                                                        {% elif alert == "email_list" %}
+                                                            <div class="col-md-12 form-group">
+                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object }}_{{ alert }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="col-md-12 form-group">
+                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object }} {{ alert }}" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endfor %}
                                                 </div>
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ intrusion_sms_string }}" id="intrusion_sms_list" name="sms_list" type="text" class="form-control" placeholder="Intrusion SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                                </div>
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ intrusion_call_string }}" id="intrusion_call_list" name="call_list" type="text" class="form-control" placeholder="Intrusion Call List"
-                                                        pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                                </div>
-                                                 <div class="form-check">
-                                                    <label class="form-check-label">
-                                                        <input id="intrusion_sound_alarm" name="intrusion_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if sound_alarm == 1 }}>
-                                                        <span class="form-check-sign"></span>
-                                                        Sound Alarm
-                                                    </label>
-                                                </div>
-                                            </div>
+                                            {% endfor %}
+                                             <!--<div class="row">-->
+                                                <!--<div class="col-md-12 form-group">-->
+                                                    <!--<input value="{{ intrusion_email_string }}" id="intrusion_email_list" name="email_list" type="text" class="form-control" placeholder="Intrusion Email ID List"--><!--pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">-->
+                                                <!--</div>-->
+                                                <!--<div class="col-md-12 form-group">-->
+                                                    <!--<input value="{{ intrusion_sms_string }}" id="intrusion_sms_list" name="sms_list" type="text" class="form-control" placeholder="Intrusion SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">-->
+                                                <!--</div>-->
+                                                <!--<div class="col-md-12 form-group">-->
+                                                    <!--<input value="{{ intrusion_call_string }}" id="intrusion_call_list" name="call_list" type="text" class="form-control" placeholder="Intrusion Call List"-->
+                                                        <!--pattern="^[0-9]{10}(,[0-9]{10})*$">-->
+                                                <!--</div>-->
+                                                 <!--<div class="form-check">-->
+                                                    <!--<label class="form-check-label">-->
+                                                        <!--<input id="intrusion_sound_alarm" name="intrusion_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if sound_alarm == 1 }}>-->
+                                                        <!--<span class="form-check-sign"></span>-->
+                                                        <!--Sound Alarm-->
+                                                    <!--</label>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
 
 
                                         </div>

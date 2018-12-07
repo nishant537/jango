@@ -6,7 +6,7 @@ import requests
 import ConfigParser
 from functools import wraps
 from operator import itemgetter
-
+import collections  # for ordered dict
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort
 
 # Initiate Flask
@@ -152,15 +152,16 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 details = []    # details mean the collection of email, sms, call lists
                 for alert in alert_dictionary:
                     if alert == "sound_alarm":
-                        details.append((str(alert), alert_dictionary[alert]))
+                        # details.append((str(alert), alert_dictionary[alert]))
+                        details.append((alert, alert_dictionary[alert]))
                     else:
                         list_for_this_alert = list_to_string(alert_dictionary[alert], is_list_page)
-                        details.append((str(alert), list_for_this_alert))
+                        details.append((alert, list_for_this_alert))
+                        # details.append((str(alert), list_for_this_alert))
                 obj_alerts_list.append((object_allowed, details))
             except KeyError, e:
                 print 'I got a KeyError - reason "%s"' % str(e)
 
-    print obj_alerts_list
     # return [camera_name, rtsp_url, priority, floor, start_time, end_time,
     #         sound_alarm, favourite, email_string, sms_string, call_string, objects, obj_alerts_list]
 
@@ -182,7 +183,7 @@ def form_to_json(form):
     camera_dict['intrusion_start_time'] = form['intrusion_start_time']
     camera_dict['intrusion_end_time'] = form['intrusion_end_time']
     # camera_dict['sound_alarm'] = 1 if form.getlist('sound_alarm') else 0
-    # camera_dict['favourite'] = 1 if form.getlist('favourite') else 0
+    camera_dict['favourite'] = 1 if form.getlist('favourite') else 0
 
     # Notifications
     # camera_dict['email_list'] = [i.strip() for i in form['email_list'].split(',')]
@@ -197,7 +198,8 @@ def form_to_json(form):
 
     camera_dict['obj_alerts'] = {}
     for object_allowed in objects_allowed:
-        object_dict = {}
+        object_dict = collections.OrderedDict()
+        # object_dict = {}
         index_email = '%s_email_list' % str(object_allowed)
         index_sms = '%s_sms_list' % str(object_allowed)
         index_call = '%s_call_list' % str(object_allowed)
@@ -239,6 +241,7 @@ def edit_camera_page(camera_id):
 
     # Match camera_id from camera_payload and load it's details
     data = [zip_data(camera_payload[str(camera_id)], objects_allowed)]
+    # print data
     return render_template('edit.html', image=img, data=data, camera_id=camera_id)
 
 @app.route('/view')
