@@ -120,17 +120,6 @@ def zip_data(data, objects_allowed, is_list_page=False):
     # sound_alarm = data['sound_alarm']
     favourite = data['favourite']
 
-    # Notifications
-    # try:
-    #     email_string = list_to_string(data['email_list'], is_list_page)
-    #     sms_string = list_to_string(data['sms_list'], is_list_page)
-    #     call_string = list_to_string(data['call_list'], is_list_page)
-    # except:
-    #     email_string = ""
-    #     sms_string = ""
-    #     call_string = ""
-
-    
     # Object detection
     objects = []
     object_detect = data['object_detect']
@@ -148,22 +137,19 @@ def zip_data(data, objects_allowed, is_list_page=False):
         if object_allowed in object_detect:
             try:
                 alert_dictionary = obj_alerts[object_allowed]
-
-                details = []    # details mean the collection of email, sms, call lists
-                for alert in alert_dictionary:
-                    if alert == "sound_alarm":
-                        # details.append((str(alert), alert_dictionary[alert]))
-                        details.append((alert, alert_dictionary[alert]))
-                    else:
-                        list_for_this_alert = list_to_string(alert_dictionary[alert], is_list_page)
-                        details.append((alert, list_for_this_alert))
-                        # details.append((str(alert), list_for_this_alert))
+                details = []
+                list_for_this_alert = list_to_string(alert_dictionary['email_list'], is_list_page)
+                details.append(("email_list", list_for_this_alert))
+                list_for_this_alert = list_to_string(alert_dictionary['sms_list'], is_list_page)
+                details.append(("sms_list", list_for_this_alert))
+                list_for_this_alert = list_to_string(alert_dictionary['call_list'], is_list_page)
+                details.append(("call_list", list_for_this_alert))
+                list_for_this_alert = list_to_string(alert_dictionary['sound_alarm'], is_list_page)
+                details.append(("sound_alarm", list_for_this_alert))
                 obj_alerts_list.append((object_allowed, details))
             except KeyError, e:
                 print 'I got a KeyError - reason "%s"' % str(e)
 
-    # return [camera_name, rtsp_url, priority, floor, start_time, end_time,
-    #         sound_alarm, favourite, email_string, sms_string, call_string, objects, obj_alerts_list]
 
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
             favourite, objects, obj_alerts_list]
@@ -185,21 +171,16 @@ def form_to_json(form):
     # camera_dict['sound_alarm'] = 1 if form.getlist('sound_alarm') else 0
     camera_dict['favourite'] = 1 if form.getlist('favourite') else 0
 
-    # Notifications
-    # camera_dict['email_list'] = [i.strip() for i in form['email_list'].split(',')]
-    # camera_dict['sms_list'] = [i.strip() for i in form['sms_list'].split(',')]
-    # camera_dict['call_list'] = [i.strip() for i in form['call_list'].split(',')]
-    
     # Object detection
     camera_dict['object_detect'] = {}
     objects_selected = form.getlist('object_detect')
     for object_allowed in objects_allowed:
         camera_dict['object_detect'][object_allowed] = 1 if (object_allowed in objects_selected) else 0
 
+    # Notifications
     camera_dict['obj_alerts'] = {}
     for object_allowed in objects_allowed:
         object_dict = collections.OrderedDict()
-        # object_dict = {}
         index_email = '%s_email_list' % str(object_allowed)
         index_sms = '%s_sms_list' % str(object_allowed)
         index_call = '%s_call_list' % str(object_allowed)
@@ -209,7 +190,6 @@ def form_to_json(form):
         object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
         object_dict['sound_alarm'] = 1 if form.getlist(index_alarm) else 0
         camera_dict['obj_alerts'][object_allowed] = object_dict
-
 
     return json.dumps(camera_dict)
 
@@ -263,6 +243,7 @@ def view_page():
         except KeyError as e:
             print 'I got a KeyError in view_page - reason "%s"' % str(e)
             sound_dict[str(cam_id)] = 0
+        # sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['obj_alerts']
         zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
         zipped_data.insert(0, str(cam_id))
         data_list.append(zipped_data)
@@ -473,13 +454,13 @@ def internal_server_error(e):
     return render_template('home.html', image="Landing.jpeg",
         alert_message='Internal server error occured, please contact Customer Support'), 500
 
-# @app.errorhandler(Exception)
-# def unhandled_exception(e):
-#     '''Unhandled exception'''
-#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, e))
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    '''Unhandled exception'''
+    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app
