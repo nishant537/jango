@@ -171,13 +171,13 @@
                                                                 {% if object == "intrusion" %}
                                                                 <li class="nav-item" style="padding-top: 1vh">
                                                                     <a class="nav-link active" data-toggle="tab" href="#{{ object }}" role="tablist">
-                                                                        {{ (object)|title }}
+                                                                        {{ object.split('_') | join(' ') | title }}
                                                                     </a>
                                                                 </li>
                                                                 {% else %}
                                                                 <li class="nav-item" style="padding-top: 1vh">
                                                                     <a class="nav-link" data-toggle="tab" href="#{{ object }}" role="tablist">
-                                                                        {{ (object)|title }}
+                                                                        {{ object.split('_') | join(' ') | title }}
                                                                     </a>
                                                                 </li>
                                                                 {% endif %}
@@ -196,16 +196,16 @@
                                                                                 <label class="form-check-label">
                                                                                     <input id="{{ object }}_sound_alarm" name="{{ object }}sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
                                                                                     <span class="form-check-sign"></span>
-                                                                                    {{ object|title }} Sound Alarm
+                                                                                        {{ object.split('_') | join(' ') | title }} Sound Alarm
                                                                                 </label>
                                                                             </div>
                                                                         {% elif alert == "email_list" %}
                                                                             <div class="col-md-12 form-group">
-                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object|title }} {{ alert|title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
                                                                             </div>
                                                                         {% else %}
                                                                             <div class="col-md-12 form-group">
-                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object|title }} {{ alert|title }}" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^[0-9]{10}(,[0-9]{10})*$">
                                                                             </div>
                                                                         {% endif %}
                                                                     {% endfor %}
@@ -220,16 +220,16 @@
                                                                                 <label class="form-check-label">
                                                                                     <input id="{{ object }}_sound_alarm" name="{{ object }}sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
                                                                                     <span class="form-check-sign"></span>
-                                                                                    {{ object|title }} Sound Alarm
+                                                                                    {{ object.split('_') | join(' ') | title }}  Sound Alarm
                                                                                 </label>
                                                                             </div>
                                                                         {% elif alert == "email_list" %}
                                                                             <div class="col-md-12 form-group">
-                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object|title }} {{ alert|title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
                                                                             </div>
                                                                         {% else %}
                                                                             <div class="col-md-12 form-group">
-                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object|title }} {{ alert|title }}" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^[0-9]{10}(,[0-9]{10})*$">
                                                                             </div>
                                                                         {% endif %}
                                                                     {% endfor %}
