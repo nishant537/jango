@@ -144,7 +144,7 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 details.append(("sms_list", list_for_this_alert))
                 list_for_this_alert = list_to_string(alert_dictionary['call_list'], is_list_page)
                 details.append(("call_list", list_for_this_alert))
-                list_for_this_alert = list_to_string(alert_dictionary['sound_alarm'], is_list_page)
+                list_for_this_alert = (alert_dictionary['sound_alarm'])
                 details.append(("sound_alarm", list_for_this_alert))
                 obj_alerts_list.append((object_allowed, details))
             except KeyError, e:
@@ -188,7 +188,12 @@ def form_to_json(form):
         object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
         object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
         object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
-        object_dict['sound_alarm'] = 1 if form.getlist(index_alarm) else 0
+        # print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        # print form[index_alarm]
+        object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
+
+        # print index_alarm
+        # print object_dict['sound_alarm']
         camera_dict['obj_alerts'][object_allowed] = object_dict
 
     return json.dumps(camera_dict)
@@ -239,11 +244,15 @@ def view_page():
     for cam_id in camera_payload:
         unique_floors.append(str(camera_payload[str(cam_id)]['floor']))
         try:
-            sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+            # sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+            obj_alerts = camera_payload[str(cam_id)]['obj_alerts']
+            object_wise_sound_dict = {}
+            for obj in obj_alerts:
+                object_wise_sound_dict[str(obj)] = obj_alerts[obj]['sound_alarm']
+            sound_dict[str(cam_id)] = object_wise_sound_dict
         except KeyError as e:
             print 'I got a KeyError in view_page - reason "%s"' % str(e)
-            sound_dict[str(cam_id)] = 0
-        # sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['obj_alerts']
+            sound_dict[str(cam_id)] = 1
         zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
         zipped_data.insert(0, str(cam_id))
         data_list.append(zipped_data)
@@ -296,6 +305,8 @@ def get_alerts():
     # Convert objects to pretty format
     for key, objects in alert_dict.iteritems():
         alert_dict[key] = [' '.join(obj.split('_')).title() for obj in objects]
+    # print "_______________________"
+    # print alert_dict
 
     return json.dumps(alert_dict)
 
@@ -454,13 +465,13 @@ def internal_server_error(e):
     return render_template('home.html', image="Landing.jpeg",
         alert_message='Internal server error occured, please contact Customer Support'), 500
 
-@app.errorhandler(Exception)
-def unhandled_exception(e):
-    '''Unhandled exception'''
-    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-        (request.remote_addr, e.__class__.__name__, e))
-    return render_template('home.html', image="Landing.jpeg",
-        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
+# @app.errorhandler(Exception)
+# def unhandled_exception(e):
+#     '''Unhandled exception'''
+#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+#         (request.remote_addr, e.__class__.__name__, e))
+#     return render_template('home.html', image="Landing.jpeg",
+#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app
