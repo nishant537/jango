@@ -244,15 +244,19 @@ def view_page():
     for cam_id in camera_payload:
         unique_floors.append(str(camera_payload[str(cam_id)]['floor']))
         try:
-            # sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
             obj_alerts = camera_payload[str(cam_id)]['obj_alerts']
             object_wise_sound_dict = {}
             for obj in obj_alerts:
-                object_wise_sound_dict[str(obj)] = obj_alerts[obj]['sound_alarm']
+                obj_list = obj.split("_")
+                for i in range(len(obj_list)):
+                    obj_list[i] = obj_list[i].capitalize()
+                obj_pretty = " ".join(obj_list)
+                object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
+
+            print object_wise_sound_dict
             sound_dict[str(cam_id)] = object_wise_sound_dict
         except KeyError as e:
             print 'I got a KeyError in view_page - reason "%s"' % str(e)
-            sound_dict[str(cam_id)] = 1
         zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
         zipped_data.insert(0, str(cam_id))
         data_list.append(zipped_data)
@@ -305,8 +309,6 @@ def get_alerts():
     # Convert objects to pretty format
     for key, objects in alert_dict.iteritems():
         alert_dict[key] = [' '.join(obj.split('_')).title() for obj in objects]
-    # print "_______________________"
-    # print alert_dict
 
     return json.dumps(alert_dict)
 
@@ -359,13 +361,19 @@ def search_view_page():
         for cam_id in camera_payload:
             if searched_name.lower() in str(camera_payload[str(cam_id)]['camera_name']).lower():
                 try:
-                    sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+                    obj_alerts = camera_payload[str(cam_id)]['obj_alerts']
+                    object_wise_sound_dict = {}
+                    for obj in obj_alerts:
+                        obj_list = obj.split("_")
+                        for i in range(len(obj_list)):
+                            obj_list[i] = obj_list[i].capitalize()
+                        obj_pretty = " ".join(obj_list)
+                        object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
+
+                    print object_wise_sound_dict
+                    sound_dict[str(cam_id)] = object_wise_sound_dict
                 except KeyError as e:
-                    print 'I got a KeyError in search_view_page - reason "%s"' % str(e)
-                    sound_dict[str(cam_id)] = 0
-                zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
-                zipped_data.insert(0, str(cam_id))
-                data_list.append(zipped_data)
+                    print 'I got a KeyError in view_page - reason "%s"' % str(e)
 
         # Sort data alphanumerically
         data_list = natural_sort(data_list, key=itemgetter(1))

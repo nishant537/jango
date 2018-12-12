@@ -28,6 +28,8 @@
         var getAlertsAJAX = null;
         var alertsIntervalHandler = null;
 
+        detected_objects = [];
+
         // Fullscreen
         var lastKey = null;
         var lastTab = null;
@@ -370,6 +372,7 @@
                     }
                 }
                 <!--window.alert(flag)-->
+                list_detected_objects_for_current_cam = detected_objects[key];
                 if (alerts[key] >= alertShowTime) 
                 {
                     if ($(".cardBody" + key) != undefined) 
@@ -385,7 +388,14 @@
                 }
                 else if ( flag == 1)
                 {
-                    playAlarm();
+
+                    if ( list_detected_objects_for_current_cam != undefined){
+                        for (var object in list_detected_objects_for_current_cam){
+                            if (sound_dict[key][object] == 1){
+                                playAlarm();
+                            }
+                        }
+                    }
                 }
             }
 
@@ -397,16 +407,19 @@
                 success: function (response) 
                 {
                     console.log('Alerts:', response);
-                    $.each(response, function (key, val) 
+                    detected_objects = response;
+                    $.each(response, function (key, val)
                     {
                         if ($(".cardBody" + key) != undefined) 
                         {
                             alerts[key] = 0;
-                            if (sound_dict[key][val] == 1)
+                            for (var object in val)
                             {
-                                playAlarm();
+                                if (sound_dict[key][val[object]] == 1)
+                                {
+                                    playAlarm();
+                                }
                             }
-
                             $('.cardBody' + key).addClass('bg-danger');
                             $('.cardSubtitle' + key).html('<strong>' + [val.slice(0, -1).join(', '), val.slice(-1)[0]].join(val.length < 2 ? '' : ' and ') + ' Detected!</strong>');
                             $('.cardSubtitle' + key).fadeIn(500);
