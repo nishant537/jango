@@ -188,12 +188,8 @@ def form_to_json(form):
         object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
         object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
         object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
-        # print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        # print form[index_alarm]
         object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
 
-        # print index_alarm
-        # print object_dict['sound_alarm']
         camera_dict['obj_alerts'][object_allowed] = object_dict
 
     return json.dumps(camera_dict)
@@ -473,13 +469,13 @@ def internal_server_error(e):
     return render_template('home.html', image="Landing.jpeg",
         alert_message='Internal server error occured, please contact Customer Support'), 500
 
-# @app.errorhandler(Exception)
-# def unhandled_exception(e):
-#     '''Unhandled exception'''
-#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, e))
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    '''Unhandled exception'''
+    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app
