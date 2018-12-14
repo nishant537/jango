@@ -90,7 +90,6 @@ def get_camera_info(camera_id=None):
     if camera_id is None:
         return requests.get(BACKEND_URL + 'getAllCameraInfo').json()
     else:
-        print {camera_id: requests.get(BACKEND_URL + 'getCameraInfo/' + camera_id).json()}
         return {camera_id: requests.get(BACKEND_URL + 'getCameraInfo/' + camera_id).json()}
 
 def natural_sort(list, key):
