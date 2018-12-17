@@ -27,6 +27,31 @@
                 $("#intrusion_end_time").removeAttr('required');
             }
         }
+
+        function FillAllLists(f, currentObject, objects) {
+            if (f[currentObject.concat("_copy")].checked == true) {
+                for (key in objects) {
+                    if (objects[key] == currentObject) {}
+                    else {
+                        f[objects[key].concat("_email_list")].value = f[currentObject.concat("_email_list")].value;
+                        f[objects[key].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
+                        f[objects[key].concat("_call_list")].value = f[currentObject.concat("_call_list")].value;
+                        f[objects[key].concat("_sound_alarm")].checked = f[currentObject.concat("_sound_alarm")].checked;
+                    }
+                }
+            }
+            else {
+                for (key in objects) {
+                    if (objects[key] == currentObject) {}
+                    else {
+                        f[objects[key].concat("_email_list")].value = "";
+                        f[objects[key].concat("_sms_list")].value = "";
+                        f[objects[key].concat("_call_list")].value = "";
+                        f[objects[key].concat("_sound_alarm")].checked = "";
+                    }
+                }
+            }
+        }
     </script>
 
 </head>
@@ -161,13 +186,13 @@
                                                             {% for object in objects %}
                                                             {% if object == "intrusion" %}
                                                             <li class="nav-item" style="padding-top: 1vh">
-                                                                <a class="nav-link active" data-toggle="tab" href="#{{ object }}" role="tablist">
+                                                                <a class="nav-link active" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
                                                             {% else %}
                                                             <li class="nav-item" style="padding-top: 1vh">
-                                                                <a class="nav-link" data-toggle="tab" href="#{{ object }}" role="tablist">
+                                                                <a class="nav-link" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
@@ -182,7 +207,7 @@
                                                         {% for object in objects %}
                                                         <!--This if condition is to have a default page. Won't work if intrusion isn't present in the list of objects-->
                                                         {% if object == "intrusion" %}
-                                                        <div class="tab-pane active" id="{{ object }}" role="tabpanel">
+                                                        <div class="tab-pane active" id="{{ object }}_tab" role="tabpanel">
                                                             <div class="row">
                                                                 <div class = "col-md-12 form-group">
                                                                     <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
@@ -200,10 +225,17 @@
                                                                         {{ object.split('_') | join(' ') | title }} Sound Alarm
                                                                     </label>
                                                                 </div>
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}', {{ objects }})">
+                                                                        <span class="form-check-sign"></span>
+                                                                        Copy data to all objects
+                                                                    </label>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         {% else %}
-                                                        <div class="tab-pane" id="{{ object }}" role="tabpanel">
+                                                        <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
                                                             <div class="row">
                                                                 <div class = "col-md-12 form-group">
                                                                     <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
@@ -219,6 +251,13 @@
                                                                         <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox">
                                                                         <span class="form-check-sign"></span>
                                                                         {{ object.split('_') | join(' ') | title }} Sound Alarm
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}', {{ objects }})">
+                                                                        <span class="form-check-sign"></span>
+                                                                        Copy data to all objects
                                                                     </label>
                                                                 </div>
                                                             </div>
