@@ -27,6 +27,35 @@
                 $("#intrusion_end_time").removeAttr('required');
             }
         }
+
+        function FillAllLists(f, currentObject) {
+            var data = {{ data | tojson }};
+            <!--To access a list of objects, access the right index of data array (7)-->
+            objects = data[0][7];
+            <!--Now access object names which are stored in the first index of each entry of the list, second index has 1/0 for enable/disable-->
+            if (f[currentObject.concat("_copy")].checked == true) {
+                for (key in objects) {
+                    if (objects[key][0] == currentObject) {}
+                    else {
+                        f[objects[key][0].concat("_email_list")].value = f[currentObject.concat("_email_list")].value;
+                        f[objects[key][0].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
+                        f[objects[key][0].concat("_call_list")].value = f[currentObject.concat("_call_list")].value;
+                        f[objects[key][0].concat("_sound_alarm")].checked = f[currentObject.concat("_sound_alarm")].checked;
+                    }
+                }
+            }
+            else {
+                for (key in objects) {
+                    if (objects[key][0] == currentObject) {}
+                    else {
+                        f[objects[key][0].concat("_email_list")].value = "";
+                        f[objects[key][0].concat("_sms_list")].value = "";
+                        f[objects[key][0].concat("_call_list")].value = "";
+                        f[objects[key][0].concat("_sound_alarm")].checked = "";
+                    }
+                }
+            }
+        }
     </script>
 
 </head>
@@ -91,8 +120,7 @@
                         <div class="col-md-8 ml-auto mr-auto">
                             <div class="card card-signup">
                                 <div class="card-body">
-                                    {% for name, rtsp_url, priority, floor, start_time, end_time, sound_alarm,
-                                        favourite, email_string, sms_string, call_string, objects_list in data %}
+                                    {% for name, rtsp_url, priority, floor, start_time, end_time, favourite, objects_list, obj_alerts_list in data %}
                                     <h3 class="card-title text-center">Edit
                                         <strong>{{ name }}</strong>
                                     </h3>
@@ -116,19 +144,6 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row">
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ email_string }}" id="email_list" name="email_list" type="text" class="form-control" placeholder="Email ID List"
-                                                        pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
-                                                </div>
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ sms_string }}" id="sms_list" name="sms_list" type="text" class="form-control" placeholder="SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                                </div>
-                                                <div class="col-md-12 form-group">
-                                                    <input value="{{ call_string }}" id="call_list" name="call_list" type="text" class="form-control" placeholder="Call List"
-                                                        pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                                </div>
-                                            </div>
 
                                             <div class="row">
                                                 <div class="col-md-6 form-group">
@@ -164,15 +179,6 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row">
-                                                <div class="form-check">
-                                                    <label class="form-check-label">
-                                                        <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if sound_alarm == 1 }}>
-                                                        <span class="form-check-sign"></span>
-                                                        Sound Alarm
-                                                    </label>
-                                                </div>
-                                            </div>
 
                                             <div class="row">
                                                 <div class="form-check">
@@ -183,6 +189,104 @@
                                                     </label>
                                                 </div>
                                             </div>
+
+
+                                            <div class="container">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="nav-align-center">
+                                                            <ul class="nav nav-pills nav-pills-primary justify-content-center" role="tablist">
+                                                                {% for object, enabled in objects_list %}
+                                                                {% if object == "intrusion" %}
+                                                                <li class="nav-item" style="padding-top: 1vh">
+                                                                    <a class="nav-link active" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                                        {{ object.split('_') | join(' ') | title }}
+                                                                    </a>
+                                                                </li>
+                                                                {% else %}
+                                                                <li class="nav-item" style="padding-top: 1vh">
+                                                                    <a class="nav-link" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                                        {{ object.split('_') | join(' ') | title }}
+                                                                    </a>
+                                                                </li>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                        <div class="tab-content gallery">
+                                                            {% for object, details in obj_alerts_list %}
+                                                            <!--This if condition is to have a default page. Won't work if intrusion isn't present in the list of objects-->
+                                                            {% if object == "intrusion" %}
+                                                            <div class="tab-pane active" id="{{ object }}_tab" role="tabpanel">
+                                                                <div class="row">
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label">
+                                                                                    <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
+                                                                                    <span class="form-check-sign"></span>
+                                                                                        {{ object.split('_') | join(' ') | title }} Sound Alarm
+                                                                                </label>
+                                                                            </div>
+                                                                        {% elif alert == "email_list" %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                            Copy data to all objects
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {% else %}
+                                                            <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                                <div class="row">
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label">
+                                                                                    <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
+                                                                                    <span class="form-check-sign"></span>
+                                                                                    {{ object.split('_') | join(' ') | title }}  Sound Alarm
+                                                                                </label>
+                                                                            </div>
+                                                                        {% elif alert == "email_list" %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                            Copy data to all objects
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
                                         </div>
 
                                         <div class="text-center">

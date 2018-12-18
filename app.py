@@ -6,7 +6,7 @@ import requests
 import ConfigParser
 from functools import wraps
 from operator import itemgetter
-
+import collections  # for ordered dict
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort
 
 # Initiate Flask
@@ -116,14 +116,9 @@ def zip_data(data, objects_allowed, is_list_page=False):
     # Optional parameters
     start_time = str(data['intrusion_start_time'])
     end_time = str(data['intrusion_end_time'])
-    sound_alarm = data['sound_alarm']
+    # sound_alarm = data['sound_alarm']
     favourite = data['favourite']
 
-    # Notifications
-    email_string = list_to_string(data['email_list'], is_list_page)
-    sms_string = list_to_string(data['sms_list'], is_list_page)
-    call_string = list_to_string(data['call_list'], is_list_page)
-    
     # Object detection
     objects = []
     object_detect = data['object_detect']
@@ -135,8 +130,24 @@ def zip_data(data, objects_allowed, is_list_page=False):
         else:
             objects.append((object_allowed, 0))
 
+    obj_alerts = data['obj_alerts']
+    obj_alerts_list = []
+    for object_allowed in objects_allowed:
+        if object_allowed in object_detect:
+            alert_dictionary = obj_alerts[object_allowed]
+            details = []
+            list_for_this_alert = list_to_string(alert_dictionary['email_list'], is_list_page)
+            details.append(("email_list", list_for_this_alert))
+            list_for_this_alert = list_to_string(alert_dictionary['sms_list'], is_list_page)
+            details.append(("sms_list", list_for_this_alert))
+            list_for_this_alert = list_to_string(alert_dictionary['call_list'], is_list_page)
+            details.append(("call_list", list_for_this_alert))
+            list_for_this_alert = (alert_dictionary['sound_alarm'])
+            details.append(("sound_alarm", list_for_this_alert))
+            obj_alerts_list.append((object_allowed, details))
+
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
-        sound_alarm, favourite, email_string, sms_string, call_string, objects]
+            favourite, objects, obj_alerts_list]
 
 def form_to_json(form):
     '''Convert the requests.form data to JSON'''
@@ -152,19 +163,29 @@ def form_to_json(form):
     # Optional parameters
     camera_dict['intrusion_start_time'] = form['intrusion_start_time']
     camera_dict['intrusion_end_time'] = form['intrusion_end_time']
-    camera_dict['sound_alarm'] = 1 if form.getlist('sound_alarm') else 0
+    # camera_dict['sound_alarm'] = 1 if form.getlist('sound_alarm') else 0
     camera_dict['favourite'] = 1 if form.getlist('favourite') else 0
 
-    # Notifications
-    camera_dict['email_list'] = [i.strip() for i in form['email_list'].split(',')]
-    camera_dict['sms_list'] = [i.strip() for i in form['sms_list'].split(',')]
-    camera_dict['call_list'] = [i.strip() for i in form['call_list'].split(',')]
-    
     # Object detection
     camera_dict['object_detect'] = {}
     objects_selected = form.getlist('object_detect')
     for object_allowed in objects_allowed:
         camera_dict['object_detect'][object_allowed] = 1 if (object_allowed in objects_selected) else 0
+
+    # Notifications
+    camera_dict['obj_alerts'] = {}
+    for object_allowed in objects_allowed:
+        object_dict = collections.OrderedDict()
+        index_email = '%s_email_list' % str(object_allowed)
+        index_sms = '%s_sms_list' % str(object_allowed)
+        index_call = '%s_call_list' % str(object_allowed)
+        index_alarm = '%s_sound_alarm' % str(object_allowed)
+        object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
+        object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
+        object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
+        object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
+
+        camera_dict['obj_alerts'][object_allowed] = object_dict
 
     return json.dumps(camera_dict)
 
@@ -196,6 +217,7 @@ def edit_camera_page(camera_id):
 
     # Match camera_id from camera_payload and load it's details
     data = [zip_data(camera_payload[str(camera_id)], objects_allowed)]
+    # print data
     return render_template('edit.html', image=img, data=data, camera_id=camera_id)
 
 @app.route('/view')
@@ -212,7 +234,17 @@ def view_page():
     unique_floors = []
     for cam_id in camera_payload:
         unique_floors.append(str(camera_payload[str(cam_id)]['floor']))
-        sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
+        obj_alerts = camera_payload[str(cam_id)]['obj_alerts']
+        object_wise_sound_dict = {}
+        for obj in obj_alerts:
+            obj_list = obj.split("_")
+            for i in range(len(obj_list)):
+                obj_list[i] = obj_list[i].capitalize()
+            obj_pretty = " ".join(obj_list)
+            object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
+
+        print object_wise_sound_dict
+        sound_dict[str(cam_id)] = object_wise_sound_dict
         zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
         zipped_data.insert(0, str(cam_id))
         data_list.append(zipped_data)
@@ -316,10 +348,17 @@ def search_view_page():
         data_list = []
         for cam_id in camera_payload:
             if searched_name.lower() in str(camera_payload[str(cam_id)]['camera_name']).lower():
-                sound_dict[str(cam_id)] = camera_payload[str(cam_id)]['sound_alarm']
-                zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
-                zipped_data.insert(0, str(cam_id))
-                data_list.append(zipped_data)
+                obj_alerts = camera_payload[str(cam_id)]['obj_alerts']
+                object_wise_sound_dict = {}
+                for obj in obj_alerts:
+                    obj_list = obj.split("_")
+                    for i in range(len(obj_list)):
+                        obj_list[i] = obj_list[i].capitalize()
+                    obj_pretty = " ".join(obj_list)
+                    object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
+
+                print object_wise_sound_dict
+                sound_dict[str(cam_id)] = object_wise_sound_dict
 
         # Sort data alphanumerically
         data_list = natural_sort(data_list, key=itemgetter(1))
@@ -425,7 +464,7 @@ def unhandled_exception(e):
     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
         (request.remote_addr, e.__class__.__name__, e))
     return render_template('home.html', image="Landing.jpeg",
-        alert_message='Unhandled exception occured, please contact Customer Support'), 520
+        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app

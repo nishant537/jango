@@ -27,12 +27,37 @@
                 $("#intrusion_end_time").removeAttr('required');
             }
         }
+
+        function FillAllLists(f, currentObject, objects) {
+            if (f[currentObject.concat("_copy")].checked == true) {
+                for (key in objects) {
+                    if (objects[key] == currentObject) {}
+                    else {
+                        f[objects[key].concat("_email_list")].value = f[currentObject.concat("_email_list")].value;
+                        f[objects[key].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
+                        f[objects[key].concat("_call_list")].value = f[currentObject.concat("_call_list")].value;
+                        f[objects[key].concat("_sound_alarm")].checked = f[currentObject.concat("_sound_alarm")].checked;
+                    }
+                }
+            }
+            else {
+                for (key in objects) {
+                    if (objects[key] == currentObject) {}
+                    else {
+                        f[objects[key].concat("_email_list")].value = "";
+                        f[objects[key].concat("_sms_list")].value = "";
+                        f[objects[key].concat("_call_list")].value = "";
+                        f[objects[key].concat("_sound_alarm")].checked = "";
+                    }
+                }
+            }
+        }
     </script>
 
 </head>
 
 <body class="signup-page">
-    <nav class="navbar navbar-expand-sm navbar-absolute bg-white">
+    <nav class="navbar navbar-expand-sm fixed-top bg-white">
         <div class="container">
             <div class="navbar-translate">
                 <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">
@@ -109,17 +134,6 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row">
-                                                <div class="col-md-12 form-group">
-                                                    <input id="email_list" name="email_list" type="text" class="form-control" placeholder="Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
-                                                </div>
-                                                <div class="col-md-12 form-group">
-                                                    <input id="sms_list" name="sms_list" type="text" class="form-control" placeholder="SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                                </div>
-                                                <div class="col-md-12 form-group">
-                                                    <input id="call_list" name="call_list" type="text" class="form-control" placeholder="Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
-                                                </div>
-                                            </div>
 
                                             <div class="row">
                                                 <div class="col-md-6 form-group">
@@ -156,28 +170,112 @@
                                             <div class="row">
                                                 <div class="form-check">
                                                     <label class="form-check-label">
-                                                        <input id="sound_alarm" name="sound_alarm" class="form-check-input" type="checkbox">
-                                                        <span class="form-check-sign"></span>
-                                                        Sound Alarm
-                                                    </label>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="form-check">
-                                                    <label class="form-check-label">
                                                         <input id="favourite" name="favourite" class="form-check-input" type="checkbox">
                                                         <span class="form-check-sign"></span>
                                                         Favourite
                                                     </label>
                                                 </div>
                                             </div>
-                                        </div>
 
+
+                                            <div class="container">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                    <div class="nav-align-center">
+                                                        <ul class="nav nav-pills nav-pills-primary justify-content-center" role="tablist">
+                                                            {% for object in objects %}
+                                                            {% if object == "intrusion" %}
+                                                            <li class="nav-item" style="padding-top: 1vh">
+                                                                <a class="nav-link active" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                                    {{ object.split('_') | join(' ') | title }}
+                                                                </a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="nav-item" style="padding-top: 1vh">
+                                                                <a class="nav-link" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                                    {{ object.split('_') | join(' ') | title }}
+                                                                </a>
+                                                            </li>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="tab-content gallery">
+                                                        {% for object in objects %}
+                                                        <!--This if condition is to have a default page. Won't work if intrusion isn't present in the list of objects-->
+                                                        {% if object == "intrusion" %}
+                                                        <div class="tab-pane active" id="{{ object }}_tab" role="tabpanel">
+                                                            <div class="row">
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                </div>
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_sms_list" name="{{ object }}_sms_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                </div>
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox">
+                                                                        <span class="form-check-sign"></span>
+                                                                        {{ object.split('_') | join(' ') | title }} Sound Alarm
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}', {{ objects }})">
+                                                                        <span class="form-check-sign"></span>
+                                                                        Copy data to all objects
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {% else %}
+                                                        <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                            <div class="row">
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                </div>
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_sms_list" name="{{ object }}_sms_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                </div>
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox">
+                                                                        <span class="form-check-sign"></span>
+                                                                        {{ object.split('_') | join(' ') | title }} Sound Alarm
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}', {{ objects }})">
+                                                                        <span class="form-check-sign"></span>
+                                                                        Copy data to all objects
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
                                         <div class="text-center">
                                             <a href="/list" class="btn btn-round btn-default">Cancel</a>
                                             <button type="submit" class="btn btn-round btn-success">Done</button>
                                         </div>
+
+
                                     </form>
                                 </div>
                             </div>

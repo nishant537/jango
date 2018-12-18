@@ -96,6 +96,7 @@
         {% endif %}
         <div class="row" style="padding: 50px;">
             <div class="card card-plain">
+
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table">
@@ -110,15 +111,6 @@
                                     <th class="text-center">
                                         Priority
                                     </th>
-                                    <th class="text-center">
-                                        Email ID List
-                                    </th>
-                                    <th class="text-center">
-                                        SMS List
-                                    </th>
-                                    <th class="text-center">
-                                        Call List
-                                    </th>
                                     {% for object in objects %}
                                     <th class="text-center">
                                         {{ object.split('_') | join(' ') | title }}
@@ -130,17 +122,13 @@
                                     <th class="text-center">
                                         End Time
                                     </th>
-                                    <th class="text-center">
-                                        Sound Alarm
-                                    </th>
                                     <th class="text-center" colspan="2">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for id, name, rtsp_url, priority, floor, start_time, end_time, sound_alarm,
-                                    favourite, email_string, sms_string, call_string, objects_list in data %}
+                                {% for id, name, rtsp_url, priority, floor, start_time, end_time, favourite, objects_list, obj_alerts_list in data %}
                                 <tr>
                                     <td class="text-center">
                                         {{ name }}
@@ -151,28 +139,22 @@
                                     <td class="text-center">
                                         {{ priority|title }}
                                     </td>
-                                    <td class="text-center">
-                                        {{ email_string }}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ sms_string }}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ call_string }}
-                                    </td>
                                     {% for object, enabled in objects_list %}
+                                    {% if enabled == 1 %}
                                     <td class="text-center">
-                                        {{ enabled }}
+                                        On
                                     </td>
+                                    {% else %}
+                                    <td class="text-center">
+                                        Off
+                                    </td>
+                                    {% endif %}
                                     {% endfor %}
                                     <td class="text-center">
                                         {{ start_time or '-'}}
                                     </td>
                                     <td class="text-center">
                                         {{ end_time or '-'}}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ sound_alarm }}
                                     </td>
                                     <td class="text-center">
                                         <a class="btn btn-default btn-icon btn-sm" data-original-title="Edit" title="Edit" href="/edit/{{ id }}">
@@ -186,6 +168,7 @@
                                     </td>
                                 </tr>
                                 {% endfor %}
+
                             </tbody>
                         </table>
                     </div>
