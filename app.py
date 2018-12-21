@@ -157,7 +157,11 @@ def form_to_json(form):
     # Mandatory parameters
     camera_dict['camera_name'] = form['camera_name'].strip()
     camera_dict['rtsp_url'] = form['rtsp_url'].strip()
-    camera_dict['camera_priority'] = form['camera_priority'].strip()
+    try:
+        camera_dict['camera_priority'] = form['camera_priority'].strip()
+    except KeyError as e:
+        # will be triggered in case camera priority is disabled, set priority low by default
+        camera_dict['camera_priority'] = "low"
     camera_dict['floor'] = form['floor'].strip()
 
     # Optional parameters

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
+
 <head>
     <meta charset="utf-8" />
     <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
@@ -52,116 +54,162 @@
                 }
             }
         }
+
+        function intrusion_tab_show(){
+          $('[href="#intrusion_tab"]').tab('show');
+        }
+
     </script>
+
+    <style>
+    ::placeholder {
+      color: black !important;
+      opacity: 1 !important; /* Firefox */
+      font-size: 15px; !important
+    }
+
+    .pill .active a{
+        background:orange !important;
+            color:white;
+    }
+    .pill .active a:hover{
+            <!--background:orange !important;-->
+        }
+    .pill a:hover {
+         background:orange !important;
+        color:white;
+    }
+    .pill a:inactive {
+        background:orange !important;
+        color:white;
+
+    }
+
+    input[type=text] {
+        font-size: 15px;
+    }
+
+    .nav-pill-text{
+        font-size: 18px;
+        font-weight: bold !important;
+    }
+
+    .top-bar-link p{
+        font-size: 30px;
+    }
+
+    .top-bar-link i{
+        font-size: 30px !important;
+        width: 40px !important;
+    }
+
+
+    </style>
 
 </head>
 
 <body class="signup-page">
     <nav class="navbar navbar-expand-sm fixed-top bg-white">
         <div class="container">
-            <div class="navbar-translate">
-                <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">
-                    <img class="dsal_logo" src="/static/img/dsal.png">
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-bar bar1"></span>
-                    <span class="navbar-toggler-bar bar2"></span>
-                    <span class="navbar-toggler-bar bar3"></span>
-                </button>
-            </div>
-            <div class="collapse navbar-collapse" data-nav-image="/static/img/blur1.jpg" data-color="orange">
-                <ul class="navbar-nav ml-auto">
+            <!--<div class="navbar-translate">-->
+                <!--<a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">-->
+                    <!--<img class="dsal_logo" src="/static/img/dsal.png">-->
+                <!--</a>-->
+                <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"-->
+                    <!--aria-expanded="false" aria-label="Toggle navigation">-->
+                    <!--<span class="navbar-toggler-bar bar1"></span>-->
+                    <!--<span class="navbar-toggler-bar bar2"></span>-->
+                    <!--<span class="navbar-toggler-bar bar3"></span>-->
+                <!--</button>-->
+            <!--</div>-->
+            <div class="navbar-collapse collapse" data-nav-image="/static/img/blur1.jpg" data-color="orange">
+                <ul class="navbar-nav mr-auto">
+                    <!--<li class="nav-item">-->
+                        <!--<a class="nav-link top-bar-link" href="/">-->
+                            <!--<i class="fa fa-home"></i>-->
+                            <!--<p>Home</p>-->
+                        <!--</a>-->
+                    <!--</li>-->
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fa fa-home"></i>
-                            <p>Home</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/view">
-                            <i class="fa fa-camera"></i>
-                            <p>View</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/list">
+                        <a class="nav-link top-bar-link" href="/list">
                             <i class="fa fa-list"></i>
                             <p>List</p>
                         </a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">
-                            <p>Background</p>
+                    <li class="nav-item">
+                        <a class="nav-link top-bar-link" href="/view">
+                            <i class="fa fa-camera"></i>
+                            <p>View</p>
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="/background/bank/add_camera">Bank</a>
-                            <a class="dropdown-item" href="/background/hospital/add_camera">Hospital</a>
-                            <a class="dropdown-item" href="/background/insurance/add_camera">Insurance</a>
-                            <a class="dropdown-item" href="/background/pixel/add_camera">Pixel</a>
-                            <a class="dropdown-item" href="/background/retail/add_camera">Retail</a>
-                        </div>
                     </li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fa fa-rocket"></i>
+                            <p>Launch</p>
+                        </a>
+                    </li>
+                    <!--<li class="nav-item dropdown">-->
+                        <!--<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">-->
+                            <!--<p>Background</p>-->
+                        <!--</a>-->
+                        <!--<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">-->
+                            <!--<a class="dropdown-item" href="/background/bank/add_camera">Bank</a>-->
+                            <!--<a class="dropdown-item" href="/background/hospital/add_camera">Hospital</a>-->
+                            <!--<a class="dropdown-item" href="/background/insurance/add_camera">Insurance</a>-->
+                            <!--<a class="dropdown-item" href="/background/pixel/add_camera">Pixel</a>-->
+                            <!--<a class="dropdown-item" href="/background/retail/add_camera">Retail</a>-->
+                        <!--</div>-->
+                    <!--</li>-->
                 </ul>
             </div>
         </div>
     </nav>
-    <div class="wrapper" style="padding-top: 4vh;">
-        <div class="page-header section-image">
-            <div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>
-            <div class="content">
+    <div class="wrapper">
+        <!--<div class="page-header section-image">-->
+            <!--<div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>-->
+            <div class="content" style="background-color:lightblue">
                 <div class="container">
                     <div class="row">
-                        <div class="col-md-8 ml-auto mr-auto">
-                            <div class="card card-signup">
+                        <div class="col-md-12 ml-auto mr-auto">
+                            <div class="card card-signup" style="padding-top:80px; margin-bottom:80px;">
                                 <div class="card-body">
-                                    <h3 class="card-title text-center">Add Camera</h3>
+                                    <h3 class="card-title text-center"><b>Add Camera</b></h3>
                                     <br>
                                     <form class="form" method="POST" action="/addCamera">
                                         <div class="card-body">
                                             <div class="row">
                                                 <div class="col-md-6 form-group">
-                                                    <input id="camera_name" name="camera_name" type="text" class="form-control" placeholder="Camera Name" required>
+                                                    <input id="camera_name" name="camera_name" type="text" class="form-control" placeholder="Enter Camera Name" required>
                                                 </div>
                                                 <div class="col-md-6 form-group">
-                                                    <input id="floor" name="floor" type="text" class="form-control" placeholder="Floor" required>
+                                                    <input id="floor" name="floor" type="text" class="form-control" placeholder="Enter Floor" required>
                                                 </div>
                                             </div>
 
                                             <div class="row">
                                                 <div class="col-md-12 form-group">
-                                                    <input id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Camera Stream URL" required>
+                                                    <input id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Enter Camera Stream URL" required>
                                                 </div>
                                             </div>
 
-
-                                            <div class="row">
-                                                <div class="col-md-6 form-group">
-                                                    <input id="intrusion_start_time" name="intrusion_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
-                                                        class="form-control" placeholder="Intrusion Start Time (24hrs HH:MM)">
-                                                </div>
-                                                <div class="col-md-6 form-group">
-                                                    <input id="intrusion_end_time" name="intrusion_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
-                                                        class="form-control" placeholder="Intrusion End Time (24hrs HH:MM)">
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-12 bootstrap-select show-tick">
-                                                    <select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"
-                                                        title="Camera Priority" required>
-                                                        <option value="high">High</option>
-                                                        <option value="low">Low</option>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                            <!--<div class="row">-->
+                                                <!--<div class="col-md-12 bootstrap-select show-tick">-->
+                                                    <!--<select class="selectpicker show-tick" name="camera_priority" id="camera_priority" data-style="btn btn-default btn-round"-->
+                                                        <!--title="Camera Priority" required>-->
+                                                        <!--<option value="high">High</option>-->
+                                                        <!--<option value="low">Low</option>-->
+                                                    <!--</select>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
 
                                             <div class="row">
                                                 <div class="col-md-12 bootstrap-select show-tick">
                                                     <select class="selectpicker show-tick" name="object_detect" id="object_detect" data-style="btn btn-default btn-round"
-                                                        multiple="" title="Object Detection" onchange="objectSelectOnChange()">
+                                                        multiple="" title="Object Detection" onchange="objectSelectOnChange()" >
                                                         {% for object in objects %}
-                                                        <option value="{{ object }}">{{ object.split('_') | join(' ') | title }}</option>
+                                                        <option value="{{ object }}" style="font-size:18px; font-weight: bold;">{{ object.split('_') | join(' ') | title }}</option>
                                                         {% endfor %}
                                                     </select>
                                                 </div>
@@ -182,17 +230,17 @@
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                     <div class="nav-align-center">
-                                                        <ul class="nav nav-pills nav-pills-primary justify-content-center" role="tablist">
+                                                        <ul class="nav nav-pills nav-pills-info pill justify-content-center" role="tablist">
                                                             {% for object in objects %}
                                                             {% if object == "intrusion" %}
-                                                            <li class="nav-item" style="padding-top: 1vh">
-                                                                <a class="nav-link active" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                            <li class="nav-item" style="padding-bottom: 1vh">
+                                                                <a class="nav-link active nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
                                                             {% else %}
-                                                            <li class="nav-item" style="padding-top: 1vh">
-                                                                <a class="nav-link" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                            <li class="nav-item" style="padding-bottom: 1vh">
+                                                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
@@ -210,13 +258,21 @@
                                                         <div class="tab-pane active" id="{{ object }}_tab" role="tabpanel">
                                                             <div class="row">
                                                                 <div class = "col-md-12 form-group">
-                                                                    <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                    <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
                                                                 </div>
                                                                 <div class = "col-md-12 form-group">
-                                                                    <input id = "{{ object }}_sms_list" name="{{ object }}_sms_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                    <input id = "{{ object }}_sms_list" name="{{ object }}_sms_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
                                                                 </div>
                                                                 <div class = "col-md-12 form-group">
-                                                                    <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                    <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                </div>
+                                                                <div class="col-md-6 form-group">
+                                                                    <input id="intrusion_start_time" name="intrusion_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                        class="form-control" placeholder="Intrusion Start Time (24hrs HH:MM)">
+                                                                </div>
+                                                                <div class="col-md-6 form-group">
+                                                                    <input id="intrusion_end_time" name="intrusion_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                        class="form-control" placeholder="Intrusion End Time (24hrs HH:MM)">
                                                                 </div>
                                                                 <div class="form-check">
                                                                     <label class="form-check-label">
@@ -238,13 +294,22 @@
                                                         <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
                                                             <div class="row">
                                                                 <div class = "col-md-12 form-group">
-                                                                    <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                    <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
                                                                 </div>
                                                                 <div class = "col-md-12 form-group">
-                                                                    <input id = "{{ object }}_sms_list" name="{{ object }}_sms_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                    <input id = "{{ object }}_sms_list" name="{{ object }}_sms_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} SMS List" pattern="^[0-9]{10}(,[0-9]{10})*$">
                                                                 </div>
                                                                 <div class = "col-md-12 form-group">
-                                                                    <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="{{ object.split('_') | join(' ') | title }} Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                    <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Call List" pattern="^[0-9]{10}(,[0-9]{10})*$">
+                                                                </div>
+                                                                <!--the following two divs are kept to maintain consistency, hidden for now, because not implemented-->
+                                                                <div class="col-md-6 form-group">
+                                                                    <input id="{{ object }}_start_time" name="{{ object }}_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text" style="visibility: hidden;"
+                                                                        class="form-control" placeholder="Intrusion Start Time (24hrs HH:MM)">
+                                                                </div>
+                                                                <div class="col-md-6 form-group">
+                                                                    <input id="{{ object }}_end_time" name="{ object }}_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text" style="visibility: hidden;"
+                                                                        class="form-control" placeholder="Intrusion End Time (24hrs HH:MM)">
                                                                 </div>
                                                                 <div class="form-check">
                                                                     <label class="form-check-label">
@@ -272,7 +337,7 @@
                                         </div>
                                         <div class="text-center">
                                             <a href="/list" class="btn btn-round btn-default">Cancel</a>
-                                            <button type="submit" class="btn btn-round btn-success">Done</button>
+                                            <button type="submit" class="btn btn-round btn-success" onclick="intrusion_tab_show()">Done</button>
                                         </div>
 
 
@@ -283,7 +348,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        <!--</div>-->
     </div>
 
     <footer class="footer">

@@ -440,53 +440,98 @@
         startTimer();
 
     </script>
+    <style>
+        ::placeholder {
+          color: black !important;
+          opacity: 1 !important; /* Firefox */
+          font-size: 15px; !important
+        }
+
+        .pill .active a{
+            background:orange !important;
+                color:white;
+        }
+        .pill .active a:hover{
+                <!--background:orange !important;-->
+            }
+        .pill a:hover {
+             background:orange !important;
+            color:white;
+        }
+        .pill a:inactive {
+            background:orange !important;
+            color:white;
+
+        }
+
+        input[type=text] {
+            font-size: 15px;
+        }
+
+        .nav-pill-text{
+            font-size: 18px;
+            font-weight: bold !important;
+        }
+
+        .top-bar-link p{
+            font-size: 30px;
+        }
+
+        .top-bar-link i{
+            font-size: 30px !important;
+            width: 40px !important;
+        }
+    </style>
 </head>
 
 <body class="profile-page" onload="onLoad()">
     <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
         <div class="container">
-            <div class="navbar-translate">
-                <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">
-                    <img class="dsal_logo" src="/static/img/dsal.png">
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-bar bar1"></span>
-                    <span class="navbar-toggler-bar bar2"></span>
-                    <span class="navbar-toggler-bar bar3"></span>
-                </button>
-            </div>
+            <!--<div class="navbar-translate">-->
+                <!--<a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">-->
+                    <!--<img class="dsal_logo" src="/static/img/dsal.png">-->
+                <!--</a>-->
+                <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"-->
+                    <!--aria-expanded="false" aria-label="Toggle navigation">-->
+                    <!--<span class="navbar-toggler-bar bar1"></span>-->
+                    <!--<span class="navbar-toggler-bar bar2"></span>-->
+                    <!--<span class="navbar-toggler-bar bar3"></span>-->
+                <!--</button>-->
+            <!--</div>-->
             <div class="collapse navbar-collapse" data-nav-image="/static/img/blur1.jpg" data-color="orange">
-                <ul class="navbar-nav ml-auto">
+                <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fa fa-home"></i>
-                            <p>Home</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/list">
+                        <a class="nav-link top-bar-link" href="/list">
                             <i class="fa fa-list"></i>
                             <p>List</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/add">
+                        <a class="nav-link top-bar-link" href="/add">
                             <i class="fa fa-plus"></i>
                             <p>Add Camera</p>
                         </a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">
-                            <p>Background</p>
+                    <!--<li class="nav-item dropdown">-->
+                        <!--<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">-->
+                            <!--<p>Background</p>-->
+                        <!--</a>-->
+                        <!--<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">-->
+                            <!--<a class="dropdown-item" href="/background/bank/view">Bank</a>-->
+                            <!--<a class="dropdown-item" href="/background/hospital/view">Hospital</a>-->
+                            <!--<a class="dropdown-item" href="/background/insurance/view">Insurance</a>-->
+                            <!--<a class="dropdown-item" href="/background/pixel/view">Pixel</a>-->
+                            <!--<a class="dropdown-item" href="/background/retail/view">Retail</a>-->
+                        <!--</div>-->
+                    <!--</li>-->
+                </ul>
+
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fa fa-rocket"></i>
+                            <p>Launch</p>
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="/background/bank/view">Bank</a>
-                            <a class="dropdown-item" href="/background/hospital/view">Hospital</a>
-                            <a class="dropdown-item" href="/background/insurance/view">Insurance</a>
-                            <a class="dropdown-item" href="/background/pixel/view">Pixel</a>
-                            <a class="dropdown-item" href="/background/retail/view">Retail</a>
-                        </div>
                     </li>
                 </ul>
                 <form class="form form-newsletter" method="POST" action="/view/search">
@@ -505,37 +550,37 @@
         <img id='fullScreenImage' class='modal_content' src=''>
     </div>
 
-    <div id="mainHeader" class="wrapper" style="padding-top: 2vh;">
-        <div class="page-header page-header-mini">
-            <div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>
-            <div class="content-center">
-                <div class="row">
-                    <div class="col-md-8 ml-auto mr-auto text-center">
-                        <h2 class="title">GoDeep Platform</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="mainHeader" class="wrapper" style="padding-top: 8vh;">
+        <!--<div class="page-header page-header-mini">-->
+            <!--<div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>-->
+            <!--<div class="content-center">-->
+                <!--<div class="row">-->
+                    <!--<div class="col-md-8 ml-auto mr-auto text-center">-->
+                        <!--<h2 class="title">GoDeep Platform</h2>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
 
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
                     {% if not search_mode %}
                     <div class="nav-align-center">
-                        <ul class="nav nav-pills nav-pills-primary justify-content-center" role="tablist">
+                        <ul class="nav nav-pills nav-pills-info pill justify-content-center" role="tablist">
                             <li class="nav-item" style="padding-top: 1vh">
-                                <a class="nav-link" data-toggle="tab" href="#Fav" role="tablist">
+                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#Fav" role="tablist">
                                     Favourites
                                 </a>
                             </li>
                             <li class="nav-item" style="padding-top: 1vh">
-                                <a class="nav-link active" data-toggle="tab" href="#All" role="tablist">
+                                <a class="nav-link active nav-pill-text" data-toggle="tab" href="#All" role="tablist">
                                     All
                                 </a>
                             </li>
                             {% for unique_floor, floor_stripped in unique_floors %}
                             <li class="nav-item" style="padding-top: 1vh">
-                                <a class="nav-link" data-toggle="tab" href="#{{ floor_stripped }}" role="tablist">
+                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ floor_stripped }}" role="tablist">
                                     {{ unique_floor }}
                                 </a>
                             </li>
