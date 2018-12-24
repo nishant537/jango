@@ -442,9 +442,13 @@
     </script>
     <style>
         ::placeholder {
-          color: black !important;
+          color: white !important;
           opacity: 1 !important; /* Firefox */
           font-size: 15px; !important
+        }
+
+        .form-control {
+            color: white; !important;
         }
 
         .pill .active a{
@@ -485,19 +489,20 @@
 </head>
 
 <body class="profile-page" onload="onLoad()">
-    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
+    <nav class="navbar navbar-expand-sm fixed-top bg-dark" id="mainNavbar">
+                    <div class="navbar-translate">
+                <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">
+                    <img class="dsal_logo" src="/static/img/dsal.png">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-bar bar1"></span>
+                    <span class="navbar-toggler-bar bar2"></span>
+                    <span class="navbar-toggler-bar bar3"></span>
+                </button>
+            </div>
         <div class="container">
-            <!--<div class="navbar-translate">-->
-                <!--<a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">-->
-                    <!--<img class="dsal_logo" src="/static/img/dsal.png">-->
-                <!--</a>-->
-                <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"-->
-                    <!--aria-expanded="false" aria-label="Toggle navigation">-->
-                    <!--<span class="navbar-toggler-bar bar1"></span>-->
-                    <!--<span class="navbar-toggler-bar bar2"></span>-->
-                    <!--<span class="navbar-toggler-bar bar3"></span>-->
-                <!--</button>-->
-            <!--</div>-->
+
             <div class="collapse navbar-collapse" data-nav-image="/static/img/blur1.jpg" data-color="orange">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
@@ -529,8 +534,8 @@
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/">
-                            <i class="fa fa-rocket"></i>
-                            <p>Launch</p>
+                            <i class="fa fa-file-alt"></i>
+                            <p>License Status</p>
                         </a>
                     </li>
                 </ul>

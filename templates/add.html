@@ -62,12 +62,18 @@
     </script>
 
     <style>
+    .btn {
+        font-size:1em;
+    }
+
+    <!--for the form placeholders-->
     ::placeholder {
       color: black !important;
       opacity: 1 !important; /* Firefox */
       font-size: 15px; !important
     }
 
+    <!--the tab pills' behavior-->
     .pill .active a{
         background:orange !important;
             color:white;
@@ -85,31 +91,33 @@
 
     }
 
+    <!--for the user text input-->
     input[type=text] {
         font-size: 15px;
     }
 
+    <!--for the text in the nav pills-->
     .nav-pill-text{
         font-size: 18px;
         font-weight: bold !important;
     }
 
+    <!--top bar button font size-->
     .top-bar-link p{
         font-size: 30px;
     }
 
+    <!--top bar button icon size-->
     .top-bar-link i{
         font-size: 30px !important;
         width: 40px !important;
     }
-
-
     </style>
 
 </head>
 
 <body class="signup-page">
-    <nav class="navbar navbar-expand-sm fixed-top bg-white">
+    <nav class="navbar navbar-expand-sm fixed-top bg-dark">
         <div class="container">
             <!--<div class="navbar-translate">-->
                 <!--<a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">-->
@@ -146,8 +154,8 @@
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/">
-                            <i class="fa fa-rocket"></i>
-                            <p>Launch</p>
+                            <i class="fa fa-file-alt"></i>
+                            <p>License Status</p>
                         </a>
                     </li>
                     <!--<li class="nav-item dropdown">-->

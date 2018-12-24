@@ -21,9 +21,15 @@
     <!--custom css-->
     <style>
         ::placeholder {
-          color: black !important;
-          opacity: 1 !important; /* Firefox */
+          color: white !important;
+          opacity: 1 !important;
           font-size: 15px; !important
+        }
+
+        <!--for the search field-->
+
+        .form-control {
+            color: white; !important;
         }
 
         .pill .active a{
@@ -73,7 +79,7 @@
 </head>
 
 <body class="profile-page">
-    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
+    <nav class="navbar navbar-expand-sm fixed-top bg-dark" id="mainNavbar">
         <div class="container">
             <!--<div class="navbar-translate">-->
                 <!--<a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">-->
@@ -145,11 +151,11 @@
             <!--</div>-->
         <!--</div>-->
         {% if search_mode %}
-        <div class="ml-auto mr-auto col-md-2" style="padding-top: 2vh;">
+        <div class="ml-auto mr-auto col-md-2" style="padding-top: 8vh;">
             <a href="/list" class="btn btn-default btn-round btn-block">Clear Search</a>
         </div>
         {% endif %}
-        <div class="row" style="padding: 80px;">
+        <div class="row" style="margin-top: 80px;">
             <div class="card card-plain">
 
                 <div class="card-body">
