@@ -358,12 +358,11 @@ def search_view_page():
                         obj_list[i] = obj_list[i].capitalize()
                     obj_pretty = " ".join(obj_list)
                     object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
-
+                
                 sound_dict[str(cam_id)] = object_wise_sound_dict
-                zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed, is_list_page=True)
+                zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
                 zipped_data.insert(0, str(cam_id))
                 data_list.append(zipped_data)
-
 
         # Sort data alphanumerically
         data_list = natural_sort(data_list, key=itemgetter(1))
