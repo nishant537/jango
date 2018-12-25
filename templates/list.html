@@ -20,18 +20,6 @@
 
     <!--custom css-->
     <style>
-        ::placeholder {
-          color: white !important;
-          opacity: 1 !important;
-          font-size: 15px; !important
-        }
-
-        <!--for the search field-->
-
-        .form-control {
-            color: white; !important;
-        }
-
         .pill .active a{
             background:orange !important;
                 color:white;
@@ -75,25 +63,57 @@
         .table-normal-row td{
             font-size: 20px;
         }
+
+        html, body {
+          height: 100%;
+        }
+
+        #wrap {
+            min-height: 100%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            margin-top: 100px;
+            background-image: url('/static/img/wall.jpg')
+        }
+
+        #main {
+          overflow:auto;
+          padding-bottom:150px; /* this needs to be bigger than footer height*/
+        }
+
+        .footer {
+          position: relative;
+          margin-top: -150px; /* negative value of footer height */
+          height: 150px;
+          clear:both;
+          <!--padding-top:20px;-->
+        }
     </style>
 </head>
 
 <body class="profile-page">
-    <nav class="navbar navbar-expand-sm fixed-top bg-dark" id="mainNavbar">
+    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
+        <div class="navbar-translate" style="height: 80px;">
+            <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">
+                <img class="dsal_logo" src="/static/img/dsal.png">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-bar bar1"></span>
+                <span class="navbar-toggler-bar bar2"></span>
+                <span class="navbar-toggler-bar bar3"></span>
+            </button>
+        </div>
         <div class="container">
-            <!--<div class="navbar-translate">-->
-                <!--<a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">-->
-                    <!--<img class="dsal_logo" src="/static/img/dsal.png">-->
-                <!--</a>-->
-                <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"-->
-                    <!--aria-expanded="false" aria-label="Toggle navigation">-->
-                    <!--<span class="navbar-toggler-bar bar1"></span>-->
-                    <!--<span class="navbar-toggler-bar bar2"></span>-->
-                    <!--<span class="navbar-toggler-bar bar3"></span>-->
-                <!--</button>-->
-            <!--</div>-->
             <div class="collapse navbar-collapse" data-nav-image="/static/img/blur1.jpg" data-color="orange">
                 <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link top-bar-link" href="/list">
+                            <i class="fa fa-list"></i>
+                            <p>Home</p>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link top-bar-link" href="/view">
                             <i class="fa fa-camera"></i>
@@ -139,7 +159,7 @@
         </div>
     </nav>
 
-    <div class="wrapper" style="padding-top: 2vh;">
+    <div class="wrapper" id="wrap">
         <!--<div class="page-header page-header-mini">-->
             <!--<div class="page-header-image" style="background-image: url('/static/img/{{ image }}');"></div>-->
             <!--<div class="content-center">-->
@@ -151,11 +171,11 @@
             <!--</div>-->
         <!--</div>-->
         {% if search_mode %}
-        <div class="ml-auto mr-auto col-md-2" style="padding-top: 8vh;">
+        <div class="ml-auto mr-auto col-md-2" style="padding-top:4vh">
             <a href="/list" class="btn btn-default btn-round btn-block">Clear Search</a>
         </div>
         {% endif %}
-        <div class="row" style="margin-top: 80px;">
+        <div class="row">
             <div class="card card-plain">
 
                 <div class="card-body">
@@ -169,9 +189,9 @@
                                     <th class="text-center">
                                         Floor
                                     </th>
-                                    <th class="text-center">
-                                        Priority
-                                    </th>
+                                    <!--<th class="text-center">-->
+                                        <!--Priority-->
+                                    <!--</th>-->
                                     {% for object in objects %}
                                     <th class="text-center">
                                         {{ object.split('_') | join(' ') | title }}
@@ -197,9 +217,9 @@
                                     <td class="text-center">
                                         {{ floor }}
                                     </td>
-                                    <td class="text-center">
-                                        {{ priority|title }}
-                                    </td>
+                                    <!--<td class="text-center">-->
+                                        <!--{{ priority|title }}-->
+                                    <!--</td>-->
                                     {% for object, enabled in objects_list %}
                                     {% if enabled == 1 %}
                                     <td class="text-center">
