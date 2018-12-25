@@ -48,11 +48,13 @@
 
         .top-bar-link p{
             font-size: 30px;
+            color: black;
         }
 
         .top-bar-link i{
             font-size: 30px !important;
             width: 40px !important;
+            color: black;
         }
 
         .table-heading th{
@@ -70,32 +72,32 @@
 
         #wrap {
             min-height: 100%;
-            background-size: cover;
-            background-repeat: no-repeat;
+            /*background-size: cover;
+            background-repeat: repeat;*/
             background-position: center center;
             margin-top: 100px;
-            background-image: url('/static/img/wall.jpg')
+            background-image: url('/static/img/wall.png')
         }
 
         #main {
-          overflow:auto;
-          padding-bottom:150px; /* this needs to be bigger than footer height*/
+            overflow:auto;
+            padding-bottom:150px; /* this needs to be bigger than footer height*/
         }
 
         .footer {
-          position: relative;
-          margin-top: -150px; /* negative value of footer height */
-          height: 150px;
-          clear:both;
-          <!--padding-top:20px;-->
+            position: relative;
+            margin-top: -150px; /* negative value of footer height */
+            height: 150px;
+            clear:both;
+            <!--padding-top:20px;-->
         }
     </style>
 </head>
 
 <body class="profile-page">
-    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar">
+    <nav class="navbar navbar-expand-sm fixed-top bg-white" id="mainNavbar" >
         <div class="navbar-translate" style="height: 80px;">
-            <a class="navbar-brand" href="/" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">
+            <a class="navbar-brand" href="http://www.deepsightlabs.com" target="_blank" rel="tooltip" title="DeepSight AI Labs" data-placement="bottom">
                 <img class="dsal_logo" src="/static/img/dsal.png">
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index"
