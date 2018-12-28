@@ -34,6 +34,8 @@ handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('[%(filename)s:%(lineno)s %(funcName)s %(module)s] %(message)s'))
 logger.addHandler(handler)
 
+# TODO: MAKE CROWD COUNTING FIELDS REQUIRED WHEN IT IS SELECTED
+# TODO: HANDLE THE NOT FOCUSSABLE ISSUE
 #### Functions
 
 def get_license():
@@ -136,6 +138,9 @@ def zip_data(data, objects_allowed, is_list_page=False):
         if object_allowed in object_detect:
             alert_dictionary = obj_alerts[object_allowed]
             if object_allowed == "crowd_counting":
+                alert_dictionary['crowd_email_list']['daily'] = list_to_string(alert_dictionary['crowd_email_list']['daily'], is_list_page)
+                alert_dictionary['crowd_email_list']['weekly'] = list_to_string(alert_dictionary['crowd_email_list']['weekly'], is_list_page)
+                alert_dictionary['crowd_email_list']['monthly'] = list_to_string(alert_dictionary['crowd_email_list']['monthly'], is_list_page)
                 obj_alerts_list.append((object_allowed, alert_dictionary))
                 pass
             else:
@@ -187,18 +192,14 @@ def form_to_json(form):
             object_dict = collections.OrderedDict()
 
             notif_choice_list = []
-            print form.getlist('crowd_daily_enable')
             if form.getlist('crowd_daily_enable'):
                 notif_choice_list.append("daily")
-                print "daily"
             form.getlist('crowd_weekly_enable')
             if form.getlist('crowd_weekly_enable'):
                 notif_choice_list.append("weekly")
-                print "weekly"
             form.getlist('crowd_monthly_enable')
             if form.getlist('crowd_monthly_enable'):
                 notif_choice_list.append("monthly")
-                print "monthly"
             object_dict['crowd_notif_choice'] = notif_choice_list
 
             report_details = {}
@@ -511,13 +512,13 @@ def internal_server_error(e):
     return render_template('home.html', image="Landing.jpeg",
         alert_message='Internal server error occured, please contact Customer Support'), 500
 
-# @app.errorhandler(Exception)
-# def unhandled_exception(e):
-#     '''Unhandled exception'''
-#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, e))
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    '''Unhandled exception'''
+    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app
