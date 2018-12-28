@@ -28,6 +28,44 @@
             }
         }
 
+        function crowdCountEnableOnChange() {
+            if ($("#crowd_daily_enable").is(':checked')) {
+                $("#daily_time").attr('required', '');
+                $("#daily_start_1").attr('required', '');
+                $("#daily_end_1").attr('required', '');
+            }
+            else {
+                $("#daily_time").removeAttr('required');
+                $("#daily_start_1").removeAttr('required');
+                $("#daily_end_1").removeAttr('required');
+            }
+
+            if ($("#crowd_weekly_enable").is(':checked')) {
+                $("#weekly_time").attr('required', '');
+                $("#weekly_start_1").attr('required', '');
+                $("#weekly_end_1").attr('required', '');
+            }
+            else {
+                $("#weekly_time").removeAttr('required');
+                $("#weekly_start_1").removeAttr('required');
+                $("#weekly_end_1").removeAttr('required');
+            }
+
+            if ($("#crowd_monthly_enable").is(':checked')) {
+                $("#monthly_time").attr('required', '');
+                $("#monthly_start_1").attr('required', '');
+                $("#monthly_end_1").attr('required', '');
+                $("#monthly_date").attr('required', '');
+            }
+            else {
+                $("#monthly_time").removeAttr('required');
+                $("#monthly_start_1").removeAttr('required');
+                $("#monthly_end_1").removeAttr('required');
+                $("#monthly_date").removeAttr('required');
+            }
+
+        }
+
         function FillAllLists(f, currentObject) {
             var data = {{ data | tojson }};
             <!--To access a list of objects, access the right index of data array (7)-->
@@ -338,7 +376,7 @@
                                                                                     <div class="row">
                                                                                         <div class="col-md-2 form-group">
                                                                                             <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
-                                                                                                <input id="crowd_daily_enable" name="crowd_daily_enable" class="form-check-input" type="checkbox" {{ 'checked' if "daily" in details.crowd_notif_choice }} >
+                                                                                                <input id="crowd_daily_enable" name="crowd_daily_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()" {{ 'checked' if "daily" in details.crowd_notif_choice }} >
                                                                                                 <span class="form-check-sign"></span>
                                                                                                 Enabled
                                                                                             </label>
@@ -369,7 +407,7 @@
                                                                                     <div class="row">
                                                                                         <div class="col-md-2 form-group">
                                                                                             <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
-                                                                                                <input id="crowd_weekly_enable" name="crowd_weekly_enable" class="form-check-input" type="checkbox" {{ 'checked' if "weekly" in details.crowd_notif_choice }} >
+                                                                                                <input id="crowd_weekly_enable" name="crowd_weekly_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()" {{ 'checked' if "weekly" in details.crowd_notif_choice }} >
                                                                                                 <span class="form-check-sign"></span>
                                                                                                 Enabled
                                                                                             </label>
@@ -429,7 +467,7 @@
                                                                                     <div class="row">
                                                                                         <div class="col-md-2 form-group">
                                                                                             <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
-                                                                                                <input id="crowd_monthly_enable" name="crowd_monthly_enable" class="form-check-input" type="checkbox" {{ 'checked' if "monthly" in details.crowd_notif_choice }} >
+                                                                                                <input id="crowd_monthly_enable" name="crowd_monthly_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()" {{ 'checked' if "monthly" in details.crowd_notif_choice }} >
                                                                                                 <span class="form-check-sign"></span>
                                                                                                 Enabled
                                                                                             </label>

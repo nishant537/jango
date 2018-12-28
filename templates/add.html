@@ -28,12 +28,51 @@
                 $("#intrusion_start_time").removeAttr('required');
                 $("#intrusion_end_time").removeAttr('required');
             }
+
+         }
+
+        function crowdCountEnableOnChange() {
+            if ($("#crowd_daily_enable").is(':checked')) {
+                $("#daily_time").attr('required', '');
+                $("#daily_start_1").attr('required', '');
+                $("#daily_end_1").attr('required', '');
+            }
+            else {
+                $("#daily_time").removeAttr('required');
+                $("#daily_start_1").removeAttr('required');
+                $("#daily_end_1").removeAttr('required');
+            }
+
+            if ($("#crowd_weekly_enable").is(':checked')) {
+                $("#weekly_time").attr('required', '');
+                $("#weekly_start_1").attr('required', '');
+                $("#weekly_end_1").attr('required', '');
+            }
+            else {
+                $("#weekly_time").removeAttr('required');
+                $("#weekly_start_1").removeAttr('required');
+                $("#weekly_end_1").removeAttr('required');
+            }
+
+            if ($("#crowd_monthly_enable").is(':checked')) {
+                $("#monthly_time").attr('required', '');
+                $("#monthly_start_1").attr('required', '');
+                $("#monthly_end_1").attr('required', '');
+                $("#monthly_date").attr('required', '');
+            }
+            else {
+                $("#monthly_time").removeAttr('required');
+                $("#monthly_start_1").removeAttr('required');
+                $("#monthly_end_1").removeAttr('required');
+                $("#monthly_date").removeAttr('required');
+            }
+
         }
 
         function FillAllLists(f, currentObject, objects) {
             if (f[currentObject.concat("_copy")].checked == true) {
                 for (key in objects) {
-                    if (objects[key] == currentObject) {}
+                    if (objects[key] == currentObject || objects[key] == "crowd_counting") {}
                     else {
                         f[objects[key].concat("_email_list")].value = f[currentObject.concat("_email_list")].value;
                         f[objects[key].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
@@ -44,7 +83,7 @@
             }
             else {
                 for (key in objects) {
-                    if (objects[key] == currentObject) {}
+                    if (objects[key] == currentObject || objects[key] == "crowd_counting") {}
                     else {
                         f[objects[key].concat("_email_list")].value = "";
                         f[objects[key].concat("_sms_list")].value = "";
@@ -55,10 +94,6 @@
             }
         }
 
-        function intrusion_tab_show(){
-          // $('[href="#intrusion_tab"]').tab('show')
-          form.reportValidity();
-        }
 
     </script>
 
@@ -277,13 +312,13 @@
                                                             {% for object in objects %}
                                                             {% if object == "intrusion" %}
                                                             <li class="nav-item" style="padding-bottom: 1vh">
-                                                                <a class="nav-link active nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                                <a class="nav-link active nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist" onclick="Validate(this.form)">
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
                                                             {% else %}
                                                             <li class="nav-item" style="padding-bottom: 1vh">
-                                                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist" onclick="Validate(this.form)">
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
@@ -364,7 +399,7 @@
                                                                                 <div class="row">
                                                                                     <div class="col-md-2 form-group">
                                                                                         <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
-                                                                                            <input id="crowd_daily_enable" name="crowd_daily_enable" class="form-check-input" type="checkbox">
+                                                                                            <input id="crowd_daily_enable" name="crowd_daily_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()">
                                                                                             <span class="form-check-sign"></span>
                                                                                             Enabled
                                                                                         </label>
@@ -395,7 +430,7 @@
                                                                                 <div class="row">
                                                                                     <div class="col-md-2 form-group">
                                                                                         <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
-                                                                                            <input id="crowd_weekly_enable" name="crowd_weekly_enable" class="form-check-input" type="checkbox">
+                                                                                            <input id="crowd_weekly_enable" name="crowd_weekly_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()">
                                                                                             <span class="form-check-sign"></span>
                                                                                             Enabled
                                                                                         </label>
@@ -455,7 +490,7 @@
                                                                                 <div class="row">
                                                                                     <div class="col-md-2 form-group">
                                                                                         <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
-                                                                                            <input id="crowd_monthly_enable" name="crowd_monthly_enable" class="form-check-input" type="checkbox">
+                                                                                            <input id="crowd_monthly_enable" name="crowd_monthly_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()">
                                                                                             <span class="form-check-sign"></span>
                                                                                             Enabled
                                                                                         </label>
