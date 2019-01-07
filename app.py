@@ -207,9 +207,9 @@ def form_to_json(form):
             report_details['monthly'] = form['monthly_date']
             object_dict['crowd_report_day'] = report_details
 
-            interval_dict = {'daily': [(form['daily_start_1'], form['daily_end_1'])],
-                                   'weekly': [(form['weekly_start_1'], form['weekly_end_1'])],
-                                   'monthly': [(form['monthly_start_1'], form['monthly_end_1'])]}
+            interval_dict = {'daily': [(form['daily_start_1'], form['daily_end_1']), (form['daily_start_2'], form['daily_end_2']), (form['daily_start_3'], form['daily_end_3'])],
+                             'weekly': [(form['weekly_start_1'], form['weekly_end_1']), (form['weekly_start_2'], form['weekly_end_2']), (form['weekly_start_3'], form['weekly_end_3'])],
+                             'monthly': [(form['monthly_start_1'], form['monthly_end_1']), (form['monthly_start_2'], form['monthly_end_2']), (form['monthly_start_3'], form['monthly_end_3'])]}
             object_dict['crowd_interval_dict'] = interval_dict
 
             report_time = {'daily': form['daily_time'],
