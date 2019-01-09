@@ -246,14 +246,18 @@ def home_page():
     '''Route / or home page'''
     # Nothing to do here, license_required handles everything
     pass
-    
+
+
 @app.route('/add')
 @license_required
 def add_camera_page():
     '''Route Add Camera page'''
+    # check if the maximum number of cameras have been added already
+    check_response = requests.get(BACKEND_URL + 'maxCameraCheck').json()
     img = get_background()
     objects_allowed = get_objects_list()
-    return render_template('add.html', image=img, objects=objects_allowed)
+    return render_template('add.html', image=img, objects=objects_allowed, message=check_response)
+
 
 @app.route('/edit/<camera_id>')
 @license_required
