@@ -28,12 +28,51 @@
                 $("#intrusion_start_time").removeAttr('required');
                 $("#intrusion_end_time").removeAttr('required');
             }
+
+         }
+
+        function crowdCountEnableOnChange() {
+            if ($("#crowd_daily_enable").is(':checked')) {
+                $("#daily_time").attr('required', '');
+                $("#daily_start_1").attr('required', '');
+                $("#daily_end_1").attr('required', '');
+            }
+            else {
+                $("#daily_time").removeAttr('required');
+                $("#daily_start_1").removeAttr('required');
+                $("#daily_end_1").removeAttr('required');
+            }
+
+            if ($("#crowd_weekly_enable").is(':checked')) {
+                $("#weekly_time").attr('required', '');
+                $("#weekly_start_1").attr('required', '');
+                $("#weekly_end_1").attr('required', '');
+            }
+            else {
+                $("#weekly_time").removeAttr('required');
+                $("#weekly_start_1").removeAttr('required');
+                $("#weekly_end_1").removeAttr('required');
+            }
+
+            if ($("#crowd_monthly_enable").is(':checked')) {
+                $("#monthly_time").attr('required', '');
+                $("#monthly_start_1").attr('required', '');
+                $("#monthly_end_1").attr('required', '');
+                $("#monthly_date").attr('required', '');
+            }
+            else {
+                $("#monthly_time").removeAttr('required');
+                $("#monthly_start_1").removeAttr('required');
+                $("#monthly_end_1").removeAttr('required');
+                $("#monthly_date").removeAttr('required');
+            }
+
         }
 
         function FillAllLists(f, currentObject, objects) {
             if (f[currentObject.concat("_copy")].checked == true) {
                 for (key in objects) {
-                    if (objects[key] == currentObject) {}
+                    if (objects[key] == currentObject || objects[key] == "crowd_counting") {}
                     else {
                         f[objects[key].concat("_email_list")].value = f[currentObject.concat("_email_list")].value;
                         f[objects[key].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
@@ -44,7 +83,7 @@
             }
             else {
                 for (key in objects) {
-                    if (objects[key] == currentObject) {}
+                    if (objects[key] == currentObject || objects[key] == "crowd_counting") {}
                     else {
                         f[objects[key].concat("_email_list")].value = "";
                         f[objects[key].concat("_sms_list")].value = "";
@@ -55,9 +94,6 @@
             }
         }
 
-        function intrusion_tab_show(){
-          $('[href="#intrusion_tab"]').tab('show');
-        }
 
     </script>
 
@@ -68,9 +104,9 @@
 
     /*for the form placeholders*/
     ::placeholder {
-      color: black !important;
-      opacity: 1 !important; /* Firefox */
-      font-size: 15px; !important
+        color: black !important;
+        opacity: 1 !important; /* Firefox */
+        font-size: 15px; !important
     }
 
     /*the tab pills' behavior*/
@@ -116,7 +152,7 @@
     }
 
     html, body {
-      height: 100%;
+        height: 100%;
     }
 
     #wrap {
@@ -129,17 +165,25 @@
     }
 
     .footer {
-      position: relative;
-      margin-top: -150px; /* negative value of footer height */
-      height: 150px;
-      clear:both;
+        position: relative;
+        margin-top: -150px; /* negative value of footer height */
+        height: 150px;
+        clear:both;
     }
 
     .selected {
         background-color: #ebebeb;
+
+    }
+
+    .radio-label-text {
+        padding: 5px;
+    }
+
+    #field {
+    margin-bottom:20px;
     }
     </style>
-
 </head>
 
 <body class="signup-page">
@@ -268,13 +312,13 @@
                                                             {% for object in objects %}
                                                             {% if object == "intrusion" %}
                                                             <li class="nav-item" style="padding-bottom: 1vh">
-                                                                <a class="nav-link active nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                                <a class="nav-link active nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist" onclick="Validate(this.form)">
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
                                                             {% else %}
                                                             <li class="nav-item" style="padding-bottom: 1vh">
-                                                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist">
+                                                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist" onclick="Validate(this.form)">
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
@@ -324,6 +368,215 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        {% elif object == "crowd_counting" %}
+                                                        <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                             <div class="container">
+                                                                <div class="row">
+                                                                    <div class="col-md-2">
+                                                                        <!--<div class="nav-align-center">-->
+                                                                            <ul class="nav nav-tabs nav-stacked" role="tablist">
+                                                                                <li class="nav-item active">
+                                                                                    <a class="nav-link active nav-pill-text" data-toggle="pill" href="#daily_tab" role="tablist">
+                                                                                        Daily
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li class="nav-item">
+                                                                                    <a class="nav-link nav-pill-text" data-toggle="pill" href="#weekly_tab" role="tablist">
+                                                                                        Weekly
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li class="nav-item">
+                                                                                    <a class="nav-link nav-pill-text" data-toggle="pill" href="#monthly_tab" role="tablist">
+                                                                                        Monthly
+                                                                                    </a>
+                                                                                </li>
+                                                                            </ul>
+                                                                        <!--</div>-->
+                                                                    </div>
+                                                                    <div class="col-md-10">
+                                                                        <div class="tab-content gallery">
+                                                                            <div class="tab-pane active" id="daily_tab" role="tabpanel">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-2 form-group">
+                                                                                        <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
+                                                                                            <input id="crowd_daily_enable" name="crowd_daily_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()">
+                                                                                            <span class="form-check-sign"></span>
+                                                                                            Enabled
+                                                                                        </label>
+                                                                                    </div>
+
+                                                                                    <div class = "col-md-4 form-group">
+                                                                                        <input id = "daily_time" name="daily_time" type="text" class="form-control" placeholder="Report Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "daily_email_list" name="daily_email_list" type="text" class="form-control" placeholder="Enter Email List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "daily_start_1" name="daily_start_1" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "daily_end_1" name="daily_end_1" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "daily_start_2" name="daily_start_2" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "daily_end_2" name="daily_end_2" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "daily_start_3" name="daily_start_3" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "daily_end_3" name="daily_end_3" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class= "col-md-12 form-group">
+                                                                                        <input id = "daily_date" name="daily_date" type="text" class="form-control" placeholder="Report Date (1-28)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-8])$" style="visibility:hidden">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="tab-pane" id="weekly_tab" role="tabpanel">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-2 form-group">
+                                                                                        <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
+                                                                                            <input id="crowd_weekly_enable" name="crowd_weekly_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()">
+                                                                                            <span class="form-check-sign"></span>
+                                                                                            Enabled
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class = "col-md-4 form-group">
+                                                                                        <input id = "weekly_time" name="weekly_time" type="text" class="form-control" placeholder="Report Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "weekly_email_list" name="weekly_email_list" type="text" class="form-control" placeholder="Enter Email List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "weekly_start_1" name="weekly_start_1" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "weekly_end_1" name="weekly_end_1" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "weekly_start_2" name="weekly_start_2" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "weekly_end_2" name="weekly_end_2" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "weekly_start_3" name="weekly_start_3" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "weekly_end_3" name="weekly_end_3" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <b>Reporting Day:</b>
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="crowd_day" id="radio_mon" value="mon" checked>
+                                                                                            Monday
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="crowd_day" id="radio_tue" value="tue">
+                                                                                            Tuesday
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="crowd_day" id="radio_wed" value="wed">
+                                                                                            Wednesday
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="crowd_day" id="radio_thu" value="thu">
+                                                                                            Thursday
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="crowd_day" id="radio_fri" value="fri">
+                                                                                            Friday
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="crowd_day" id="radio_sat" value="sat">
+                                                                                            Saturday
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="crowd_day" id="radio_sun" value="sun">
+                                                                                            Sunday
+                                                                                        </label>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="tab-pane" id="monthly_tab" role="tabpanel">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-2 form-group">
+                                                                                        <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
+                                                                                            <input id="crowd_monthly_enable" name="crowd_monthly_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()">
+                                                                                            <span class="form-check-sign"></span>
+                                                                                            Enabled
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class = "col-md-4 form-group">
+                                                                                        <input id = "monthly_time" name="monthly_time" type="text" class="form-control" placeholder="Report Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "monthly_email_list" name="monthly_email_list" type="text" class="form-control" placeholder="Enter Email List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "monthly_start_1" name="monthly_start_1" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "monthly_end_1" name="monthly_end_1" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "monthly_start_2" name="monthly_start_2" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "monthly_end_2" name="monthly_end_2" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "monthly_start_3" name="monthly_start_3" type="text" class="form-control" placeholder="Enter Interval Start Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input id = "monthly_end_3" name="monthly_end_3" type="text" class="form-control" placeholder="Enter Interval End Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class= "col-md-12 form-group">
+                                                                                        <input id = "monthly_date" name="monthly_date" type="text" class="form-control" placeholder="Report Date (DD)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-8]|3[0-1])$">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                             </div>
+                                                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
                                                         {% else %}
                                                         <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
                                                             <div class="row">
@@ -371,7 +624,7 @@
                                         </div>
                                         <div class="text-center">
                                             <a href="/list" class="btn btn-round btn-default">Cancel</a>
-                                            <button type="submit" class="btn btn-round btn-success" onclick="intrusion_tab_show()">Done</button>
+                                            <button type="submit" class="btn btn-round btn-success">Done</button>
                                         </div>
 
 
@@ -404,7 +657,6 @@
         </div>
     </footer>
 </body>
-
 <!-- Core JS Files -->
 <script src="/static/js/jquery.3.2.1.min.js" type="text/javascript"></script>
 <script src="/static/js/popper.min.js" type="text/javascript"></script>

@@ -34,6 +34,8 @@ handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('[%(filename)s:%(lineno)s %(funcName)s %(module)s] %(message)s'))
 logger.addHandler(handler)
 
+# TODO: MAKE CROWD COUNTING FIELDS REQUIRED WHEN IT IS SELECTED
+# TODO: HANDLE THE NOT FOCUSSABLE ISSUE
 #### Functions
 
 def get_license():
@@ -135,16 +137,23 @@ def zip_data(data, objects_allowed, is_list_page=False):
     for object_allowed in objects_allowed:
         if object_allowed in object_detect:
             alert_dictionary = obj_alerts[object_allowed]
-            details = []
-            list_for_this_alert = list_to_string(alert_dictionary['email_list'], is_list_page)
-            details.append(("email_list", list_for_this_alert))
-            list_for_this_alert = list_to_string(alert_dictionary['sms_list'], is_list_page)
-            details.append(("sms_list", list_for_this_alert))
-            list_for_this_alert = list_to_string(alert_dictionary['call_list'], is_list_page)
-            details.append(("call_list", list_for_this_alert))
-            list_for_this_alert = (alert_dictionary['sound_alarm'])
-            details.append(("sound_alarm", list_for_this_alert))
-            obj_alerts_list.append((object_allowed, details))
+            if object_allowed == "crowd_counting":
+                alert_dictionary['crowd_email_list']['daily'] = list_to_string(alert_dictionary['crowd_email_list']['daily'], is_list_page)
+                alert_dictionary['crowd_email_list']['weekly'] = list_to_string(alert_dictionary['crowd_email_list']['weekly'], is_list_page)
+                alert_dictionary['crowd_email_list']['monthly'] = list_to_string(alert_dictionary['crowd_email_list']['monthly'], is_list_page)
+                obj_alerts_list.append((object_allowed, alert_dictionary))
+                pass
+            else:
+                details = []
+                list_for_this_alert = list_to_string(alert_dictionary['email_list'], is_list_page)
+                details.append(("email_list", list_for_this_alert))
+                list_for_this_alert = list_to_string(alert_dictionary['sms_list'], is_list_page)
+                details.append(("sms_list", list_for_this_alert))
+                list_for_this_alert = list_to_string(alert_dictionary['call_list'], is_list_page)
+                details.append(("call_list", list_for_this_alert))
+                list_for_this_alert = (alert_dictionary['sound_alarm'])
+                details.append(("sound_alarm", list_for_this_alert))
+                obj_alerts_list.append((object_allowed, details))
 
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
             favourite, objects, obj_alerts_list]
@@ -179,15 +188,50 @@ def form_to_json(form):
     # Notifications
     camera_dict['obj_alerts'] = {}
     for object_allowed in objects_allowed:
-        object_dict = collections.OrderedDict()
-        index_email = '%s_email_list' % str(object_allowed)
-        index_sms = '%s_sms_list' % str(object_allowed)
-        index_call = '%s_call_list' % str(object_allowed)
-        index_alarm = '%s_sound_alarm' % str(object_allowed)
-        object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
-        object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
-        object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
-        object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
+        if object_allowed == "crowd_counting":
+            object_dict = collections.OrderedDict()
+
+            notif_choice_list = []
+            if form.getlist('crowd_daily_enable'):
+                notif_choice_list.append("daily")
+            form.getlist('crowd_weekly_enable')
+            if form.getlist('crowd_weekly_enable'):
+                notif_choice_list.append("weekly")
+            form.getlist('crowd_monthly_enable')
+            if form.getlist('crowd_monthly_enable'):
+                notif_choice_list.append("monthly")
+            object_dict['crowd_notif_choice'] = notif_choice_list
+
+            report_details = {}
+            report_details['weekly'] = form.get('crowd_day')
+            report_details['monthly'] = form['monthly_date']
+            object_dict['crowd_report_day'] = report_details
+
+            interval_dict = {'daily': [(form['daily_start_1'], form['daily_end_1']), (form['daily_start_2'], form['daily_end_2']), (form['daily_start_3'], form['daily_end_3'])],
+                             'weekly': [(form['weekly_start_1'], form['weekly_end_1']), (form['weekly_start_2'], form['weekly_end_2']), (form['weekly_start_3'], form['weekly_end_3'])],
+                             'monthly': [(form['monthly_start_1'], form['monthly_end_1']), (form['monthly_start_2'], form['monthly_end_2']), (form['monthly_start_3'], form['monthly_end_3'])]}
+            object_dict['crowd_interval_dict'] = interval_dict
+
+            report_time = {'daily': form['daily_time'],
+                           'weekly': form['weekly_time'],
+                           'monthly': form['monthly_time']}
+            object_dict['crowd_report_time'] = report_time
+
+            email_dict = {'daily': [i.strip() for i in form['daily_email_list'].split(',')],
+                          'weekly': [i.strip() for i in form['weekly_email_list'].split(',')],
+                          'monthly': [i.strip() for i in form['monthly_email_list'].split(',')]}
+            object_dict['crowd_email_list'] = email_dict
+
+        else:
+            object_dict = collections.OrderedDict()
+            index_email = '%s_email_list' % str(object_allowed)
+            index_sms = '%s_sms_list' % str(object_allowed)
+            index_call = '%s_call_list' % str(object_allowed)
+            index_alarm = '%s_sound_alarm' % str(object_allowed)
+            object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
+            object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
+            object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
+            object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
 
         camera_dict['obj_alerts'][object_allowed] = object_dict
 
@@ -244,7 +288,10 @@ def view_page():
             for i in range(len(obj_list)):
                 obj_list[i] = obj_list[i].capitalize()
             obj_pretty = " ".join(obj_list)
-            object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
+            if obj == "crowd_counting":
+                object_wise_sound_dict[str(obj_pretty)] = 0
+            else:
+                object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
 
         sound_dict[str(cam_id)] = object_wise_sound_dict
         zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
@@ -357,7 +404,10 @@ def search_view_page():
                     for i in range(len(obj_list)):
                         obj_list[i] = obj_list[i].capitalize()
                     obj_pretty = " ".join(obj_list)
-                    object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
+                    if obj == "crowd_counting":
+                        object_wise_sound_dict[str(obj_pretty)] = 0
+                    else:
+                        object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
                 
                 sound_dict[str(cam_id)] = object_wise_sound_dict
                 zipped_data = zip_data(camera_payload[str(cam_id)], objects_allowed)
