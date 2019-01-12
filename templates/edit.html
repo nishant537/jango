@@ -218,7 +218,7 @@
                 </ul>
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
+                        <a class="nav-link" href="/home">
                             <i class="fa fa-file-alt"></i>
                             <p>License Status</p>
                         </a>
@@ -606,11 +606,11 @@
                                                                     {% endfor %}
 
                                                                     <div class="col-md-6 form-group">
-                                                                        <input value="{{ start_time }}" id="intrusion_start_time" name="intrusion_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+                                                                        <input value="{{ start_time }}" id="{{ object }}_start_time" name="{{ object }}_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
                                                                             type="text" class="form-control" placeholder="Enter Intrusion Start Time (24hrs HH:MM)"  style="visibility: hidden;">
                                                                     </div>
                                                                     <div class="col-md-6 form-group">
-                                                                        <input value="{{ end_time }}" id="intrusion_end_time" name="intrusion_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+                                                                        <input value="{{ end_time }}" id="{{ object }}_end_time" name="{{ object }}_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
                                                                             type="text" class="form-control" placeholder="Enter Intrusion End Time (24hrs HH:MM)"  style="visibility: hidden;">
                                                                     </div>
 
