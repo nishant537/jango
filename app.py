@@ -222,6 +222,15 @@ def form_to_json(form):
                           'monthly': [i.strip() for i in form['monthly_email_list'].split(',')]}
             object_dict['crowd_email_list'] = email_dict
 
+            regions_list = [[i.strip() for i in form['crowd_region_1'].split(';')],
+                            [i.strip() for i in form['crowd_region_2'].split(';')],
+                            [i.strip() for i in form['crowd_region_3'].split(';')]]
+            for i in range(len(regions_list)):
+                for j in range(len(regions_list[i])):
+                    regions_list[i][j] = (regions_list[i][j].split(','))
+
+            object_dict['regions_list'] = regions_list
+
         else:
             object_dict = collections.OrderedDict()
             index_email = '%s_email_list' % str(object_allowed)
