@@ -114,7 +114,7 @@ def dimensions_to_string(data):
         return_list = []
         for point in data:
             return_list.append(str(','.join(point)))
-        return str(';'.join(data))
+        return str(';'.join(return_list))
     else:
         return ''
 
@@ -244,9 +244,9 @@ def form_to_json(form):
                     regions_list[i][j] = (regions_list[i][j].split(','))
             object_dict['regions_list'] = regions_list
 
-            region_enable = {'region_enable': 'false'}
+            region_enable = {'status': 'false'}
             if form.getlist('crowd_dimension_enable'):
-                region_enable['region_enable'] = 'true'
+                region_enable['status'] = 'true'
             object_dict['region_enable'] = region_enable
 
         else:
@@ -521,7 +521,7 @@ def edit_camera(camera_id):
             data=form_to_json(request.form))
     return redirect(url_for('list_page'))
 
-#### Error handlers
+### Error handlers
 
 @app.errorhandler(404)
 def page_not_found(e):
