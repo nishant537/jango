@@ -34,8 +34,7 @@ handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('[%(filename)s:%(lineno)s %(funcName)s %(module)s] %(message)s'))
 logger.addHandler(handler)
 
-# TODO: MAKE CROWD COUNTING FIELDS REQUIRED WHEN IT IS SELECTED
-# TODO: HANDLE THE NOT FOCUSSABLE ISSUE
+
 #### Functions
 
 def get_license():
@@ -244,9 +243,9 @@ def form_to_json(form):
                     regions_list[i][j] = (regions_list[i][j].split(','))
             object_dict['regions_list'] = regions_list
 
-            region_enable = {'status': 'false'}
+            region_enable = {'status': 'False'}
             if form.getlist('crowd_dimension_enable'):
-                region_enable['status'] = 'true'
+                region_enable['status'] = 'True'
             object_dict['region_enable'] = region_enable
 
         else:

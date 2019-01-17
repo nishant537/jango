@@ -67,12 +67,19 @@
                 $("#monthly_date").removeAttr('required');
             }
 
+            if ($("#crowd_dimension_enable").is(':checked')) {
+                $("#crowd_region_1").attr('required', '');
+            }
+            else {
+                $("#crowd_region_1").removeAttr('required');
+            }
+
         }
 
         function FillAllLists(f, currentObject, objects) {
             if (f[currentObject.concat("_copy")].checked == true) {
                 for (key in objects) {
-                    if (objects[key] == currentObject || objects[key] == "crowd_counting") {}
+                    if (objects[key] == currentObject || objects[key] == "crowd_counting" && objects[key][0] != "crowd_counting") {}
                     else {
                         f[objects[key].concat("_email_list")].value = f[currentObject.concat("_email_list")].value;
                         f[objects[key].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
@@ -83,7 +90,7 @@
             }
             else {
                 for (key in objects) {
-                    if (objects[key] == currentObject || objects[key] == "crowd_counting") {}
+                    if (objects[key] == currentObject || objects[key] == "crowd_counting" && objects[key][0] != "crowd_counting") {}
                     else {
                         f[objects[key].concat("_email_list")].value = "";
                         f[objects[key].concat("_sms_list")].value = "";
