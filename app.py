@@ -7,8 +7,7 @@ import ConfigParser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
-from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort
-
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, session, flash
 # Initiate Flask
 app = Flask(__name__)
 
@@ -27,15 +26,15 @@ BACKEND_URL = 'http://%s:%s/'%(BACKEND_IP, BACKEND_PORT)
 # Setup license folder
 UPLOAD_FOLDER = config.get('global', 'UPLOAD_FOLDER')
 
-# Login boolean
-LOGGED_IN = False
-
 # Setup logger
 logger = logging.getLogger()
 logger.setLevel(logging.NOTSET)
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('[%(filename)s:%(lineno)s %(funcName)s %(module)s] %(message)s'))
 logger.addHandler(handler)
+
+# Key required to use session and secure username cookie
+app.secret_key = 'DSALGUIGUIDSAL'
 
 # TODO: MAKE CROWD COUNTING FIELDS REQUIRED WHEN IT IS SELECTED
 # TODO: HANDLE THE NOT FOCUSSABLE ISSUE
@@ -57,19 +56,20 @@ def license_required(func):
             # License valid and home_page decorated
             if license_status and func.__name__=='login':
                     error = None
-                    if LOGGED_IN is True:
+                    username = session.get('username')
+                    if username:
                         return redirect('/list')
                     elif request.method == 'POST':
                         login_info = get_login_info()
-                        print login_info
                         if request.form['username'] != login_info['username'] or request.form['password'] != login_info['password']:
                             error = 'Invalid Credentials. Please try again.'
                         else:
-                            global LOGGED_IN
-                            LOGGED_IN = True
-                            return redirect('/list')
+                            session['username'] = login_info['username']
+                            response = redirect('/list')
+                            return response
                     return render_template('login.html', message='Valid',
-                        license_status=license_status, image='Landing.jpeg', error=error)
+                                           license_status=license_status, image='Landing.jpeg', error=error)
+
 
             elif license_status and func.__name__=='home_page':
                 return render_template('home.html', message='Valid',
@@ -98,7 +98,8 @@ def login_required(func):
 
     @wraps(func)
     def valid_session(*args, **kwargs):
-        if LOGGED_IN is True:
+        user_id = session.get('username')
+        if user_id:
             return func(*args, **kwargs)
         else:
             return redirect('/login')
@@ -304,10 +305,8 @@ def login():
 @app.route('/logout')
 @license_required
 def logout():
-    global LOGGED_IN
-    LOGGED_IN = False
+    session.pop('username')
     return redirect('/login')
-
 
 @app.route('/add')
 @license_required
