@@ -305,7 +305,8 @@ def login():
 @app.route('/logout')
 @license_required
 def logout():
-    session.pop('username')
+    if session.get('username'):
+        session.pop('username')
     return redirect('/login')
 
 @app.route('/add')
