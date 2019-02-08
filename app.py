@@ -7,7 +7,7 @@ import ConfigParser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
-from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, jsonify
 
 # Initiate Flask
 app = Flask(__name__)
@@ -246,6 +246,17 @@ def home_page():
     '''Route / or home page'''
     # Nothing to do here, license_required handles everything
     pass
+
+@app.route('/status')
+def backend_status():
+    '''Returns a JSON containing the status of the backend'''
+    lic_status = False
+    try:
+        lic_status,lic_reason = get_license()
+    except Exception as e:
+        pass
+    print "License Status: " + str(lic_status)
+    return jsonify(result=lic_status)
 
 
 @app.route('/add')
