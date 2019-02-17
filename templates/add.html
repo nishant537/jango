@@ -19,6 +19,14 @@
     <link href="/static/css/main.css" rel="stylesheet" />
 
     <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            var message = {{ message|tojson }};
+            if (message.allow_add == 'false'){
+                alert('You have added the maximum number of cameras allowed.');
+                window.location.replace("/list");
+            }
+        }, false);
+
         function objectSelectOnChange() {
             if ($("#object_detect option[value=intrusion]:selected").length > 0) {
                 $("#intrusion_start_time").attr('required', '');

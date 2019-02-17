@@ -7,7 +7,7 @@ import ConfigParser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
-from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, jsonify
 
 # Initiate Flask
 app = Flask(__name__)
@@ -272,14 +272,29 @@ def home_page():
     '''Route / or home page'''
     # Nothing to do here, license_required handles everything
     pass
-    
+
+@app.route('/status')
+def backend_status():
+    '''Returns a JSON containing the status of the backend'''
+    lic_status = False
+    try:
+        lic_status,lic_reason = get_license()
+    except Exception as e:
+        pass
+    print "License Status: " + str(lic_status)
+    return jsonify(result=lic_status)
+
+
 @app.route('/add')
 @license_required
 def add_camera_page():
     '''Route Add Camera page'''
+    # check if the maximum number of cameras have been added already
+    check_response = requests.get(BACKEND_URL + 'maxCameraCheck').json()
     img = get_background()
     objects_allowed = get_objects_list()
-    return render_template('add.html', image=img, objects=objects_allowed)
+    return render_template('add.html', image=img, objects=objects_allowed, message=check_response)
+
 
 @app.route('/edit/<camera_id>')
 @license_required
