@@ -239,14 +239,6 @@ def form_to_json(form):
 
 #### Flask Routing
 
-@app.route('/')
-@app.route('/home')
-@license_required
-def home_page():
-    '''Route / or home page'''
-    # Nothing to do here, license_required handles everything
-    pass
-
 @app.route('/status')
 def backend_status():
     '''Returns a JSON containing the status of the backend'''
@@ -325,6 +317,8 @@ def view_page():
     return render_template('view.html', image=img, search_mode=False, sound_dict=sound_dict,
         objects=objects_allowed, data=data_list, unique_floors=unique_floors)
 
+@app.route('/')
+@app.route('/home')
 @app.route('/list')
 @license_required
 def list_page():
