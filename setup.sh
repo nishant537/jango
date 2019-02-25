@@ -13,6 +13,7 @@ cd ..
 
 # Copy the application folder to GoDeep directory
 sudo cp -R static /var/www/godeep
+rm -rf static/fontawesome
 sudo cp -R templates /var/www/godeep
 sudo cp alarm.mp3 /var/www/godeep/alarm.mp3
 sudo cp app.py /var/www/godeep
