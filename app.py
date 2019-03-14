@@ -8,7 +8,6 @@ from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, jsonify, flash
-import time
 
 # Initiate Flask
 app = Flask(__name__)
