@@ -57,19 +57,23 @@ def license_required(func):
 
             # License valid and home_page decorated
             if license_status and func.__name__=='login':
-                    error = None
-                    username = session.get('username')
-                    if username:
-                        return redirect('/list')
-                    elif request.method == 'POST':
-                        login_info = get_login_info()
-                        if request.form['username'] != login_info['username'] or request.form['password'] != login_info['password']:
-                            error = 'Invalid Credentials. Please try again.'
-                        else:
-                            session['username'] = login_info['username']
+                error = None
+                username = session.get('username')
+                if username:
+                    return redirect('/list')
+                elif request.method == 'POST':
+                    login_info = get_login_info()
+                    if request.form['username'] in login_info.keys():
+                        password = login_info[request.form['username']]
+                        if password == request.form['password']:
+                            session['username'] = request.form['username']
                             response = redirect('/list')
                             return response
-                    return render_template('login.html', message='Valid',
+                        else:
+                            error = 'Invalid Credentials. Please try again.'
+                    else:
+                        error = 'Invalid Credentials. Please try again.'
+                return render_template('login.html', message='Valid',
                                            license_status=license_status, image='Landing.jpeg', error=error)
 
 
@@ -641,7 +645,7 @@ def edit_camera(camera_id):
     return redirect(url_for('list_page'))
 
 
-### Error handlers
+## Error handlers
 
 @app.errorhandler(404)
 def page_not_found(e):
