@@ -38,7 +38,7 @@ logger.addHandler(handler)
 # Key required to use session and secure username cookie
 app.secret_key = 'DSALGUIGUIDSAL'
 
-# TODO: MAKE CROWD COUNTING FIELDS REQUIRED WHEN IT IS SELECTED
+# TODO: ADD LOGIN ACTIVITY LOGIN ALONG WITH IP ADDRESS OF SYSTEM USED FOR LOGIN FOR SECURITY
 # TODO: HANDLE THE NOT FOCUSSABLE ISSUE
 #### Functions
 
