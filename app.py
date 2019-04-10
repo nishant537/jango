@@ -7,10 +7,12 @@ import ConfigParser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
-from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, session, flash
+
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, session, flash, jsonify
+
 # Initiate Flask
 app = Flask(__name__)
-
+app.secret_key = 'BhySSMlymg'
 # GoDeep GUI Path
 GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -276,6 +278,41 @@ def form_to_json(form):
 
     return json.dumps(camera_dict)
 
+
+def sanitise_input(form):
+    # check on size of call, sms, email lists
+    check_response = requests.get(BACKEND_URL + 'maxCallSMSEmailCheck').json()
+    max_email = int(check_response['email'])
+    max_call = int(check_response['call'])
+    max_sms = int(check_response['sms'])
+    objects_list = get_objects_list()
+    for curr_object in objects_list:
+        email_index = '%s_email_list' % str(curr_object)
+        email_list = form.get(email_index)
+        email_length = 0
+        if email_list is not None:
+            email_length = len([i.strip() for i in email_list.split(',')])
+        if email_length > max_email:
+            return False, "Error: Maximum of %d Email addresses allowed" % max_email
+
+        call_index = '%s_call_list' % str(curr_object)
+        call_list = form.get(call_index)
+        call_length = 0
+        if call_list is not None:
+            call_length = len([i.strip() for i in call_list.split(',')])
+        if call_length > max_call:
+            return False, "Error: Maximum of %d phone numbers allowed for call" % max_call
+
+        sms_index = '%s_sms_list' % str(curr_object)
+        sms_list = form.get(sms_index)
+        sms_length = 0
+        if sms_list is not None:
+            sms_length = len([i.strip() for i in sms_list.split(',')])
+        if sms_length > max_sms:
+            return False, "Error: Maximum of %d phone numbers allowed for SMS" % max_sms
+
+    return True, "form is good"
+
 #### Flask Routing
 
 
@@ -287,6 +324,17 @@ def home_page():
     '''Route / or home page'''
     # Nothing to do here, license_required handles everything
     pass
+  
+@app.route('/status')
+def backend_status():
+    '''Returns a JSON containing the status of the backend'''
+    lic_status = False
+    try:
+        lic_status,lic_reason = get_license()
+    except Exception as e:
+        pass
+    print "License Status: " + str(lic_status)
+    return jsonify(result=lic_status)
 
 
 # Route for handling the login page logic
@@ -298,7 +346,7 @@ def root():
 @app.route('/login', methods=['GET', 'POST'])
 @license_required
 def login():
-    # return render_template('login.html', error=error)
+    return render_template('login.html', error=error)
     pass
 
 
@@ -380,6 +428,7 @@ def view_page():
         objects=objects_allowed, data=data_list, unique_floors=unique_floors)
 
 
+@app.route('/home')
 @app.route('/list')
 @license_required
 @login_required
@@ -563,9 +612,15 @@ def add_camera():
     '''Add Camera'''
     if request.method == 'POST':
         # Making a POST to the Backend - New Camera
-        requests.post(url=BACKEND_URL + 'createCamera', 
-            data=form_to_json(request.form))
-        return redirect(url_for('list_page'))
+        sanitised, issue = sanitise_input(request.form)
+        if sanitised:
+            # checking if form input is proper
+            requests.post(url=BACKEND_URL + 'createCamera', data=form_to_json(request.form))
+            return redirect(url_for('list_page'))
+        else:
+            flash(issue)
+            return redirect(url_for('add_camera_page'))
+
     else:
         return redirect(url_for('add_camera_page'))
 
@@ -577,36 +632,40 @@ def edit_camera(camera_id):
     '''Edit Camera'''
     if request.method == 'POST':
         # Making a POST to the Backend - Edit Camera
-        requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, 
-            data=form_to_json(request.form))
+        sanitised, issue = sanitise_input(request.form)
+        if sanitised:
+            requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, data=form_to_json(request.form))
+        else:
+            flash(issue)
+            return redirect(url_for('edit_camera_page', camera_id=camera_id))
     return redirect(url_for('list_page'))
 
 
-#### Error handlers
+### Error handlers
 
-# @app.errorhandler(404)
-# def page_not_found(e):
-#     '''Handle 404 page not found'''
-#     logger.error('[Client %s] [404 Page Not Found] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, request.path))
-#     return render_template('home.html', image="Landing.jpeg", license_status=True,
-#         alert_message='The page you were looking for was not found on this server'), 404
-#
-# @app.errorhandler(500)
-# def internal_server_error(e):
-#     '''Handle 500 internal server error'''
-#     logger.error('[Client %s] [500 Internal Server Error] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, e))
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Internal server error occured, please contact Customer Support'), 500
-#
-# @app.errorhandler(Exception)
-# def unhandled_exception(e):
-#     '''Unhandled exception'''
-#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, e))
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
+@app.errorhandler(404)
+def page_not_found(e):
+    '''Handle 404 page not found'''
+    logger.error('[Client %s] [404 Page Not Found] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, request.path))
+    return render_template('home.html', image="Landing.jpeg", license_status=True,
+        alert_message='The page you were looking for was not found on this server'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    '''Handle 500 internal server error'''
+    logger.error('[Client %s] [500 Internal Server Error] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Internal server error occured, please contact Customer Support'), 500
+
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    '''Unhandled exception'''
+    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app
