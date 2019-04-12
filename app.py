@@ -398,6 +398,22 @@ def send_alarm_file():
     '''Return alarm.mp3 file'''
     return send_file('alarm.mp3')
 
+
+@app.route('/updateFrame', methods=['POST'])
+def update_frame():
+    """Takes post request from add/edit page with rtsp link and updates the camera frame image"""
+    data = request.get_json()
+    rtsp = data['rtsp']
+    if rtsp == "":
+        # Update with a placeholder image
+        return_response = {'image_path': '/static/img/invalid_rtsp.jpg'}
+        pass
+    else:
+        # Update with frame from camera rtsp link (if can't get frame, update with placeholder)
+        return_response = {'image_path': '/static/img/tmp_frame.jpg'}
+    return json.dumps(return_response)
+
+
 @app.route('/deleteCamera/<camera_id>')
 @license_required
 def delete_camera(camera_id):
@@ -534,6 +550,7 @@ def add_camera():
     else:
         return redirect(url_for('add_camera_page'))
 
+
 @app.route('/editCamera/<camera_id>', methods=['GET', 'POST'])
 @license_required
 def edit_camera(camera_id):
@@ -548,6 +565,10 @@ def edit_camera(camera_id):
             return redirect(url_for('edit_camera_page', camera_id=camera_id))
     return redirect(url_for('list_page'))
 
+@app.route('/dim', methods=['GET', 'POST'])
+@license_required
+def dim():
+    return render_template('example.html')
 #### Error handlers
 
 @app.errorhandler(404)
