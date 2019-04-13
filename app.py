@@ -601,13 +601,13 @@ def internal_server_error(e):
     return render_template('home.html', image="Landing.jpeg",
         alert_message='Internal server error occured, please contact Customer Support'), 500
 
-# @app.errorhandler(Exception)
-# def unhandled_exception(e):
-#     '''Unhandled exception'''
-#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, e))
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    '''Unhandled exception'''
+    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app
