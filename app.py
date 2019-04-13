@@ -3,6 +3,7 @@ import re
 import json
 import logging
 import requests
+import time
 import ConfigParser
 from functools import wraps
 from operator import itemgetter
@@ -399,18 +400,31 @@ def send_alarm_file():
     return send_file('alarm.mp3')
 
 
-@app.route('/updateFrame', methods=['POST'])
+@app.route('/updateFrame', methods=['POST', 'GET'])
 def update_frame():
     """Takes post request from add/edit page with rtsp link and updates the camera frame image"""
     data = request.get_json()
     rtsp = data['rtsp']
     if rtsp == "":
         # Update with a placeholder image
-        return_response = {'image_path': '/static/img/invalid_rtsp.jpg'}
-        pass
+        return_response = {'success': False, 'path': '/static/img/invalid_rtsp.jpg'}
+
     else:
         # Update with frame from camera rtsp link (if can't get frame, update with placeholder)
-        return_response = {'image_path': '/static/img/tmp_frame.jpg'}
+        response = requests.get(BACKEND_URL + 'getFrameFromRTSP/' + "rtsp=" + rtsp)
+        frame = response.content
+        if frame is not None:
+            temp_dir = 'static/img/temp'
+            filelist = [f for f in os.listdir(temp_dir) if f.endswith(".jpg")]
+            for f in filelist:
+                os.remove(os.path.join(temp_dir, f))
+            unique_filename = 'static/img/temp/%d.jpg' % int(time.time())  # workaround for the browser caching older images
+            fh = open(unique_filename, "w")
+            fh.write(frame)
+            fh.close()
+            return_response = {'success': True, 'path': unique_filename}
+        else:
+            return_response = {'success': False, 'path': '/static/img/invalid_rtsp.jpg'}
     return json.dumps(return_response)
 
 
@@ -587,13 +601,13 @@ def internal_server_error(e):
     return render_template('home.html', image="Landing.jpeg",
         alert_message='Internal server error occured, please contact Customer Support'), 500
 
-@app.errorhandler(Exception)
-def unhandled_exception(e):
-    '''Unhandled exception'''
-    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-        (request.remote_addr, e.__class__.__name__, e))
-    return render_template('home.html', image="Landing.jpeg",
-        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
+# @app.errorhandler(Exception)
+# def unhandled_exception(e):
+#     '''Unhandled exception'''
+#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+#         (request.remote_addr, e.__class__.__name__, e))
+#     return render_template('home.html', image="Landing.jpeg",
+#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app

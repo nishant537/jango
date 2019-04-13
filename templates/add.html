@@ -117,14 +117,28 @@
             dataType: "json",
             success: function(response) {
                 console.log(response);
-                canvas.setAttribute('data-imgsrc', response.image_path);
-                canvas.width = canvas.width;
-                var context = canvas.getContext("2d");
-                var img = new Image();
-                img.src = response.image_path;
-                img.onload = function() {
-                    context.drawImage(img, 0, 0);
-                };
+                if (response.success){
+                    var image = new Image(response);
+                    canvas.setAttribute('data-imgsrc', response.path);
+                    canvas.width = canvas.width;
+                    var context = canvas.getContext("2d");
+                    var img = new Image();
+                    img.src = response.path;
+                    img.onload = function() {
+                        context.drawImage(img, 0, 0);
+                    };
+                }
+                else{
+                    var image = new Image(response);
+                    canvas.setAttribute('data-imgsrc', response.path);
+                    canvas.width = canvas.width;
+                    var context = canvas.getContext("2d");
+                    var img = new Image();
+                    img.src = response.path;
+                    img.onload = function() {
+                        context.drawImage(img, 0, 0);
+                    };
+                }
             },
             error: function(err) {
                 console.log(err);
@@ -339,7 +353,7 @@
                                                         <div class="modal-body">
                                                             <div style="float:left">
 <!--                                                                <canvas id="jPolygon" width="640" height="480" style="cursor:crosshair" data-imgsrc="/static/img/image.jpg" onmousedown="point_it(event)" oncontextmenu="return false;">-->
-                                                                <canvas id="jPolygon" name="jPolygon" width="352" height="240" style="cursor:crosshair" data-imgsrc="/static/img/image.jpg" onmousedown="point_it(event)" oncontextmenu="return false;">
+                                                                <canvas id="jPolygon" name="jPolygon" width="352" height="240" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event)" oncontextmenu="return false;">
 <!--                                                                <canvas id="jPolygon" width="640" height="480" style="cursor:crosshair" onmousedown="point_it(event)" oncontextmenu="return false;">-->
                                                                     Your browser does not support the HTML5 canvas tag.
                                                                 </canvas>
