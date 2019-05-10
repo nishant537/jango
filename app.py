@@ -7,7 +7,8 @@ import ConfigParser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
-from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, jsonify, flash
+
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, session, flash, jsonify
 
 # Initiate Flask
 app = Flask(__name__)
@@ -34,7 +35,10 @@ handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('[%(filename)s:%(lineno)s %(funcName)s %(module)s] %(message)s'))
 logger.addHandler(handler)
 
-# TODO: MAKE CROWD COUNTING FIELDS REQUIRED WHEN IT IS SELECTED
+# Key required to use session and secure username cookie
+app.secret_key = 'DSALGUIGUIDSAL'
+
+# TODO: ADD LOGIN ACTIVITY LOGIN ALONG WITH IP ADDRESS OF SYSTEM USED FOR LOGIN FOR SECURITY
 # TODO: HANDLE THE NOT FOCUSSABLE ISSUE
 #### Functions
 
@@ -52,7 +56,28 @@ def license_required(func):
             license_status, license_message = get_license()
 
             # License valid and home_page decorated
-            if license_status and func.__name__=='home_page': 
+            if license_status and func.__name__=='login':
+                error = None
+                username = session.get('username')
+                if username:
+                    return redirect('/list')
+                elif request.method == 'POST':
+                    login_info = get_login_info()
+                    if request.form['username'] in login_info.keys():
+                        password = login_info[request.form['username']]
+                        if password == request.form['password']:
+                            session['username'] = request.form['username']
+                            response = redirect('/list')
+                            return response
+                        else:
+                            error = 'Invalid Credentials. Please try again.'
+                    else:
+                        error = 'Invalid Credentials. Please try again.'
+                return render_template('login.html', message='Valid',
+                                           license_status=license_status, image='Landing.jpeg', error=error)
+
+
+            elif license_status and func.__name__=='home_page':
                 return render_template('home.html', message='Valid',
                     license_status=license_status, image='Landing.jpeg')
 
@@ -72,7 +97,27 @@ def license_required(func):
                 alert_message='Failed to establish connection with server')
 
     return valid_license
-    
+
+
+def login_required(func):
+    """Checking whether logged in before loading any page"""
+
+    @wraps(func)
+    def valid_session(*args, **kwargs):
+        user_id = session.get('username')
+        if user_id:
+            return func(*args, **kwargs)
+        else:
+            return redirect('/login')
+
+    return valid_session
+
+
+def get_login_info():
+    login_info = requests.get(BACKEND_URL + 'getLoginInfo').json()
+    return login_info
+
+
 def get_background():
     '''Get background info from backend'''
     background_payload = requests.get(BACKEND_URL + 'getBackground').json()
@@ -274,6 +319,16 @@ def sanitise_input(form):
 
 #### Flask Routing
 
+
+# @app.route('/')
+@app.route('/home')
+@license_required
+@login_required
+def home_page():
+    '''Route / or home page'''
+    # Nothing to do here, license_required handles everything
+    pass
+  
 @app.route('/status')
 def backend_status():
     '''Returns a JSON containing the status of the backend'''
@@ -286,8 +341,29 @@ def backend_status():
     return jsonify(result=lic_status)
 
 
+# Route for handling the login page logic
+@app.route('/')
+def root():
+    return redirect('/login')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+@license_required
+def login():
+    return render_template('login.html', error=error)
+    pass
+
+
+@app.route('/logout')
+@license_required
+def logout():
+    if session.get('username'):
+        session.pop('username')
+    return redirect('/login')
+
 @app.route('/add')
 @license_required
+@login_required
 def add_camera_page():
     '''Route Add Camera page'''
     # check if the maximum number of cameras have been added already
@@ -299,6 +375,7 @@ def add_camera_page():
 
 @app.route('/edit/<camera_id>')
 @license_required
+@login_required
 def edit_camera_page(camera_id):
     '''Route Edit Camera page'''
     img = get_background()
@@ -309,8 +386,10 @@ def edit_camera_page(camera_id):
     data = [zip_data(camera_payload[str(camera_id)], objects_allowed)]
     return render_template('edit.html', image=img, data=data, camera_id=camera_id)
 
+
 @app.route('/view')
 @license_required
+@login_required
 def view_page():
     '''Route view page'''
     img = get_background()
@@ -352,10 +431,11 @@ def view_page():
     return render_template('view.html', image=img, search_mode=False, sound_dict=sound_dict,
         objects=objects_allowed, data=data_list, unique_floors=unique_floors)
 
-@app.route('/')
+
 @app.route('/home')
 @app.route('/list')
 @license_required
+@login_required
 def list_page():
     '''Route list page'''
     img = get_background()
@@ -375,8 +455,8 @@ def list_page():
     return render_template('list.html', image=img, search_mode=False,
         objects=objects_allowed, data=data_list)
 
-#### Data Handling from GUI
 
+#### Data Handling from GUI
 @app.route('/getAlerts', methods=['GET', 'POST'])
 def get_alerts():
     '''Get Alerts from backend, also no need for license check here'''
@@ -393,20 +473,25 @@ def get_alerts():
 
     return json.dumps(alert_dict)
 
+
 @app.route('/getAlarmAudio')
 def send_alarm_file():
     '''Return alarm.mp3 file'''
     return send_file('alarm.mp3')
 
+
 @app.route('/deleteCamera/<camera_id>')
 @license_required
+@login_required
 def delete_camera(camera_id):
     '''Handling delete camera'''
     post_delete_camera = requests.post(url=BACKEND_URL + 'deleteCamera/' + camera_id)
     return redirect(url_for('list_page'))
 
+
 @app.route('/favourite/<camera_id>')
 @license_required
+@login_required
 def toggle_favourite(camera_id):
     '''Toggle favourite parameter'''
     camera_payload = get_camera_info(camera_id)
@@ -424,8 +509,10 @@ def toggle_favourite(camera_id):
 
     return redirect(url_for('view_page'))
 
+
 @app.route('/view/search', methods=['GET', 'POST'])
 @license_required
+@login_required
 def search_view_page():
     '''Handling search for view page'''
     if request.method == 'POST':
@@ -466,8 +553,10 @@ def search_view_page():
     else:
         return redirect(url_for('view_page'))
 
+
 @app.route('/list/search', methods=['GET', 'POST'])
 @license_required
+@login_required
 def search_list_page():
     '''Handling search for list page'''
     if request.method == 'POST':
@@ -494,9 +583,11 @@ def search_list_page():
     else:
         return redirect(url_for('list_page'))
 
+
 @app.route('/background/<background_image>/<page_redirect>')
 @app.route('/background/<background_image>/<page_redirect>/<camera_id>')
 @license_required
+@login_required
 def background_image(background_image, page_redirect, camera_id=None):
     '''Send background information to backend'''
     background_dict = {'image': background_image.title() + '.jpeg'}
@@ -505,7 +596,8 @@ def background_image(background_image, page_redirect, camera_id=None):
         return redirect(url_for(page_redirect + '_page'))
     else:
         return redirect(url_for('edit_camera_page', camera_id=camera_id))
-    
+
+
 @app.route('/licenseUpload', methods=['GET', 'POST'])
 def license():
     '''Handle license upload'''
@@ -516,8 +608,10 @@ def license():
         requests.post(url=BACKEND_URL + 'licenseUpdate')
     return redirect(url_for('home_page'))
 
+
 @app.route('/addCamera', methods=['GET', 'POST'])
 @license_required
+@login_required
 def add_camera():
     '''Add Camera'''
     if request.method == 'POST':
@@ -534,8 +628,10 @@ def add_camera():
     else:
         return redirect(url_for('add_camera_page'))
 
+
 @app.route('/editCamera/<camera_id>', methods=['GET', 'POST'])
 @license_required
+@login_required
 def edit_camera(camera_id):
     '''Edit Camera'''
     if request.method == 'POST':
@@ -548,7 +644,8 @@ def edit_camera(camera_id):
             return redirect(url_for('edit_camera_page', camera_id=camera_id))
     return redirect(url_for('list_page'))
 
-#### Error handlers
+
+## Error handlers
 
 @app.errorhandler(404)
 def page_not_found(e):
