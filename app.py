@@ -7,11 +7,11 @@ import ConfigParser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
-from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, jsonify, flash
 
 # Initiate Flask
 app = Flask(__name__)
-
+app.secret_key = 'BhySSMlymg'
 # GoDeep GUI Path
 GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -263,6 +263,41 @@ def form_to_json(form):
 
     return json.dumps(camera_dict)
 
+
+def sanitise_input(form):
+    # check on size of call, sms, email lists
+    check_response = requests.get(BACKEND_URL + 'maxCallSMSEmailCheck').json()
+    max_email = int(check_response['email'])
+    max_call = int(check_response['call'])
+    max_sms = int(check_response['sms'])
+    objects_list = get_objects_list()
+    for curr_object in objects_list:
+        email_index = '%s_email_list' % str(curr_object)
+        email_list = form.get(email_index)
+        email_length = 0
+        if email_list is not None:
+            email_length = len([i.strip() for i in email_list.split(',')])
+        if email_length > max_email:
+            return False, "Error: Maximum of %d Email addresses allowed" % max_email
+
+        call_index = '%s_call_list' % str(curr_object)
+        call_list = form.get(call_index)
+        call_length = 0
+        if call_list is not None:
+            call_length = len([i.strip() for i in call_list.split(',')])
+        if call_length > max_call:
+            return False, "Error: Maximum of %d phone numbers allowed for call" % max_call
+
+        sms_index = '%s_sms_list' % str(curr_object)
+        sms_list = form.get(sms_index)
+        sms_length = 0
+        if sms_list is not None:
+            sms_length = len([i.strip() for i in sms_list.split(',')])
+        if sms_length > max_sms:
+            return False, "Error: Maximum of %d phone numbers allowed for SMS" % max_sms
+
+    return True, "form is good"
+
 #### Flask Routing
 
 @app.route('/status')
@@ -513,9 +548,15 @@ def add_camera():
     '''Add Camera'''
     if request.method == 'POST':
         # Making a POST to the Backend - New Camera
-        requests.post(url=BACKEND_URL + 'createCamera', 
-            data=form_to_json(request.form))
-        return redirect(url_for('list_page'))
+        sanitised, issue = sanitise_input(request.form)
+        if sanitised:
+            # checking if form input is proper
+            requests.post(url=BACKEND_URL + 'createCamera', data=form_to_json(request.form))
+            return redirect(url_for('list_page'))
+        else:
+            flash(issue)
+            return redirect(url_for('add_camera_page'))
+
     else:
         return redirect(url_for('add_camera_page'))
 
@@ -525,8 +566,12 @@ def edit_camera(camera_id):
     '''Edit Camera'''
     if request.method == 'POST':
         # Making a POST to the Backend - Edit Camera
-        requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, 
-            data=form_to_json(request.form))
+        sanitised, issue = sanitise_input(request.form)
+        if sanitised:
+            requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, data=form_to_json(request.form))
+        else:
+            flash(issue)
+            return redirect(url_for('edit_camera_page', camera_id=camera_id))
     return redirect(url_for('list_page'))
 
 ### Error handlers
