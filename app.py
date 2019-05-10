@@ -174,8 +174,8 @@ def form_to_json(form):
     camera_dict['floor'] = form['floor'].strip()
 
     # Optional parameters
-    camera_dict['intrusion_start_time'] = form['intrusion_start_time']
-    camera_dict['intrusion_end_time'] = form['intrusion_end_time']
+    camera_dict['intrusion_start_time'] = form['intrusion_start_time'] if 'intrusion' in objects_allowed else ""
+    camera_dict['intrusion_end_time'] = form['intrusion_end_time'] if 'intrusion' in objects_allowed else ""
     # camera_dict['sound_alarm'] = 1 if form.getlist('sound_alarm') else 0
     camera_dict['favourite'] = 1 if form.getlist('favourite') else 0
 
