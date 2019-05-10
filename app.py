@@ -619,7 +619,11 @@ def add_camera():
         sanitised, issue = sanitise_input(request.form)
         if sanitised:
             # checking if form input is proper
-            requests.post(url=BACKEND_URL + 'createCamera', data=form_to_json(request.form))
+            r = requests.post(url=BACKEND_URL + 'createCamera', data=form_to_json(request.form))
+            response = json.loads(r.text)
+            if not response['status']:
+                flash(response['reason'])
+                return redirect(url_for('add_camera_page'))
             return redirect(url_for('list_page'))
         else:
             flash(issue)
@@ -638,7 +642,11 @@ def edit_camera(camera_id):
         # Making a POST to the Backend - Edit Camera
         sanitised, issue = sanitise_input(request.form)
         if sanitised:
-            requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, data=form_to_json(request.form))
+            r = requests.post(url=BACKEND_URL + 'editCamera/' + camera_id, data=form_to_json(request.form))
+            response = json.loads(r.text)
+            if not response['status']:
+                flash(response['reason'])
+                return redirect(url_for('edit_camera_page', camera_id=camera_id))
         else:
             flash(issue)
             return redirect(url_for('edit_camera_page', camera_id=camera_id))
