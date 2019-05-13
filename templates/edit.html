@@ -64,6 +64,14 @@
                 $("#monthly_date").removeAttr('required');
             }
 
+            if ($("#crowd_dimension_enable").is(':checked')) {
+                $("#crowd_region_1").attr('required', '');
+            }
+            else {
+                $("#crowd_region_1").removeAttr('required');
+            }
+
+
         }
 
         function FillAllLists(f, currentObject) {
@@ -383,6 +391,11 @@
                                                                                             Monthly
                                                                                         </a>
                                                                                     </li>
+                                                                                    <li class="nav-item">
+                                                                                        <a class="nav-link nav-pill-text" data-toggle="pill" href="#dimensions_tab" role="tablist">
+                                                                                        Region Dimensions
+                                                                                        </a>
+                                                                                    </li>
                                                                                 </ul>
                                                                             <!--</div>-->
                                                                         </div>
@@ -557,6 +570,43 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
+                                                                                <div class="tab-pane" id="dimensions_tab" role="tabpanel">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-2 form-group">
+                                                                                        <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
+                                                                                            <input id="crowd_dimension_enable" name="crowd_dimension_enable" class="form-check-input" type="checkbox" onchange="crowdCountEnableOnChange()" {{ 'checked' if details.region_enable.status == True }}>
+                                                                                            <span class="form-check-sign"></span>
+                                                                                            Enabled
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class = "col-md-4 form-group">
+                                                                                        <input type="text" class="form-control" placeholder="Report Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" style="visibility: hidden;">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input type="text" class="form-control" placeholder="Enter Email List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$" style="visibility: hidden;">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input value="{{ details.regions_list[0] }}" id = "crowd_region_1" name="crowd_region_1" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input value="{{ details.regions_list[1] }}" id = "crowd_region_2" name="crowd_region_2" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input value="{{ details.regions_list[2] }}" id = "crowd_region_3" name="crowd_region_3" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input id = "crowd_region_4" name="crowd_region_4" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h" style="visibility: hidden;">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>

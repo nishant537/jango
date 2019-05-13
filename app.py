@@ -40,6 +40,7 @@ app.secret_key = 'DSALGUIGUIDSAL'
 
 # TODO: ADD LOGIN ACTIVITY LOGIN ALONG WITH IP ADDRESS OF SYSTEM USED FOR LOGIN FOR SECURITY
 # TODO: HANDLE THE NOT FOCUSSABLE ISSUE
+
 #### Functions
 
 def get_license():
@@ -152,6 +153,18 @@ def list_to_string(data, is_list_page=False):
     else:
         return str(','.join(data)) if data else ''
 
+
+def dimensions_to_string(data):
+    """Converts dimensions of regions into semicolon separated list"""
+    if data:
+        return_list = []
+        for point in data:
+            return_list.append(str(','.join(point)))
+        return str(';'.join(return_list))
+    else:
+        return ''
+
+
 def zip_data(data, objects_allowed, is_list_page=False):
     '''Appends all data to a list for Jinja templating'''
     # Mandatory parameters
@@ -186,6 +199,8 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 alert_dictionary['crowd_email_list']['daily'] = list_to_string(alert_dictionary['crowd_email_list']['daily'], is_list_page)
                 alert_dictionary['crowd_email_list']['weekly'] = list_to_string(alert_dictionary['crowd_email_list']['weekly'], is_list_page)
                 alert_dictionary['crowd_email_list']['monthly'] = list_to_string(alert_dictionary['crowd_email_list']['monthly'], is_list_page)
+                for i in range(len(alert_dictionary['regions_list'])):
+                    alert_dictionary['regions_list'][i] = dimensions_to_string(alert_dictionary['regions_list'][i])
                 obj_alerts_list.append((object_allowed, alert_dictionary))
                 pass
             else:
@@ -266,6 +281,19 @@ def form_to_json(form):
                           'weekly': [i.strip() for i in form['weekly_email_list'].split(',')],
                           'monthly': [i.strip() for i in form['monthly_email_list'].split(',')]}
             object_dict['crowd_email_list'] = email_dict
+
+            regions_list = [[i.strip() for i in form['crowd_region_1'].split(';')],
+                            [i.strip() for i in form['crowd_region_2'].split(';')],
+                            [i.strip() for i in form['crowd_region_3'].split(';')]]
+            for i in range(len(regions_list)):
+                for j in range(len(regions_list[i])):
+                    regions_list[i][j] = (regions_list[i][j].split(','))
+            object_dict['regions_list'] = regions_list
+
+            region_enable = {'status': 'False'}
+            if form.getlist('crowd_dimension_enable'):
+                region_enable['status'] = 'True'
+            object_dict['region_enable'] = region_enable
 
         else:
             object_dict = collections.OrderedDict()
@@ -652,8 +680,8 @@ def edit_camera(camera_id):
             return redirect(url_for('edit_camera_page', camera_id=camera_id))
     return redirect(url_for('list_page'))
 
+### Error handlers
 
-## Error handlers
 
 @app.errorhandler(404)
 def page_not_found(e):
