@@ -302,7 +302,7 @@ def form_to_json(form):
         elif object_allowed == "alpr":
             object_dict = collections.OrderedDict()
 
-            alert_time = form['alpr_time'],
+            alert_time = form['alpr_time']
             object_dict['alert_time'] = alert_time
 
             email_list = [i.strip() for i in form['alpr_email_list'].split(',')]
