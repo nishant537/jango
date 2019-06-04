@@ -118,48 +118,48 @@
 
 
 
-    function request_frame(region_num){
-        var rtsp_field = document.getElementById('rtsp_url');
-        var canvas_name_common = "jPolygon";
-        var canvas_id = canvas_name_common.concat(region_num);
-        var canvas = document.getElementById(canvas_id);
-        var request_data = rtsp_field.value;
-        $.ajax({
-            type: "POST",
-            url: "/updateFrame",
-            contentType: "application/json",
-            data: JSON.stringify({rtsp: request_data}),
-            dataType: "json",
-            success: function(response) {
-                console.log(response);
-                if (response.success){
-                    var image = new Image(response);
-                    canvas.setAttribute('data-imgsrc', response.path);
-                    canvas.width = canvas.width;
-                    var context = canvas.getContext("2d");
-                    var img = new Image();
-                    img.src = response.path;
-                    img.onload = function() {
-                        context.drawImage(img, 0, 0);
-                    };
+        function request_frame(region_num){
+            var rtsp_field = document.getElementById('rtsp_url');
+            var canvas_name_common = "jPolygon";
+            var canvas_id = canvas_name_common.concat(region_num);
+            var canvas = document.getElementById(canvas_id);
+            var request_data = rtsp_field.value;
+            $.ajax({
+                type: "POST",
+                url: "/updateFrame",
+                contentType: "application/json",
+                data: JSON.stringify({rtsp: request_data}),
+                dataType: "json",
+                success: function(response) {
+                    console.log(response);
+                    if (response.success){
+                        var image = new Image(response.path);
+                        canvas.setAttribute('data-imgsrc', response.path);
+                        canvas.width = canvas.width;
+                        var context = canvas.getContext("2d");
+                        var img = new Image();
+                        img.src = response.path;
+                        img.onload = function() {
+                            context.drawImage(img, 0, 0);
+                        };
+                    }
+                    else{
+                        var image = new Image(response);
+                        canvas.setAttribute('data-imgsrc', response.path);
+                        canvas.width = canvas.width;
+                        var context = canvas.getContext("2d");
+                        var img = new Image();
+                        img.src = response.path;
+                        img.onload = function() {
+                            context.drawImage(img, 0, 0);
+                        };
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
                 }
-                else{
-                    var image = new Image(response);
-                    canvas.setAttribute('data-imgsrc', response.path);
-                    canvas.width = canvas.width;
-                    var context = canvas.getContext("2d");
-                    var img = new Image();
-                    img.src = response.path;
-                    img.onload = function() {
-                        context.drawImage(img, 0, 0);
-                    };
-                }
-            },
-            error: function(err) {
-                console.log(err);
-            }
-        });
-    }
+            });
+        }
     </script>
 
     <style>
