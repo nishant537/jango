@@ -718,29 +718,29 @@ def dim():
   
   
 #### Error handlers
-# @app.errorhandler(404)
-# def page_not_found(e):
-#     '''Handle 404 page not found'''
-#     logger.error('[Client %s] [404 Page Not Found] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, request.path))
-#     return render_template('home.html', image="Landing.jpeg", license_status=True,
-#         alert_message='The page you were looking for was not found on this server'), 404
-#
-# @app.errorhandler(500)
-# def internal_server_error(e):
-#     '''Handle 500 internal server error'''
-#     logger.error('[Client %s] [500 Internal Server Error] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, e))
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Internal server error occured, please contact Customer Support'), 500
-#
-# @app.errorhandler(Exception)
-# def unhandled_exception(e):
-#     '''Unhandled exception'''
-#     logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
-#         (request.remote_addr, e.__class__.__name__, e))
-#     return render_template('home.html', image="Landing.jpeg",
-#         alert_message='Unhandled exception occurred, please contact Customer Support'), 520
+@app.errorhandler(404)
+def page_not_found(e):
+    '''Handle 404 page not found'''
+    logger.error('[Client %s] [404 Page Not Found] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, request.path))
+    return render_template('home.html', image="Landing.jpeg", license_status=True,
+        alert_message='The page you were looking for was not found on this server'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    '''Handle 500 internal server error'''
+    logger.error('[Client %s] [500 Internal Server Error] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Internal server error occured, please contact Customer Support'), 500
+
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    '''Unhandled exception'''
+    logger.error('[Client %s] [520 Unhandled Exception] %s: %s' %
+        (request.remote_addr, e.__class__.__name__, e))
+    return render_template('home.html', image="Landing.jpeg",
+        alert_message='Unhandled exception occurred, please contact Customer Support'), 520
 
 if __name__ == "__main__":
     # Run flask app
