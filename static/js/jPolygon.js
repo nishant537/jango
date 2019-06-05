@@ -1,8 +1,12 @@
 var perimeter = new Array();
 var complete = false;
-var canvas1 = document.getElementById("jPolygon1");
-var canvas2 = document.getElementById("jPolygon2");
-var canvas3 = document.getElementById("jPolygon3");
+var numberOfCanvasses = 3;
+var canvasList = [];
+for(var i=1; i<=numberOfCanvasses; i++){
+    var id = "jPolygon".concat(i.toString());
+    var canvas = document.getElementById(id);
+    canvasList[i] = canvas
+}
 var ctx;
 
 function line_intersects(p0, p1, p2, p3) {
@@ -79,7 +83,7 @@ function draw(end, region_num){
     ctx.lineCap = "square";
     ctx.beginPath();
     var coordinates_generic = 'coordinates';
-    var element_id = coordinates_generic.concat(region_num);
+    var element_id = coordinates_generic.concat(region_num.toString());
     for(var i=0; i<perimeter.length; i++){
         if(i==0){
             ctx.moveTo(perimeter[i]['x'],perimeter[i]['y']);
@@ -159,8 +163,7 @@ function point_it(event, region_num) {
 	    event.preventDefault();
         return false;
     } else {
-        if (region_num=='1'){
-        rect = canvas1.getBoundingClientRect();
+        rect = canvasList[region_num].getBoundingClientRect();
         x = event.clientX - rect.left;
         y = event.clientY - rect.top;
         if (perimeter.length>0 && x == perimeter[perimeter.length-1]['x'] && y == perimeter[perimeter.length-1]['y']){
@@ -174,87 +177,20 @@ function point_it(event, region_num) {
         perimeter.push({'x':x,'y':y});
         draw(false, region_num);
         return false;
-        }
-        if (region_num=='2'){
-            rect = canvas2.getBoundingClientRect();
-            x = event.clientX - rect.left;
-            y = event.clientY - rect.top;
-            if (perimeter.length>0 && x == perimeter[perimeter.length-1]['x'] && y == perimeter[perimeter.length-1]['y']){
-                // same point - double click
-                return false;
-            }
-            if(check_intersect(x,y)){
-                alert('The line you are drawing intersects another line');
-                return false;
-            }
-            perimeter.push({'x':x,'y':y});
-            draw(false, region_num);
-            return false;
-        }
-        if (region_num=='3'){
-            rect = canvas3.getBoundingClientRect();
-            x = event.clientX - rect.left;
-            y = event.clientY - rect.top;
-            if (perimeter.length>0 && x == perimeter[perimeter.length-1]['x'] && y == perimeter[perimeter.length-1]['y']){
-                // same point - double click
-                return false;
-            }
-            if(check_intersect(x,y)){
-                alert('The line you are drawing intersects another line');
-                return false;
-            }
-            perimeter.push({'x':x,'y':y});
-            draw(false, region_num);
-            return false;
-        }
-
     }
 }
 
 function start(with_draw, region_num) {
     var img = new Image();
-    if (region_num == "0"){
-        img.src = canvas1.getAttribute('data-imgsrc');
-
-        img.onload = function(){
-            ctx = canvas1.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas1.width, canvas1.height);
-            if(with_draw == true){
-                draw(false, region_num);
-            }
-        }
+    if (region_num == 0){
+        region_num = 1;
     }
-    if (region_num == "1"){
-        img.src = canvas1.getAttribute('data-imgsrc');
-
-        img.onload = function(){
-            ctx = canvas1.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas1.width, canvas1.height);
-            if(with_draw == true){
-                draw(false, region_num);
-            }
-        }
-    }
-    if (region_num == "2"){
-        img.src = canvas2.getAttribute('data-imgsrc');
-
-        img.onload = function(){
-            ctx = canvas2.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas2.width, canvas2.height);
-            if(with_draw == true){
-                draw(false, region_num);
-            }
-        }
-    }
-    if (region_num == "3"){
-        img.src = canvas3.getAttribute('data-imgsrc');
-
-        img.onload = function(){
-            ctx = canvas3.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas3.width, canvas3.height);
-            if(with_draw == true){
-                draw(false, region_num);
-            }
+    img.src = canvasList[region_num].getAttribute('data-imgsrc');
+    img.onload = function(){
+        ctx = canvasList[region_num].getContext("2d");
+        ctx.drawImage(img, 0, 0, canvasList[region_num].width, canvasList[region_num].height);
+        if(with_draw == true){
+            draw(false, region_num);
         }
     }
 }

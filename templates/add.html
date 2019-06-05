@@ -111,9 +111,10 @@
         }
 
         function copyRegionCoordinates(f, region_num) {
-            f["crowd_region_".concat(region_num)].value = f["coordinates".concat(region_num)].value;
-            f["crowd_region_".concat(region_num)].value = f["coordinates".concat(region_num)].value;
-            f["crowd_region_".concat(region_num)].value = f["coordinates".concat(region_num)].value;
+            var region_num_string = region_num.toString();
+            f["crowd_region_".concat(region_num_string)].value = f["coordinates".concat(region_num_string)].value;
+            f["crowd_region_".concat(region_num_string)].value = f["coordinates".concat(region_num_string)].value;
+            f["crowd_region_".concat(region_num_string)].value = f["coordinates".concat(region_num_string)].value;
         }
 
 
@@ -121,7 +122,7 @@
         function request_frame(region_num){
             var rtsp_field = document.getElementById('rtsp_url');
             var canvas_name_common = "jPolygon";
-            var canvas_id = canvas_name_common.concat(region_num);
+            var canvas_id = canvas_name_common.concat(region_num.toString());
             var canvas = document.getElementById(canvas_id);
             var request_data = rtsp_field.value;
             $.ajax({
@@ -368,14 +369,14 @@
                                                     <div class="modal-content">
                                                         <div class="modal-body">
                                                             <div style="float:left">
-                                                                <canvas id="jPolygon1" name="jPolygon1" width="352" height="240" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, '1')" oncontextmenu="return false;">
+                                                                <canvas id="jPolygon1" name="jPolygon1" width="352" height="240" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, 1)" oncontextmenu="return false;">
                                                                     Your browser does not support the HTML5 canvas tag.
                                                                 </canvas>
                                                             </div>
                                                             <div style="float:left;">
                                                                 <div>
-                                                                    <button type="button" onclick="clear_canvas('1')" >Clear</button>
-                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, '1')" >Copy</button>
+                                                                    <button type="button" onclick="clear_canvas(1)" >Clear</button>
+                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, 1)" >Copy</button>
                                                                     <p>Press <strong>Left Click</strong> to draw a point.</p>
                                                                     <p><strong>CTRL+Click</strong> or <strong>Right Click</strong> to close the polygon.</p>
                                                                     <p>Click <strong>Copy</strong> to copy the obtained coordinates to the form</p>
@@ -395,14 +396,14 @@
                                                     <div class="modal-content">
                                                         <div class="modal-body">
                                                             <div style="float:left">
-                                                                <canvas id="jPolygon2" name="jPolygon2" width="352" height="240" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, '2')" oncontextmenu="return false;">
+                                                                <canvas id="jPolygon2" name="jPolygon2" width="352" height="240" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, 2)" oncontextmenu="return false;">
                                                                     Your browser does not support the HTML5 canvas tag.
                                                                 </canvas>
                                                             </div>
                                                             <div style="float:left;">
                                                                 <div>
-                                                                    <button type="button" onclick="clear_canvas('2')" >Clear</button>
-                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, '2')" >Copy</button>
+                                                                    <button type="button" onclick="clear_canvas(2)" >Clear</button>
+                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, 2)" >Copy</button>
                                                                     <p>Press <strong>Left Click</strong> to draw a point.</p>
                                                                     <p><strong>CTRL+Click</strong> or <strong>Right Click</strong> to close the polygon.</p>
                                                                     <p>Click <strong>Copy</strong> to copy the obtained coordinates to the form</p>
@@ -422,14 +423,14 @@
                                                     <div class="modal-content">
                                                         <div class="modal-body">
                                                             <div style="float:left">
-                                                                <canvas id="jPolygon3" name="jPolygon3" width="352" height="240" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, '3')" oncontextmenu="return false;">
+                                                                <canvas id="jPolygon3" name="jPolygon3" width="352" height="240" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, 3)" oncontextmenu="return false;">
                                                                     Your browser does not support the HTML5 canvas tag.
                                                                 </canvas>
                                                             </div>
                                                             <div style="float:left;">
                                                                 <div>
-                                                                    <button type="button" onclick="clear_canvas('3')" >Clear</button>
-                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, '3')" >Copy</button>
+                                                                    <button type="button" onclick="clear_canvas(3)" >Clear</button>
+                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, 3)" >Copy</button>
                                                                     <p>Press <strong>Left Click</strong> to draw a point.</p>
                                                                     <p><strong>CTRL+Click</strong> or <strong>Right Click</strong> to close the polygon.</p>
                                                                     <p>Click <strong>Copy</strong> to copy the obtained coordinates to the form</p>
@@ -758,7 +759,7 @@
                                                                                         <input id = "crowd_region_1" name="crowd_region_1" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
                                                                                     </div>
                                                                                     <div class="col-md-2 form-group">
-                                                                                        <button id="modalBtn1" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal1" onclick="request_frame('1'); clear_canvas('1');">Select Region</button>
+                                                                                        <button id="modalBtn1" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal1" onclick="request_frame(1); clear_canvas(1);">Select Region</button>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row">
@@ -766,7 +767,7 @@
                                                                                         <input id = "crowd_region_2" name="crowd_region_2" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
                                                                                     </div>
                                                                                     <div class="col-md-2 form-group">
-                                                                                        <button id="modalBtn2" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal2" onclick="request_frame('2'); clear_canvas('2');">Select Region</button>
+                                                                                        <button id="modalBtn2" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal2" onclick="request_frame(2); clear_canvas(2);">Select Region</button>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row">
@@ -774,7 +775,7 @@
                                                                                         <input id = "crowd_region_3" name="crowd_region_3" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
                                                                                     </div>
                                                                                     <div class="col-md-2 form-group">
-                                                                                        <button id="modalBtn3" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal3" onclick="request_frame('3'); clear_canvas('3');">Select Region</button>
+                                                                                        <button id="modalBtn3" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal3" onclick="request_frame(3); clear_canvas(3);">Select Region</button>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row">
