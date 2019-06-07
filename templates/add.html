@@ -357,6 +357,12 @@
                                                                     {{ object.split('_') | join(' ') | title }}
                                                                 </a>
                                                             </li>
+                                                            {% elif object == "alpr" %}
+                                                            <li class="nav-item" style="padding-bottom: 1vh">
+                                                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist" onclick="Validate(this.form)">
+                                                                    ANPR
+                                                                </a>
+                                                            </li>
                                                             {% else %}
                                                             <li class="nav-item" style="padding-bottom: 1vh">
                                                                 <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist" onclick="Validate(this.form)">
@@ -657,7 +663,7 @@
                                                                         <ul class="nav nav-tabs nav-stacked" role="tablist">
                                                                             <li class="nav-item active">
                                                                                 <a class="nav-link active nav-pill-text" data-toggle="pill" href="#alpr_main_tab" role="tablist">
-                                                                                    ALPR
+                                                                                    ANPR
                                                                                 </a>
                                                                             </li>
                                                                              <li class="nav-item">
@@ -678,6 +684,25 @@
                                                                                 <div class="row">
                                                                                     <div class = "col-md-12 form-group">
                                                                                         <input id = "alpr_email_list" name="alpr_email_list" type="text" class="form-control" placeholder="Enter Email List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <b>Camera Role</b>
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="alpr_camera_role" id="radio_entry" value="entry" checked>
+                                                                                            Entry
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="alpr_camera_role" id="radio_exit" value="exit">
+                                                                                            Exit
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="alpr_camera_role" id="radio_entry_exit" value="entryexit">
+                                                                                            Both Entry and Exit
+                                                                                        </label>
                                                                                     </div>
                                                                                 </div>
 

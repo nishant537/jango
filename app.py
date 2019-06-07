@@ -320,6 +320,7 @@ def form_to_json(form):
             if form.getlist('alpr_dimension_enable'):
                 region_enable['status'] = 'True'
             object_dict['region_enable'] = region_enable
+            object_dict['camera_role'] = form.get('alpr_camera_role')
 
         else:
             object_dict = collections.OrderedDict()
