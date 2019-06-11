@@ -197,9 +197,15 @@
                                         <!--Priority-->
                                     <!--</th>-->
                                     {% for object in objects %}
+                                    {% if object == 'alpr' %}
+                                    <th class="text-center">
+                                        ANPR
+                                    </th>
+                                    {% else %}
                                     <th class="text-center">
                                         {{ object.split('_') | join(' ') | title }}
                                     </th>
+                                    {% endif %}
                                     {% endfor %}
                                     <th class="text-center">
                                         Start Time

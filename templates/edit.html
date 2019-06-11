@@ -333,9 +333,15 @@
                                                     <select class="selectpicker show-tick" name="object_detect" id="object_detect" data-style="btn btn-default btn-round"
                                                         multiple="" title="Object Detection" onchange="objectSelectOnChange()">
                                                         {% for object, enabled in objects_list %}
+                                                        {% if object == 'alpr' %}
+                                                        <option value="{{ object }}" style="font-size:18px; font-weight: bold;" {{ 'selected' if enabled == 1 }}>
+                                                            ANPR
+                                                        </option>
+                                                        {% else %}
                                                         <option value="{{ object }}" style="font-size:18px; font-weight: bold;" {{ 'selected' if enabled == 1 }}>
                                                             {{ object.split('_') | join(' ') | title }}
                                                         </option>
+                                                        {% endif %}
                                                         {% endfor %}
                                                     </select>
                                                 </div>
