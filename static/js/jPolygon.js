@@ -158,6 +158,18 @@ function point_it(event, region_num) {
             alert('The line you are drawing intersects another line');
             return false;
         }
+        x = perimeter[1]['x'];
+        y = perimeter[1]['y'];
+        if(check_intersect(x,y)){
+            alert('The line you are drawing intersects another line');
+            return false;
+        }
+        x = perimeter[2]['x'];
+        y = perimeter[2]['y'];
+        if(check_intersect(x,y)){
+            alert('The line you are drawing intersects another line');
+            return false;
+        }
         draw(true, region_num);
         alert('Polygon closed');
 	    event.preventDefault();
