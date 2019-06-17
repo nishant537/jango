@@ -9,23 +9,50 @@ for(var i=1; i<=numberOfCanvasses; i++){
 }
 var ctx;
 
+//function line_intersects(p0, p1, p2, p3) {
+//
+//    var s1_x, s1_y, s2_x, s2_y;
+//    s1_x = p1['x'] - p0['x'];
+//    s1_y = p1['y'] - p0['y'];
+//    s2_x = p3['x'] - p2['x'];
+//    s2_y = p3['y'] - p2['y'];
+//
+//    var slope_1, slope_2
+//    slope_1 = s1_y/s1_x
+//    slope_2 = s2_y/s2_x
+//
+//    result_point_1
+//    var s, t;
+//    s = (-s1_y * (p0['x'] - p2['x']) + s1_x * (p0['y'] - p2['y'])) / (-s2_x * s1_y + s1_x * s2_y);
+//    t = ( s2_x * (p0['y'] - p2['y']) - s2_y * (p0['x'] - p2['x'])) / (-s2_x * s1_y + s1_x * s2_y);
+//
+//    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+//    {
+//        // Collision detected
+//        return true;
+//    }
+//    return false; // No collision
+//}
+
 function line_intersects(p0, p1, p2, p3) {
-    var s1_x, s1_y, s2_x, s2_y;
-    s1_x = p1['x'] - p0['x'];
-    s1_y = p1['y'] - p0['y'];
-    s2_x = p3['x'] - p2['x'];
-    s2_y = p3['y'] - p2['y'];
-
-    var s, t;
-    s = (-s1_y * (p0['x'] - p2['x']) + s1_x * (p0['y'] - p2['y'])) / (-s2_x * s1_y + s1_x * s2_y);
-    t = ( s2_x * (p0['y'] - p2['y']) - s2_y * (p0['x'] - p2['x'])) / (-s2_x * s1_y + s1_x * s2_y);
-
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
-    {
-        // Collision detected
-        return true;
-    }
-    return false; // No collision
+  var a,b,c,d,p,q,r,s;
+  a = p0['x']
+  b = p0['y']
+  c = p1['x']
+  d = p1['y']
+  p = p2['x']
+  q = p2['y']
+  r = p3['x']
+  s = p3['y']
+  var det, gamma, lambda;
+  det = (c - a) * (s - q) - (r - p) * (d - b);
+  if (det === 0) {
+    return false;
+  } else {
+    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+  }
 }
 
 function point(x, y){
@@ -113,7 +140,7 @@ function draw(end, region_num){
 }
 
 function check_intersect(x,y){
-    if(perimeter.length < 4){
+    if(perimeter.length < 3){
         return false;
     }
     var p0 = new Array();
@@ -154,18 +181,6 @@ function point_it(event, region_num) {
         }
         x = perimeter[0]['x'];
         y = perimeter[0]['y'];
-        if(check_intersect(x,y)){
-            alert('The line you are drawing intersects another line');
-            return false;
-        }
-        x = perimeter[1]['x'];
-        y = perimeter[1]['y'];
-        if(check_intersect(x,y)){
-            alert('The line you are drawing intersects another line');
-            return false;
-        }
-        x = perimeter[2]['x'];
-        y = perimeter[2]['y'];
         if(check_intersect(x,y)){
             alert('The line you are drawing intersects another line');
             return false;
