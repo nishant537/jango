@@ -135,7 +135,9 @@ function draw(end, region_num){
         document.getElementById(element_id).value = '';
     } else {
         modPerimeter = reformatAndResize(perimeter);
-        document.getElementById(element_id).value = (modPerimeter);
+        if (complete){
+            document.getElementById(element_id).value = (modPerimeter);
+        }
     }
 }
 
