@@ -466,6 +466,8 @@ def view_page():
             obj_pretty = " ".join(obj_list)
             if obj == "crowd_counting":
                 object_wise_sound_dict[str(obj_pretty)] = 0
+            elif obj == "alpr":
+                object_wise_sound_dict[str(obj_pretty)] = 0
             else:
                 object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
 
