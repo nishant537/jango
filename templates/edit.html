@@ -90,7 +90,7 @@
             <!--Now access object names which are stored in the first index of each entry of the list, second index has 1/0 for enable/disable-->
             if (f[currentObject.concat("_copy")].checked == true) {
                 for (key in objects) {
-                    if (objects[key][0] == currentObject || objects[key][0] == "crowd_counting") {}
+                    if (objects[key][0] == currentObject || objects[key][0] == "crowd_counting" || objects[key][0] != "alpr") {}
                     else {
                         f[objects[key][0].concat("_email_list")].value = f[currentObject.concat("_email_list")].value;
                         f[objects[key][0].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
@@ -101,7 +101,7 @@
             }
             else {
                 for (key in objects) {
-                    if (objects[key][0] == currentObject || objects[key][0] == "crowd_counting") {}
+                    if (objects[key][0] == currentObject || objects[key][0] == "crowd_counting" || objects[key][0] != "alpr") {}
                     else {
                         f[objects[key][0].concat("_email_list")].value = "";
                         f[objects[key][0].concat("_sms_list")].value = "";
