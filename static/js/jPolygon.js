@@ -1,3 +1,5 @@
+// This file handles interative region selection functionality
+
 var perimeter = new Array();
 var complete = false;
 var numberOfCanvasses = 3;
