@@ -3,6 +3,7 @@ import re
 import json
 import logging
 import requests
+import time
 import ConfigParser
 from functools import wraps
 from operator import itemgetter
@@ -507,7 +508,36 @@ def send_alarm_file():
     '''Return alarm.mp3 file'''
     return send_file('alarm.mp3')
 
+  
+@app.route('/updateFrame', methods=['POST', 'GET'])
+def update_frame():
+    """Takes post request from add/edit page with rtsp link and updates the camera frame image"""
+    data = request.get_json()
+    rtsp = data['rtsp']
+    if rtsp == "":
+        # Update with a placeholder image
+        return_response = {'success': False, 'path': '/static/img/invalid_rtsp.jpg'}
 
+    else:
+        # Update with frame from camera rtsp link (if can't get frame, update with placeholder)
+        response = requests.get(BACKEND_URL + 'getFrameFromRTSP/' + "rtsp=" + rtsp)
+        frame = response.content
+        if frame is not None:
+            temp_dir = 'static/img/temp'
+            filelist = [f for f in os.listdir(temp_dir) if f.endswith(".jpg")]
+            for f in filelist:
+                os.remove(os.path.join(temp_dir, f))
+            unique_filename = 'static/img/temp/%d.jpg' % int(time.time())  # workaround for the browser caching older images
+            fh = open(unique_filename, "w")
+            fh.write(frame)
+            fh.close()
+            unique_filename = "/" + unique_filename
+            return_response = {'success': True, 'path': unique_filename}
+        else:
+            return_response = {'success': False, 'path': '/static/img/invalid_rtsp.jpg'}
+    return json.dumps(return_response)
+
+  
 @app.route('/deleteCamera/<camera_id>')
 @license_required
 @login_required
@@ -680,9 +710,14 @@ def edit_camera(camera_id):
             return redirect(url_for('edit_camera_page', camera_id=camera_id))
     return redirect(url_for('list_page'))
 
-### Error handlers
-
-
+  
+@app.route('/dim', methods=['GET', 'POST'])
+@license_required
+def dim():
+    return render_template('example.html')
+  
+  
+#### Error handlers
 @app.errorhandler(404)
 def page_not_found(e):
     '''Handle 404 page not found'''
