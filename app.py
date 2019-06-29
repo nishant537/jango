@@ -305,6 +305,8 @@ def form_to_json(form):
             alert_time = form['alpr_time']
             object_dict['alert_time'] = alert_time
 
+            object_dict['out_time'] = form['alpr_out_time']
+
             email_list = [i.strip() for i in form['alpr_email_list'].split(',')]
             object_dict['email_list'] = email_list
 
