@@ -214,6 +214,9 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 details.append(("call_list", list_for_this_alert))
                 list_for_this_alert = (alert_dictionary['sound_alarm'])
                 details.append(("sound_alarm", list_for_this_alert))
+                if (object_allowed == "tamper"):
+                    list_for_this_alert = (alert_dictionary['sensitivity'])
+                    details.append(("sensitivity", list_for_this_alert))
                 obj_alerts_list.append((object_allowed, details))
 
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
@@ -306,6 +309,8 @@ def form_to_json(form):
             object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
             object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
             object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
+            if object_allowed == 'tamper':
+                object_dict["sensitivity"] = form.get('tamper_sensitivity')
 
         camera_dict['obj_alerts'][object_allowed] = object_dict
 

@@ -766,6 +766,7 @@
                                                                     </div>
                                                                  </div>
                                                             </div>
+
                                                             {% elif object == "intrusion" %}
                                                             <div class="tab-pane active" id="{{ object }}_tab" role="tabpanel">
                                                                 <div class="row">
@@ -811,6 +812,73 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
+
+                                                            {% elif object == "tamper" %}
+                                                            <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                                <div class="row">
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+
+                                                                        {% elif alert == "sensitivity" %}
+
+                                                                        {% elif alert == "email_list" %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]{10})(,(\+[0-9]{1,3}-[0-9]{10}))*$">
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sensitivity" %}
+                                                                        <div class = "col-md-12 form-group">
+                                                                            <label class="radio-inline radio-label-text">
+                                                                                <b>Sensitivity:</b>
+                                                                            </label>
+                                                                            <label class="radio-inline radio-label-text">
+                                                                                <input type="radio" name="tamper_sensitivity" id="radio_tamper_low" value=0  {{ 'checked' if list == "0" }}>
+        <!--                                                                        here value 0 indicates low sensitivity-->
+                                                                                Low
+                                                                            </label>
+                                                                            <label class="radio-inline radio-label-text">
+                                                                                <input type="radio" name="tamper_sensitivity" id="radio_tamper_normal" value=1 {{ 'checked' if list == "1" }}>
+        <!--                                                                        here value 1 indicates normal sensitivity-->
+
+                                                                                Normal
+                                                                            </label>
+                                                                            <label class="radio-inline radio-label-text">
+                                                                                <input type="radio" name="tamper_sensitivity" id="radio_tamper_high" value=2  {{ 'checked' if list == "2" }}>
+        <!--                                                                        here value 2 indicates high sensitivity-->
+
+                                                                                High
+                                                                            </label>
+                                                                        </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label">
+                                                                                    <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
+                                                                                    <span class="form-check-sign"></span>
+                                                                                    {{ object.split('_') | join(' ') | title }}  Sound Alarm
+                                                                                </label>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                            Copy data to all objects
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
                                                             {% else %}
                                                             <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
                                                                 <div class="row">
