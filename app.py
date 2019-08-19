@@ -4,7 +4,7 @@ import json
 import logging
 import requests
 import time
-import ConfigParser
+import configparser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
@@ -18,8 +18,8 @@ app.secret_key = 'BhySSMlymg'
 GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Config file
-config = ConfigParser.ConfigParser()
-config.readfp(open('/var/www/godeep/gui_settings.conf'))
+config = configparser.ConfigParser()
+config.read_file(open('/var/www/godeep/gui_settings.conf'))
 
 # GoDeep backend server settings
 BACKEND_IP = config.get('global', 'BACKEND_IP')
@@ -65,7 +65,7 @@ def license_required(func):
                     return redirect('/list')
                 elif request.method == 'POST':
                     login_info = get_login_info()
-                    if request.form['username'] in login_info.keys():
+                    if request.form['username'] in list(login_info.keys()):
                         password = login_info[request.form['username']]
                         if password == request.form['password']:
                             session['username'] = request.form['username']
@@ -371,7 +371,7 @@ def backend_status():
         lic_status,lic_reason = get_license()
     except Exception as e:
         pass
-    print "License Status: " + str(lic_status)
+    print("License Status: " + str(lic_status))
     return jsonify(result=lic_status)
 
 
@@ -457,7 +457,7 @@ def view_page():
     unique_floors = natural_sort(list(set(unique_floors)), key=itemgetter(0))
 
     # Save whitespace stripped version of floors for HTML ID tags
-    unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
+    unique_floors = list(zip(unique_floors, ["".join(flr.split()) for flr in unique_floors]))
 
     # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
@@ -502,7 +502,7 @@ def get_alerts():
             alert_message='Failed to establish connection with server')
 
     # Convert objects to pretty format
-    for key, objects in alert_dict.iteritems():
+    for key, objects in alert_dict.items():
         alert_dict[key] = [' '.join(obj.split('_')).title() for obj in objects]
 
     return json.dumps(alert_dict)
@@ -585,7 +585,7 @@ def search_view_page():
         sound_dict = {}
 
         # Get searched name from form
-        searched_name = str(request.form.values()[0])
+        searched_name = str(list(request.form.values())[0])
 
         # Parse all camera info and zip data
         data_list = []
@@ -628,7 +628,7 @@ def search_list_page():
         objects_allowed = get_objects_list()
     
         # Get searched name from form
-        searched_name = str(request.form.values()[0])
+        searched_name = str(list(request.form.values())[0])
 
         # Parse all camera info and zip data
         data_list = []
