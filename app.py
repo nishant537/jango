@@ -533,7 +533,7 @@ def update_frame():
             for f in filelist:
                 os.remove(os.path.join(temp_dir, f))
             unique_filename = 'static/img/temp/%d.jpg' % int(time.time())  # workaround for the browser caching older images
-            fh = open(unique_filename, "w")
+            fh = open(unique_filename, "wb")
             fh.write(frame)
             fh.close()
             unique_filename = "/" + unique_filename
