@@ -127,6 +127,7 @@ def admin_rights_required(func):
 
 
 def show_user_button():
+    """Check whether settings.conf allows user settings; to show user button gui navbar"""
     user_id = session.get('username')
     user_page_allowed = requests.get(BACKEND_URL + 'isUserPageAllowed').json()['allowed']
     if user_id == "admin" and user_page_allowed:
@@ -151,7 +152,7 @@ def get_background():
     return background_img
 
 def get_objects_list():
-    '''Get lsit of object from backend'''
+    '''Get list of object from backend'''
     objects_dict = requests.get(BACKEND_URL + 'getObjectsList').json()
     return natural_sort([str(i) for i in objects_dict['objects']], key=itemgetter(0))
 
@@ -339,6 +340,7 @@ def form_to_json(form):
 
 
 def user_form_to_json(form):
+    """Convert data from user form to json format for sending to backend"""
     print(form)
     user_dict = {}
     user_dict['username'] = form['username'].strip()
@@ -781,6 +783,7 @@ def edit_camera(camera_id):
 @license_required
 @login_required
 def update_password():
+    """Update the user password, called from user.html password change modal"""
     data = request.get_json()
     print(data)
     if data:
@@ -795,6 +798,7 @@ def update_password():
 @license_required
 @login_required
 def update_from_email():
+    """Update from email from user.html update from email modal"""
     return_response = {'success': False, 'message': "Sender Email Not Updated."}
     data = request.get_json()
     print(data)
@@ -815,12 +819,14 @@ def update_from_email():
 @license_required
 @login_required
 def update_user():
+    """"Update user details (except for password and from email, they are controlled by modals)"""
     data = user_form_to_json(request.form)
     r = requests.post(url=BACKEND_URL + 'updateUser', data=data)
     return redirect(url_for('list_page'))
 
 
 def check_update_from_email(data):
+    """Do a formatting check on from email info submitted by user"""
     regex_email_list = "^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$"
     regex_email = "[^@]+@[^@]+\.[a-zA-Z]{2,}"
     result_list = re.match(regex_email_list, data['recipients_list'])
