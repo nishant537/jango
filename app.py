@@ -786,7 +786,7 @@ def update_password():
     """Update the user password, called from user.html password change modal"""
     data = request.get_json()
     print(data)
-    if data:
+    if data and data['new_password']:
         r = requests.post(url=BACKEND_URL + 'updatePassword', data=json.dumps(data))
         return_response = json.loads(r.text)
     else:
