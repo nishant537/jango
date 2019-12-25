@@ -8,7 +8,7 @@ import configparser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
-
+import copy
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, session, flash, jsonify
 
 # Initiate Flask
@@ -217,6 +217,10 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 if (object_allowed == "tamper"):
                     list_for_this_alert = (alert_dictionary['sensitivity'])
                     details.append(("sensitivity", list_for_this_alert))
+                if object_allowed == 'intrusion':
+                    intrusion_data_dict = obj_alerts[object_allowed]
+                    details.append(("intrusion_all_details", intrusion_data_dict))
+
                 obj_alerts_list.append((object_allowed, details))
 
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
@@ -248,6 +252,9 @@ def form_to_json(form):
     objects_selected = form.getlist('object_detect')
     for object_allowed in objects_allowed:
         camera_dict['object_detect'][object_allowed] = 1 if (object_allowed in objects_selected) else 0
+
+    # template dictionary for holiday and half day mapping
+    days_dict = {'monday': 0, 'tuesday': 0, 'wednesday': 0, 'thursday': 0, 'friday': 0, 'saturday': 0, 'sunday': 0}
 
     # Notifications
     camera_dict['obj_alerts'] = {}
@@ -311,6 +318,22 @@ def form_to_json(form):
             object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
             if object_allowed == 'tamper':
                 object_dict["sensitivity"] = form.get('tamper_sensitivity')
+            if object_allowed == 'intrusion':
+                object_dict['holiday_start_time'] = form.get('intrusion_holiday_start_time')
+                object_dict['holiday_end_time'] = form.get('intrusion_holiday_end_time')
+                object_dict['half_day_start_time'] = form.get('intrusion_half_day_start_time')
+                object_dict['half_day_end_time'] = form.get('intrusion_half_day_end_time')
+                object_dict['holiday_date_list'] = form.get('intrusion_holiday_list')
+                holidays_dictionary = copy.deepcopy(days_dict)
+                for day in holidays_dictionary.keys():
+                    form_key = day + "_holiday"
+                    holidays_dictionary[day] = 1 if form.getlist(form_key) else 0
+                half_days_dictionary = copy.deepcopy(days_dict)
+                for day in half_days_dictionary.keys():
+                    form_key = day + "_half_day"
+                    half_days_dictionary[day] = 1 if form.getlist(form_key) else 0
+                object_dict['holiday_days_dict'] = holidays_dictionary
+                object_dict['half_day_days_dict'] = half_days_dictionary
 
         camera_dict['obj_alerts'][object_allowed] = object_dict
 
