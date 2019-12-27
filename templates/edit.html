@@ -839,6 +839,7 @@
                                                                         <input value="{{ end_time }}" id="intrusion_end_time" name="intrusion_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
                                                                             type="text" class="form-control" placeholder="Default End Time (24hrs HH:MM)">
                                                                     </div>
+                                                                    {% if advanced_intrusion_timings %}
                                                                     {% for alert, list in details %}
                                                                         {% if alert == "intrusion_all_details" %}
                                                                             <div class="col-md-6 form-group">
@@ -899,6 +900,7 @@
                                                                             </div>
                                                                         {% endif %}
                                                                     {% endfor %}
+                                                                    {% endif %}
                                                                     {% for alert, list in details %}
                                                                         {% if alert == "sound_alarm" %}
                                                                             <div class="form-check">

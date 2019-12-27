@@ -427,7 +427,14 @@ def add_camera_page():
     check_response = requests.get(BACKEND_URL + 'maxCameraCheck').json()
     img = get_background()
     objects_allowed = get_objects_list()
-    return render_template('add.html', image=img, objects=objects_allowed, message=check_response)
+    # advanced intrusion timing
+    advanced_intrusion_timings = False
+    intrusion_timing_info = requests.get(BACKEND_URL + 'isAdvancedIntrusionTimingsAvailable').json()
+    if intrusion_timing_info:
+        if intrusion_timing_info['enabled']:
+            advanced_intrusion_timings = True
+    return render_template('add.html', image=img, objects=objects_allowed, message=check_response,
+                           advanced_intrusion_timings=advanced_intrusion_timings)
 
 
 @app.route('/edit/<camera_id>')
@@ -438,10 +445,16 @@ def edit_camera_page(camera_id):
     img = get_background()
     camera_payload = get_camera_info(camera_id)
     objects_allowed = get_objects_list()
-
+    # advanced intrusion timing
+    advanced_intrusion_timings = False
+    intrusion_timing_info = requests.get(BACKEND_URL + 'isAdvancedIntrusionTimingsAvailable').json()
+    if intrusion_timing_info:
+        if intrusion_timing_info['enabled']:
+            advanced_intrusion_timings = True
     # Match camera_id from camera_payload and load it's details
     data = [zip_data(camera_payload[str(camera_id)], objects_allowed)]
-    return render_template('edit.html', image=img, data=data, camera_id=camera_id)
+    return render_template('edit.html', image=img, data=data, camera_id=camera_id,
+                           advanced_intrusion_timings=advanced_intrusion_timings)
 
 
 @app.route('/view')
