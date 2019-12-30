@@ -326,27 +326,35 @@
                             <p>Add Camera</p>
                         </a>
                     </li>
-                </ul>
-                <ul class="navbar-nav mr-auto">
+                    {% if show_user_button %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/home">
-                            <i class="fa fa-file-alt"></i>
-                            <p>License Status</p>
+                        <a class="nav-link top-bar-link" href="/user">
+                            <i class="fa fa-users"></i>
+                            <p>User</p>
                         </a>
                     </li>
-                    <!--<li class="nav-item dropdown">-->
-                        <!--<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">-->
-                            <!--<p>Background</p>-->
-                        <!--</a>-->
-                        <!--<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">-->
-                            <!--<a class="dropdown-item" href="/background/bank/add_camera">Bank</a>-->
-                            <!--<a class="dropdown-item" href="/background/hospital/add_camera">Hospital</a>-->
-                            <!--<a class="dropdown-item" href="/background/insurance/add_camera">Insurance</a>-->
-                            <!--<a class="dropdown-item" href="/background/pixel/add_camera">Pixel</a>-->
-                            <!--<a class="dropdown-item" href="/background/retail/add_camera">Retail</a>-->
-                        <!--</div>-->
-                    <!--</li>-->
+                    {% endif %}
                 </ul>
+<!--                <ul class="navbar-nav mr-auto">-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link" href="/home">-->
+<!--                            <i class="fa fa-file-alt"></i>-->
+<!--                            <p>License Status</p>-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                    &lt;!&ndash;<li class="nav-item dropdown">&ndash;&gt;-->
+<!--                        &lt;!&ndash;<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">&ndash;&gt;-->
+<!--                            &lt;!&ndash;<p>Background</p>&ndash;&gt;-->
+<!--                        &lt;!&ndash;</a>&ndash;&gt;-->
+<!--                        &lt;!&ndash;<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/bank/add_camera">Bank</a>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/hospital/add_camera">Hospital</a>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/insurance/add_camera">Insurance</a>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/pixel/add_camera">Pixel</a>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/retail/add_camera">Retail</a>&ndash;&gt;-->
+<!--                        &lt;!&ndash;</div>&ndash;&gt;-->
+<!--                    &lt;!&ndash;</li>&ndash;&gt;-->
+<!--                </ul>-->
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <form class="form" action="/logout">

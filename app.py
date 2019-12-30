@@ -64,20 +64,17 @@ def license_required(func):
                 if username:
                     return redirect('/list')
                 elif request.method == 'POST':
-                    login_info = get_login_info()
-                    if request.form['username'] in list(login_info.keys()):
-                        password = login_info[request.form['username']]
-                        if password == request.form['password']:
-                            session['username'] = request.form['username']
-                            response = redirect('/list')
-                            return response
-                        else:
-                            error = 'Invalid Credentials. Please try again.'
+                    credential_dict = {'username': request.form['username'], 'password': request.form['password']}
+                    response = requests.post(url=BACKEND_URL + 'validateCredentials/', data=json.dumps(credential_dict))
+                    response_dict = json.loads(response.text)
+                    if response_dict['success']:
+                        session['username'] = request.form['username']
+                        response = redirect('/list')
+                        return response
                     else:
                         error = 'Invalid Credentials. Please try again.'
                 return render_template('login.html', message='Valid',
-                                           license_status=license_status, image='Landing.jpeg', error=error)
-
+                                       license_status=license_status, image='Landing.jpeg', error=error)
 
             elif license_status and func.__name__=='home_page':
                 return render_template('home.html', message='Valid',
@@ -115,7 +112,32 @@ def login_required(func):
     return valid_session
 
 
+def admin_rights_required(func):
+    """Check whether settings.conf allows access of user settings, and if current user is admin"""
+    @wraps(func)
+    def admin_rights_available(*args, **kwargs):
+        user_id = session.get('username')
+        user_page_allowed = requests.get(BACKEND_URL + 'isUserPageAllowed').json()['allowed']
+        if user_id == "admin" and user_page_allowed:
+            return func(*args, **kwargs)
+        else:
+            return redirect('/list')
+
+    return admin_rights_available
+
+
+def show_user_button():
+    """Check whether settings.conf allows user settings; to show user button gui navbar"""
+    user_id = session.get('username')
+    user_page_allowed = requests.get(BACKEND_URL + 'isUserPageAllowed').json()['allowed']
+    if user_id == "admin" and user_page_allowed:
+        return True
+    else:
+        return False
+
+
 def get_login_info():
+    """Not in use since implementation of updated login protocol"""
     login_info = requests.get(BACKEND_URL + 'getLoginInfo').json()
     return login_info
 
@@ -130,7 +152,7 @@ def get_background():
     return background_img
 
 def get_objects_list():
-    '''Get lsit of object from backend'''
+    '''Get list of object from backend'''
     objects_dict = requests.get(BACKEND_URL + 'getObjectsList').json()
     return natural_sort([str(i) for i in objects_dict['objects']], key=itemgetter(0))
 
@@ -340,6 +362,23 @@ def form_to_json(form):
     return json.dumps(camera_dict)
 
 
+def user_form_to_json(form):
+    """Convert data from user form to json format for sending to backend"""
+    print(form)
+    user_dict = {}
+    user_dict['username'] = form['username'].strip()
+    user_dict['pretty_name'] = form['pretty_name'].strip()
+    user_dict['email_address'] = form['email_address'].strip()
+    user_dict['phone_number'] = form['phone_number'].strip()
+    user_dict['role'] = form.get('user_role')
+    user_dict['use_custom_from_email'] = True if form.getlist("use_custom_from_email") else False
+    try:
+        user_dict['password'] = form['password']
+    except:
+        pass
+    return json.dumps(user_dict)
+
+
 def sanitise_input(form):
     # check on size of call, sms, email lists
     check_response = requests.get(BACKEND_URL + 'maxCallSMSEmailCheck').json()
@@ -433,8 +472,9 @@ def add_camera_page():
     if intrusion_timing_info:
         if intrusion_timing_info['enabled']:
             advanced_intrusion_timings = True
+    show_user = show_user_button()
     return render_template('add.html', image=img, objects=objects_allowed, message=check_response,
-                           advanced_intrusion_timings=advanced_intrusion_timings)
+                           show_user_button=show_user, advanced_intrusion_timings=advanced_intrusion_timings)
 
 
 @app.route('/edit/<camera_id>')
@@ -453,8 +493,9 @@ def edit_camera_page(camera_id):
             advanced_intrusion_timings = True
     # Match camera_id from camera_payload and load it's details
     data = [zip_data(camera_payload[str(camera_id)], objects_allowed)]
+    show_user = show_user_button()
     return render_template('edit.html', image=img, data=data, camera_id=camera_id,
-                           advanced_intrusion_timings=advanced_intrusion_timings)
+                           advanced_intrusion_timings=advanced_intrusion_timings, show_user_button=show_user)
 
 
 @app.route('/view')
@@ -497,9 +538,10 @@ def view_page():
 
     # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
+    show_user = show_user_button()
 
     return render_template('view.html', image=img, search_mode=False, sound_dict=sound_dict,
-        objects=objects_allowed, data=data_list, unique_floors=unique_floors)
+        objects=objects_allowed, data=data_list, unique_floors=unique_floors, show_user_button=show_user)
 
 
 @app.route('/home')
@@ -521,9 +563,29 @@ def list_page():
 
     # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
+    show_user = show_user_button()
 
     return render_template('list.html', image=img, search_mode=False,
-        objects=objects_allowed, data=data_list)
+        objects=objects_allowed, data=data_list, show_user_button=show_user)
+
+
+@app.route('/user')
+@license_required
+@login_required
+@admin_rights_required
+#@admin_login_required
+def user_page():
+    """Route the user settings page"""
+    username = session.get('username')
+    user_data = {}
+    try:
+        r = requests.get(url=BACKEND_URL + 'getUserInfo/' + username)
+        user_data = json.loads(r.text)
+        if not user_data:
+            user_data['username'] = username
+    except Exception as ex:
+        print(ex)
+    return render_template('user.html', data=user_data)
 
 
 #### Data Handling from GUI
@@ -751,13 +813,65 @@ def edit_camera(camera_id):
             return redirect(url_for('edit_camera_page', camera_id=camera_id))
     return redirect(url_for('list_page'))
 
-  
-@app.route('/dim', methods=['GET', 'POST'])
+
+@app.route('/updatePassword', methods=['GET', 'POST'])
 @license_required
-def dim():
-    return render_template('example.html')
-  
-  
+@login_required
+def update_password():
+    """Update the user password, called from user.html password change modal"""
+    data = request.get_json()
+    print(data)
+    if data and data['new_password']:
+        r = requests.post(url=BACKEND_URL + 'updatePassword', data=json.dumps(data))
+        return_response = json.loads(r.text)
+    else:
+        return_response = {'success': False, 'message': "Password Not Updated"}
+    return json.dumps(return_response)
+
+
+@app.route('/updateFromEmail', methods=['GET', 'POST'])
+@license_required
+@login_required
+def update_from_email():
+    """Update from email from user.html update from email modal"""
+    return_response = {'success': False, 'message': "Sender Email Not Updated."}
+    data = request.get_json()
+    print(data)
+    checked = check_update_from_email(data)
+    if data and checked:
+        r = requests.post(url=BACKEND_URL + 'updateFromEmail', data=json.dumps(data))
+        response = json.loads(r.text)
+        if response['success']:
+            return_response = {'success': True, 'message': "Sender Email Updated. Test mail sent to recipients"}
+    elif not checked:
+        return_response = {'success': False, 'message': "Invalid Input"}
+    else:
+        return_response = {'success': False, 'message': "Sender Email Not Updated."}
+    return json.dumps(return_response)
+
+
+@app.route('/updateUser', methods=['GET', 'POST'])
+@license_required
+@login_required
+def update_user():
+    """"Update user details (except for password and from email, they are controlled by modals)"""
+    data = user_form_to_json(request.form)
+    r = requests.post(url=BACKEND_URL + 'updateUser', data=data)
+    return redirect(url_for('list_page'))
+
+
+def check_update_from_email(data):
+    """Do a formatting check on from email info submitted by user"""
+    regex_email_list = "^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$"
+    regex_email = "[^@]+@[^@]+\.[a-zA-Z]{2,}"
+    result_list = re.match(regex_email_list, data['recipients_list'])
+    result_email = re.match(regex_email, data['email'])
+    if result_email and result_list and data['email'] and data['recipients_list']:
+        if result_email.group() == data['email'] and result_list.group() == data['recipients_list'] and len(data['password']) > 0:
+            return True
+    return False
+
+
 #### Error handlers
 @app.errorhandler(404)
 def page_not_found(e):

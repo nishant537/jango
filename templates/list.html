@@ -121,6 +121,14 @@
                             <p>Add Camera</p>
                         </a>
                     </li>
+                    {% if show_user_button %}
+                    <li class="nav-item">
+                        <a class="nav-link top-bar-link" href="/user">
+                            <i class="fa fa-users"></i>
+                            <p>User</p>
+                        </a>
+                    </li>
+                    {% endif %}
                     <!--<li class="nav-item dropdown">-->
                         <!--<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">-->
                             <!--<p>Background</p>-->
@@ -134,14 +142,14 @@
                         <!--</div>-->
                     <!--</li>-->
                 </ul>
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/home">
-                            <i class="fa fa-file-alt"></i>
-                            <p>License Status</p>
-                        </a>
-                    </li>
-                </ul>
+<!--                <ul class="navbar-nav ml-auto">-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link" href="/home">-->
+<!--                            <i class="fa fa-file-alt"></i>-->
+<!--                            <p>License Status</p>-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                </ul>-->
                 <form class="form form-newsletter" method="POST" action="/list/search">
                     <div class="form-group">
                         <input value="{{ searched_name }}" id="search_name" name="seach_name" type="text" class="form-control" placeholder="Search">
