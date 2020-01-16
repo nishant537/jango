@@ -236,7 +236,7 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 details.append(("call_list", list_for_this_alert))
                 list_for_this_alert = (alert_dictionary['sound_alarm'])
                 details.append(("sound_alarm", list_for_this_alert))
-                if (object_allowed == "tamper"):
+                if (object_allowed != "camera_fault"):
                     list_for_this_alert = (alert_dictionary['sensitivity'])
                     details.append(("sensitivity", list_for_this_alert))
                 if object_allowed == 'intrusion':
@@ -338,8 +338,10 @@ def form_to_json(form):
             object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
             object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
             object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
-            if object_allowed == 'tamper':
-                object_dict["sensitivity"] = form.get('tamper_sensitivity')
+            if object_allowed != 'camera_fault':
+                index_sensitivity = '%s_sensitivity' % object_allowed
+                object_dict["sensitivity"] = form.get(index_sensitivity)
+
             if object_allowed == 'intrusion':
                 object_dict['holiday_start_time'] = form.get('intrusion_holiday_start_time')
                 object_dict['holiday_end_time'] = form.get('intrusion_holiday_end_time')
@@ -413,6 +415,11 @@ def sanitise_input(form):
 
     return True, "form is good"
 
+
+def get_default_sensitivities():
+    sensitivity_dict = requests.get(BACKEND_URL + 'getDefaultSensitivities').json()
+    return sensitivity_dict
+
 #### Flask Routing
 
 
@@ -473,8 +480,10 @@ def add_camera_page():
         if intrusion_timing_info['enabled']:
             advanced_intrusion_timings = True
     show_user = show_user_button()
+    default_sensitivity_dictionary = get_default_sensitivities()
     return render_template('add.html', image=img, objects=objects_allowed, message=check_response,
-                           show_user_button=show_user, advanced_intrusion_timings=advanced_intrusion_timings)
+                           show_user_button=show_user, advanced_intrusion_timings=advanced_intrusion_timings,
+                           default_sensitivity_dictionary=default_sensitivity_dictionary)
 
 
 @app.route('/edit/<camera_id>')
