@@ -205,8 +205,8 @@
         // this function will put the value of the current slider in the log. Helpful for devs to adjust threshold
         function sliderOnChange(item){
             id = $(item).attr("id")
-            console.log(document.getElementById(id).value)
-            //document.getElementById("intrusion_sensitivity_text").innerHTML=document.getElementById("myRange").value;
+            text_id = id.concat("_text")
+            document.getElementById(text_id).innerHTML=document.getElementById(id).value;
         }
 </script>
 
@@ -578,6 +578,9 @@
                                                                 </div>
                                                                 <div class = "col-md-2 form-group">
                                                                     <b>Sensitivity:</b>
+                                                                    <span id="{{ object }}_sensitivity_text">
+                                                                        {{ default_sensitivity_dictionary[object] }}
+                                                                    </span>
                                                                 </div>
                                                                 <div class = "col-md-10 form-group">
                                                                      <div class="slidecontainer">
@@ -989,6 +992,9 @@
                                                                 {% if object!='camera_fault' %}
                                                                 <div class = "col-md-2 form-group">
                                                                     <b>Sensitivity:</b>
+                                                                    <span id="{{ object }}_sensitivity_text">
+                                                                        {{ default_sensitivity_dictionary[object] }}                                                                                     
+                                                                    </span>
                                                                 </div>
                                                                 <div class = "col-md-10 form-group">
                                                                         High&nbsp;&nbsp;
