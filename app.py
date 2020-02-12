@@ -234,6 +234,9 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 details.append(("sms_list", list_for_this_alert))
                 list_for_this_alert = list_to_string(alert_dictionary['call_list'], is_list_page)
                 details.append(("call_list", list_for_this_alert))
+                if check_whatsapp_enabled():
+                    list_for_this_alert = list_to_string(alert_dictionary['whatsapp_list'], is_list_page)
+                    details.append(("whatsapp_list", list_for_this_alert))
                 list_for_this_alert = (alert_dictionary['sound_alarm'])
                 details.append(("sound_alarm", list_for_this_alert))
                 if (object_allowed != "camera_fault"):
@@ -333,10 +336,13 @@ def form_to_json(form):
             index_email = '%s_email_list' % str(object_allowed)
             index_sms = '%s_sms_list' % str(object_allowed)
             index_call = '%s_call_list' % str(object_allowed)
+            index_whatsapp = '%s_whatsapp_list' % str(object_allowed)
             index_alarm = '%s_sound_alarm' % str(object_allowed)
             object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
             object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
             object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
+            if check_whatsapp_enabled():
+                object_dict['whatsapp_list'] = [i.strip() for i in form[index_whatsapp].split(',')]
             object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
             if object_allowed != 'camera_fault':
                 index_sensitivity = '%s_sensitivity' % object_allowed
@@ -420,6 +426,11 @@ def get_default_sensitivities():
     sensitivity_dict = requests.get(BACKEND_URL + 'getDefaultSensitivities').json()
     return sensitivity_dict
 
+
+def check_whatsapp_enabled():
+    whatsapp_enabled = requests.get(BACKEND_URL + 'isWhatsappEnabled').json()
+    return whatsapp_enabled['enabled']
+
 #### Flask Routing
 
 
@@ -481,9 +492,11 @@ def add_camera_page():
             advanced_intrusion_timings = True
     show_user = show_user_button()
     default_sensitivity_dictionary = get_default_sensitivities()
+    whatsapp_enabled = check_whatsapp_enabled()
     return render_template('add.html', image=img, objects=objects_allowed, message=check_response,
                            show_user_button=show_user, advanced_intrusion_timings=advanced_intrusion_timings,
-                           default_sensitivity_dictionary=default_sensitivity_dictionary)
+                           default_sensitivity_dictionary=default_sensitivity_dictionary,
+                           whatsapp_enabled=whatsapp_enabled)
 
 
 @app.route('/edit/<camera_id>')
