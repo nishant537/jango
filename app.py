@@ -191,6 +191,7 @@ def dimensions_to_string(data):
 def zip_data(data, objects_allowed, is_list_page=False):
     '''Appends all data to a list for Jinja templating'''
     # Mandatory parameters
+    whatsapp_enabled = check_whatsapp_enabled()
     camera_name = str(data['camera_name'])
     rtsp_url = str(data['rtsp_url'])
     priority = str(data['camera_priority'])
@@ -234,7 +235,7 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 details.append(("sms_list", list_for_this_alert))
                 list_for_this_alert = list_to_string(alert_dictionary['call_list'], is_list_page)
                 details.append(("call_list", list_for_this_alert))
-                if check_whatsapp_enabled():
+                if whatsapp_enabled:
                     list_for_this_alert = list_to_string(alert_dictionary['whatsapp_list'], is_list_page)
                     details.append(("whatsapp_list", list_for_this_alert))
                 list_for_this_alert = (alert_dictionary['sound_alarm'])
@@ -253,6 +254,7 @@ def zip_data(data, objects_allowed, is_list_page=False):
 
 def form_to_json(form):
     '''Convert the requests.form data to JSON'''
+    whatsapp_enabled = check_whatsapp_enabled()
     camera_dict = {}
     objects_allowed = get_objects_list()
 
@@ -341,8 +343,10 @@ def form_to_json(form):
             object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
             object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
             object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
-            if check_whatsapp_enabled():
+            if whatsapp_enabled:
                 object_dict['whatsapp_list'] = [i.strip() for i in form[index_whatsapp].split(',')]
+            else:
+                object_dict['whatsapp_list'] = []
             object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
             if object_allowed != 'camera_fault':
                 index_sensitivity = '%s_sensitivity' % object_allowed
