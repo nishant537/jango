@@ -97,6 +97,10 @@
                         f[objects[key].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
                         f[objects[key].concat("_call_list")].value = f[currentObject.concat("_call_list")].value;
                         f[objects[key].concat("_sound_alarm")].checked = f[currentObject.concat("_sound_alarm")].checked;
+                        try {
+                        f[objects[key].concat("_whatsapp_list")].value = f[currentObject.concat("_whatsapp_list")].value;
+                        }
+                        catch(err) {console.log(err)}
                     }
                 }
             }
@@ -108,6 +112,10 @@
                         f[objects[key].concat("_sms_list")].value = "";
                         f[objects[key].concat("_call_list")].value = "";
                         f[objects[key].concat("_sound_alarm")].checked = "";
+                        try {
+                        f[objects[key].concat("_whatsapp_list")].value = "";
+                        }
+                        catch(err) {console.log(err)}
                     }
                 }
             }
@@ -576,6 +584,11 @@
                                                                 <div class = "col-md-12 form-group">
                                                                     <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Call List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
                                                                 </div>
+                                                                {% if whatsapp_enabled %}
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_whatsapp_list" name="{{ object }}_whatsapp_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} WhatsApp List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                </div>
+                                                                {% endif %}
                                                                 <div class = "col-md-2 form-group">
                                                                     <b>Sensitivity:</b>
                                                                     <span id="{{ object }}_sensitivity_text">
@@ -937,6 +950,11 @@
                                                                 <div class = "col-md-12 form-group">
                                                                     <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Call List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
                                                                 </div>
+                                                                {% if whatsapp_enabled %}
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_whatsapp_list" name="{{ object }}_whatsapp_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} WhatsApp List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                </div>
+                                                                {% endif %}
                                                                 <!--the following two divs are kept to maintain consistency, hidden for now, because not implemented-->
                                                                 <div class = "col-md-12 form-group">
                                                                     <label class="radio-inline radio-label-text">
@@ -989,6 +1007,11 @@
                                                                 <div class = "col-md-12 form-group">
                                                                     <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Call List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
                                                                 </div>
+                                                                {% if whatsapp_enabled %}
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_whatsapp_list" name="{{ object }}_whatsapp_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} WhatsApp List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                </div>
+                                                                {% endif %}
                                                                 {% if object!='camera_fault' %}
                                                                 <div class = "col-md-2 form-group">
                                                                     <b>Sensitivity:</b>

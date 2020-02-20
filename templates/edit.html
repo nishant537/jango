@@ -92,6 +92,10 @@
                         f[objects[key][0].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
                         f[objects[key][0].concat("_call_list")].value = f[currentObject.concat("_call_list")].value;
                         f[objects[key][0].concat("_sound_alarm")].checked = f[currentObject.concat("_sound_alarm")].checked;
+                        try {
+                        f[objects[key][0].concat("_whatsapp_list")].checked = f[currentObject.concat("_whatsapp_list")].value;
+                        }
+                        catch(err) {console.log(err)}
                     }
                 }
             }
@@ -102,7 +106,10 @@
                         f[objects[key][0].concat("_email_list")].value = "";
                         f[objects[key][0].concat("_sms_list")].value = "";
                         f[objects[key][0].concat("_call_list")].value = "";
+                        try{
                         f[objects[key][0].concat("_sound_alarm")].checked = "";
+                        }
+                        catch(err) {console.log(err)}
                     }
                 }
             }
