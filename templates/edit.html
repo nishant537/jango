@@ -31,6 +31,15 @@
                 $("#intrusion_start_time").removeAttr('required');
                 $("#intrusion_end_time").removeAttr('required');
             }
+
+            if ($("#object_detect option[value=loitering]:selected").length > 0) {
+                $("#loitering_start_time").attr('required', '');
+                $("#loitering_end_time").attr('required', '');
+            }
+            else {
+                $("#loitering_start_time").removeAttr('required');
+                $("#loitering_end_time").removeAttr('required');
+            }
         }
 
         function crowdCountEnableOnChange() {
@@ -106,8 +115,9 @@
                         f[objects[key][0].concat("_email_list")].value = "";
                         f[objects[key][0].concat("_sms_list")].value = "";
                         f[objects[key][0].concat("_call_list")].value = "";
-                        try{
                         f[objects[key][0].concat("_sound_alarm")].checked = "";
+                        try{
+                        f[objects[key][0].concat("_whatsapp_list")].checked = "";
                         }
                         catch(err) {console.log(err)}
                     }
@@ -969,6 +979,69 @@
                                                                 </div>
                                                             </div>
 
+                                                            {% elif object == "loitering" %}
+                                                            <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                                <div class="row">
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" or alert == "intrusion_all_details"  or alert == 'loitering_all_details' %}
+
+                                                                        {% elif alert == "sensitivity" %}
+
+                                                                        {% elif alert == "email_list" %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "loitering_all_details" %}
+                                                                        <div class = "col-md-2 form-group">
+                                                                            <b>Loitering Time Limit (Minutes):</b>
+                                                                            <span id="{{ object }}_time_limit_text">
+                                                                                {{ list.loitering_time_limit }}                                
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class = "col-md-10 form-group">
+                                                                                <input type="range" id="{{ object }}_time_limit" name="{{ object }}_time_limit" min="1" max="10" value='{{ list.loitering_time_limit }}' class="slider" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                        </div>
+                                                                        <div class="col-md-6 form-group">
+                                                                            <input value="{{ list.start_time }}" id="loitering_start_time" name="loitering_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                                class="form-control" placeholder="Default Start Time (24hrs HH:MM)">
+                                                                        </div>
+
+                                                                        <div class="col-md-6 form-group">
+                                                                            <input value="{{ list.end_time }}" id="loitering_end_time" name="loitering_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                                class="form-control" placeholder="Default End Time (24hrs HH:MM)">
+                                                                        </div>
+                                                                                
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label">
+                                                                                    <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
+                                                                                    <span class="form-check-sign"></span>
+                                                                                        {{ object.split('_') | join(' ') | title }} Sound Alarm
+                                                                                </label>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                            Copy data to all objects
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
                                                             {% elif object == "tamper" %}
                                                             <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
                                                                 <div class="row">
@@ -995,19 +1068,14 @@
                                                                             </label>
                                                                             <label class="radio-inline radio-label-text">
                                                                                 <input type="radio" name="tamper_sensitivity" id="radio_tamper_low" value=0  {{ 'checked' if list == "0" }}>
-        <!--                                                                        here value 0 indicates low sensitivity-->
                                                                                 Low
                                                                             </label>
                                                                             <label class="radio-inline radio-label-text">
                                                                                 <input type="radio" name="tamper_sensitivity" id="radio_tamper_normal" value=1 {{ 'checked' if list == "1" }}>
-        <!--                                                                        here value 1 indicates normal sensitivity-->
-
                                                                                 Normal
                                                                             </label>
                                                                             <label class="radio-inline radio-label-text">
                                                                                 <input type="radio" name="tamper_sensitivity" id="radio_tamper_high" value=2  {{ 'checked' if list == "2" }}>
-        <!--                                                                        here value 2 indicates high sensitivity-->
-
                                                                                 High
                                                                             </label>
                                                                         </div>
@@ -1073,15 +1141,6 @@
                                                                             {% endif %}
                                                                         {% endif %}
                                                                     {% endfor %}
-
-<!--                                                                    <div class="col-md-6 form-group">-->
-<!--                                                                        <input value="{{ start_time }}" id="{{ object }}_start_time" name="{{ object }}_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"-->
-<!--                                                                            type="text" class="form-control" placeholder="Enter Intrusion Start Time (24hrs HH:MM)"  style="visibility: hidden;">-->
-<!--                                                                    </div>-->
-<!--                                                                    <div class="col-md-6 form-group">-->
-<!--                                                                        <input value="{{ end_time }}" id="{{ object }}_end_time" name="{{ object }}_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"-->
-<!--                                                                            type="text" class="form-control" placeholder="Enter Intrusion End Time (24hrs HH:MM)"  style="visibility: hidden;">-->
-<!--                                                                    </div>-->
 
                                                                     {% for alert, list in details %}
                                                                         {% if alert == "sound_alarm" %}
