@@ -2,7 +2,7 @@
 
 var perimeter = new Array();
 var complete = false;
-var numberOfCanvasses = 3;
+var numberOfCanvasses = 4;
 var canvasList = [];
 for(var i=1; i<=numberOfCanvasses; i++){
     var id = "jPolygon".concat(i.toString());
