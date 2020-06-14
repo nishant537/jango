@@ -41,6 +41,13 @@
                 $("#intrusion_end_time").removeAttr('required');
             }
 
+            if ($("#object_detect option[value=social_distancing]:selected").length > 0) {
+                $("#social_distancing_calibration").attr('required', '');
+            }
+            else {
+                $("#social_distancing_calibration").removeAttr('required');
+            }
+
          }
 
         function crowdCountEnableOnChange() {
