@@ -1069,11 +1069,17 @@
                                                                 <div class = "col-md-2 form-group">
                                                                     <b>Minimum Distance (in cm):</b>
                                                                     <span id="{{ object }}_sensitivity_text">
-                                                                        {{ default_sensitivity_dictionary[object] }}
+                                                                        {{ default_sensitivity_dictionary[object]['distance'] }}
                                                                     </span>
                                                                 </div>
                                                                 <div class = "col-md-10 form-group">
-                                                                        <input type="range" id="{{ object }}_sensitivity" name="{{ object }}_sensitivity" step="50" min="0" max="500" value="{{ default_sensitivity_dictionary[object] }}" class="slider" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                        <input type="range" id="{{ object }}_sensitivity" name="{{ object }}_sensitivity" step="50" min="0" max="500" value="{{ default_sensitivity_dictionary[object]['distance'] }}" class="slider" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                </div>
+                                                                <div class = "col-md-6 form-group">
+                                                                    <input value = "{{ default_sensitivity_dictionary[object]['size'] }}" id = "social_distancing_dimensions" name="social_distancing_dimensions" type="text" class="form-control" placeholder="Calibration Object Dimensions in cm length,breadth">
+                                                                </div>
+                                                                <div class = "col-md-6 form-group">
+                                                                    <input value = "{{ default_sensitivity_dictionary[object]['adjustment'] }}" id = "social_distancing_adjustment" name="social_distancing_adjustment" type="text" class="form-control" placeholder="Calibration Adjustment Factor">
                                                                 </div>
                                                                 <div class = "col-md-10 form-group">
                                                                     <input id = "social_distancing_calibration" name="social_distancing_calibration" type="text" class="form-control" placeholder="Enter Calibration Coordinates a,b;c,d;e,f;g,h">

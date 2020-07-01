@@ -1097,7 +1097,7 @@
 
                                                                         {% elif alert == "sensitivity" %}
 
-                                                                        {% elif alert == "sd_calibration_box_coordinates" %}
+                                                                        {% elif alert == "sd_calibration_box_coordinates" or alert == "sd_adjustment" or alert == "sd_dimensions" %}
 
                                                                         {% elif alert == "email_list" %}
                                                                             <div class="col-md-12 form-group">
@@ -1125,6 +1125,14 @@
                                                                                      </div>
                                                                                 </div>
                                                                             {% endif %}
+                                                                        {% elif alert == "sd_dimensions" %}
+                                                                        <div class = "col-md-6 form-group">
+                                                                            <input value = "{{ list }}" id = "social_distancing_dimension" name="social_distancing_dimension" type="text" class="form-control" placeholder="Calibration Object Dimensions in cm length,breadth">
+                                                                        </div>
+                                                                        {% elif alert == "sd_adjustment" %}
+                                                                        <div class = "col-md-6 form-group">
+                                                                            <input value = "{{ list }}" id = "social_distancing_adjustment" name="social_distancing_adjustment" type="text" class="form-control" placeholder="Calibration Adjustment Factor">
+                                                                        </div>
                                                                         {% elif alert == "sd_calibration_box_coordinates" %}
                                                                         <div class = "col-md-10 form-group">
                                                                             <input value="{{ list }}" id = "social_distancing_calibration" name="social_distancing_calibration" type="text" class="form-control" placeholder="Enter Calibration Coordinates a,b;c,d;e,f;g,h">
@@ -1132,6 +1140,8 @@
                                                                         <div class="col-md-2 form-group">
                                                                             <button id="modalBtn4" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal4" onclick="request_frame(4); clear_canvas(4);">Calibrate</button>
                                                                         </div>
+
+
                                                                         {% endif %}
 
                                                                     {% endfor %}

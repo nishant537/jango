@@ -253,7 +253,10 @@ def zip_data(data, objects_allowed, is_list_page=False):
                     except KeyError as ex:
                         logger.error(ex)
                     details.append(("sd_calibration_box_coordinates", calibration_box_coordinates))
-
+                    dimensions = alert_dictionary['dimensions']
+                    adjustment = alert_dictionary['adjustment']
+                    details.append(("sd_dimensions", dimensions))
+                    details.append(("sd_adjustment", adjustment))
                 obj_alerts_list.append((object_allowed, details))
 
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
@@ -377,6 +380,8 @@ def form_to_json(form):
                 object_dict['half_day_days_dict'] = half_days_dictionary
 
             if object_allowed == 'social_distancing':
+                object_dict['dimensions'] = form.get('social_distancing_dimensions')
+                object_dict['adjustment'] = form.get('social_distancing_adjustment')
                 object_dict['calibration_box_coordinates'] = form.get('social_distancing_calibration')
 
         camera_dict['obj_alerts'][object_allowed] = object_dict
