@@ -246,7 +246,17 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 if object_allowed == 'intrusion':
                     intrusion_data_dict = obj_alerts[object_allowed]
                     details.append(("intrusion_all_details", intrusion_data_dict))
-
+                if object_allowed == 'social_distancing':
+                    calibration_box_coordinates = ''
+                    try:
+                        calibration_box_coordinates = alert_dictionary['calibration_box_coordinates']
+                    except KeyError as ex:
+                        logger.error(ex)
+                    details.append(("sd_calibration_box_coordinates", calibration_box_coordinates))
+                    dimensions = alert_dictionary['dimensions']
+                    adjustment = alert_dictionary['adjustment']
+                    details.append(("sd_dimensions", dimensions))
+                    details.append(("sd_adjustment", adjustment))
                 obj_alerts_list.append((object_allowed, details))
 
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
@@ -368,6 +378,11 @@ def form_to_json(form):
                     half_days_dictionary[day] = 1 if form.getlist(form_key) else 0
                 object_dict['holiday_days_dict'] = holidays_dictionary
                 object_dict['half_day_days_dict'] = half_days_dictionary
+
+            if object_allowed == 'social_distancing':
+                object_dict['dimensions'] = form.get('social_distancing_dimensions')
+                object_dict['adjustment'] = form.get('social_distancing_adjustment')
+                object_dict['calibration_box_coordinates'] = form.get('social_distancing_calibration')
 
         camera_dict['obj_alerts'][object_allowed] = object_dict
 
@@ -643,8 +658,12 @@ def update_frame():
     """Takes post request from add/edit page with rtsp link and updates the camera frame image"""
     data = request.get_json()
     rtsp = data['rtsp']
+    height = 0
+    widht = 0
+    path = ''
     if rtsp == "":
         # Update with a placeholder image
+        path = 'static/img/invalid_rtsp.jpg'
         return_response = {'success': False, 'path': '/static/img/invalid_rtsp.jpg'}
 
     else:
@@ -660,10 +679,27 @@ def update_frame():
             fh = open(unique_filename, "wb")
             fh.write(frame)
             fh.close()
-            unique_filename = "/" + unique_filename
-            return_response = {'success': True, 'path': unique_filename}
+            unique_filename_with_leading_backslash = "/" + unique_filename
+            return_response = {'success': True, 'path': unique_filename_with_leading_backslash}
+            path = unique_filename
         else:
             return_response = {'success': False, 'path': '/static/img/invalid_rtsp.jpg'}
+            path = 'static/img/invalid_rtsp.jpg'
+
+    # open image for reading in binary mode
+    with open(path, 'rb') as img_file:
+        # height of image (in 2 bytes) is at 164th position
+        img_file.seek(163)
+        # read the 2 bytes
+        a = img_file.read(2)
+        # calculate height
+        height = (a[0] << 8) + a[1]
+        # next 2 bytes is width
+        a = img_file.read(2)
+        # calculate width
+        width = (a[0] << 8) + a[1]
+        return_response['width'] = width
+        return_response['height'] = height
     return json.dumps(return_response)
 
   

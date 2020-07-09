@@ -41,6 +41,13 @@
                 $("#intrusion_end_time").removeAttr('required');
             }
 
+            if ($("#object_detect option[value=social_distancing]:selected").length > 0) {
+                $("#social_distancing_calibration").attr('required', '');
+            }
+            else {
+                $("#social_distancing_calibration").removeAttr('required');
+            }
+
          }
 
         function crowdCountEnableOnChange() {
@@ -165,6 +172,11 @@
             f["crowd_region_".concat(region_num_string)].value = f["coordinates".concat(region_num_string)].value;
         }
 
+        function copySocialDistancingCoordinates(f, region_num) {
+            var region_num_string = region_num.toString();
+            f["social_distancing_calibration"].value = f["coordinates".concat(region_num_string)].value;
+        }
+
 
 
         function request_frame(region_num){
@@ -184,7 +196,8 @@
                     if (response.success){
                         var image = new Image(response.path);
                         canvas.setAttribute('data-imgsrc', response.path);
-                        canvas.width = canvas.width;
+                        canvas.setAttribute('height', response.height);
+                        canvas.setAttribute('width', response.width);
                         var context = canvas.getContext("2d");
                         var img = new Image();
                         img.src = response.path;
@@ -305,6 +318,10 @@
     .modal {
         z-index: 100001 !important;
     }
+
+    .modal-lg {
+    max-width: 80% !important;
+}
     </style>
 </head>
 
@@ -505,6 +522,43 @@
                                                                 <div>
                                                                     <p><strong>Coordinates:</strong></p>
                                                                     <textarea id="coordinates3" disabled="disabled" style="width:300px; height:100px;"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="regionModal4" class="modal fade" role="dialog">
+                                                <div class="modal-dialog modal-lg">
+                                                <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-body">
+                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                            <div style="float:left">
+                                                                <canvas id="jPolygon4" name="jPolygon4" width="740" height="416" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, 4)" oncontextmenu="return false;">
+                                                                    Your browser does not support the HTML5 canvas tag.
+                                                                </canvas>
+                                                            </div>
+                                                            <div style="float:left;">
+                                                                <div>
+                                                                    <button type="button" onclick="clear_canvas(4)" >Clear</button>
+                                                                    <button type="button" onclick="copySocialDistancingCoordinates(this.form, 4)" data-dismiss="modal">Copy</button>
+                                                                    <p>Press <strong>Left Click</strong> to draw a point.</p>
+                                                                    <p>Please select 4 points of the calibration object.
+                                                                        If the object is rectangular, select the points in this order:
+                                                                        <ol>
+                                                                            <li>Select any 1 corner point</li>
+                                                                            <li>Next, select a point adjacent to the first point on the longer edge of the rectangle</li>
+                                                                            <li>Select a point adjacent to the 2nd point</li>
+                                                                            <li>Select the final remaining point</li>
+                                                                        </ol>
+                                                                    </p>
+                                                                    <p><strong>CTRL+Click</strong> or <strong>Right Click</strong> to close the rectangle.</p>
+                                                                    <p>Click <strong>Copy</strong> to copy the obtained coordinates to the form</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p><strong>Coordinates:</strong></p>
+                                                                    <textarea id="coordinates4" disabled="disabled" style="width:300px; height:100px;"></textarea>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -977,6 +1031,61 @@
 
                                                                         High
                                                                     </label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox">
+                                                                        <span class="form-check-sign"></span>
+                                                                        {{ object.split('_') | join(' ') | title }} Sound Alarm
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}', {{ objects }})">
+                                                                        <span class="form-check-sign"></span>
+                                                                        Copy data to all objects
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {% elif object == "social_distancing" %}
+                                                        <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                            <div class="row">
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_email_list" name="{{ object }}_email_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Email ID List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                </div>
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_sms_list" name="{{ object }}_sms_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} SMS List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                </div>
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_call_list" name="{{ object }}_call_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} Call List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                </div>
+                                                                {% if whatsapp_enabled %}
+                                                                <div class = "col-md-12 form-group">
+                                                                    <input id = "{{ object }}_whatsapp_list" name="{{ object }}_whatsapp_list" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} WhatsApp List" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                </div>
+                                                                {% endif %}
+                                                                <div class = "col-md-2 form-group">
+                                                                    <b>Minimum Distance (in cm):</b>
+                                                                    <span id="{{ object }}_sensitivity_text">
+                                                                        {{ default_sensitivity_dictionary[object]['distance'] }}
+                                                                    </span>
+                                                                </div>
+                                                                <div class = "col-md-10 form-group">
+                                                                        <input type="range" id="{{ object }}_sensitivity" name="{{ object }}_sensitivity" step="50" min="0" max="500" value="{{ default_sensitivity_dictionary[object]['distance'] }}" class="slider" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                </div>
+                                                                <div class = "col-md-6 form-group">
+                                                                    <input value = "{{ default_sensitivity_dictionary[object]['size'] }}" id = "social_distancing_dimensions" name="social_distancing_dimensions" type="text" class="form-control" placeholder="Calibration Object Dimensions in cm length,breadth">
+                                                                </div>
+                                                                <div class = "col-md-6 form-group">
+                                                                    <input value = "{{ default_sensitivity_dictionary[object]['adjustment'] }}" id = "social_distancing_adjustment" name="social_distancing_adjustment" type="text" class="form-control" placeholder="Calibration Adjustment Factor">
+                                                                </div>
+                                                                <div class = "col-md-10 form-group">
+                                                                    <input id = "social_distancing_calibration" name="social_distancing_calibration" type="text" class="form-control" placeholder="Enter Calibration Coordinates a,b;c,d;e,f;g,h">
+                                                                </div>
+                                                                <div class="col-md-2 form-group">
+                                                                    <button id="modalBtn4" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal4" onclick="request_frame(4); clear_canvas(4);">Calibrate</button>
                                                                 </div>
                                                                 <div class="form-check">
                                                                     <label class="form-check-label">
