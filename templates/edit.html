@@ -1125,6 +1125,16 @@
                                                                                      </div>
                                                                                 </div>
                                                                             {% endif %}
+                                                                        {% elif alert == "sd_person_sensitivity" %}
+                                                                        <div class = "col-md-2 form-group">
+                                                                            <b>Sensitivity:</b>
+                                                                            <span id="{{ object }}_person_sensitivity_text">
+                                                                                {{ default_sensitivity_dictionary[object]['person_threshold'] }}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class = "col-md-10 form-group">
+                                                                                <input value = "{{ list }}" type="range" id="{{ object }}_person_sensitivity" name="{{ object }}_person_sensitivity" step="1" min="0" max="100" class="slider" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                        </div>
                                                                         {% elif alert == "sd_dimensions" %}
                                                                         <div class = "col-md-6 form-group">
                                                                             <input value = "{{ list }}" id = "social_distancing_dimensions" name="social_distancing_dimensions" type="text" class="form-control" placeholder="Calibration Object Dimensions in cm length,breadth">
