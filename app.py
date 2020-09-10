@@ -3,7 +3,7 @@ import re
 import json
 import logging
 import requests
-import ConfigParser
+import configparser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
@@ -17,7 +17,7 @@ app.secret_key = 'BhySSMlymg'
 GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Config file
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.readfp(open('/var/www/godeep/gui_settings.conf'))
 
 # GoDeep backend server settings
