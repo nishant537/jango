@@ -394,7 +394,7 @@ def backend_status():
         lic_status,lic_reason = get_license()
     except Exception as e:
         pass
-    print "License Status: " + str(lic_status)
+    print ("License Status: " + str(lic_status))
     return jsonify(result=lic_status)
 
 
