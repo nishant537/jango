@@ -257,6 +257,7 @@ def zip_data(data, objects_allowed, is_list_page=False):
                     except KeyError as ex:
                         logger.error(ex)
                     details.append(("sd_calibration_box_coordinates", calibration_box_coordinates))
+                    details.append(("sd_person_sensitivity", alert_dictionary['person_sensitivity']))
                     dimensions = alert_dictionary['dimensions']
                     adjustment = alert_dictionary['adjustment']
                     details.append(("sd_dimensions", dimensions))
@@ -391,6 +392,7 @@ def form_to_json(form):
                 object_dict['dimensions'] = form.get('social_distancing_dimensions')
                 object_dict['adjustment'] = form.get('social_distancing_adjustment')
                 object_dict['calibration_box_coordinates'] = form.get('social_distancing_calibration')
+                object_dict['person_sensitivity'] = form.get('social_distancing_person_sensitivity')
 
         camera_dict['obj_alerts'][object_allowed] = object_dict
 
@@ -571,6 +573,8 @@ def view_page():
             obj_pretty = " ".join(obj_list)
             if obj == "crowd_counting":
                 object_wise_sound_dict[str(obj_pretty)] = 0
+            elif obj == "social_distancing":
+                object_wise_sound_dict['Breach Of Social Distancing'] = obj_alerts[obj]['sound_alarm']
             else:
                 object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
 

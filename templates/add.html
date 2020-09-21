@@ -1126,6 +1126,15 @@
                                                                 </div>
                                                                 {% endif %}
                                                                 <div class = "col-md-2 form-group">
+                                                                    <b>Sensitivity:</b>
+                                                                    <span id="{{ object }}_person_sensitivity_text">
+                                                                        {{ default_sensitivity_dictionary[object]['person_threshold'] }}
+                                                                    </span>
+                                                                </div>
+                                                                <div class = "col-md-10 form-group">
+                                                                        <input type="range" id="{{ object }}_person_sensitivity" name="{{ object }}_person_sensitivity" step="1" min="0" max="100" value="{{ default_sensitivity_dictionary[object]['person_threshold'] }}" class="slider" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                </div>
+                                                                <div class = "col-md-2 form-group">
                                                                     <b>Minimum Distance (in cm):</b>
                                                                     <span id="{{ object }}_sensitivity_text">
                                                                         {{ default_sensitivity_dictionary[object]['distance'] }}
