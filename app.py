@@ -240,12 +240,16 @@ def zip_data(data, objects_allowed, is_list_page=False):
                     details.append(("whatsapp_list", list_for_this_alert))
                 list_for_this_alert = (alert_dictionary['sound_alarm'])
                 details.append(("sound_alarm", list_for_this_alert))
-                if (object_allowed != "camera_fault"):
+                if (object_allowed != "camera_fault" and object_allowed !="loitering"):
                     list_for_this_alert = (alert_dictionary['sensitivity'])
                     details.append(("sensitivity", list_for_this_alert))
                 if object_allowed == 'intrusion':
                     intrusion_data_dict = obj_alerts[object_allowed]
                     details.append(("intrusion_all_details", intrusion_data_dict))
+                if object_allowed == 'loitering':
+                    loitering_data_dict = obj_alerts[object_allowed]
+                    details.append(("loitering_all_details", loitering_data_dict))
+
                 if object_allowed == 'social_distancing':
                     calibration_box_coordinates = ''
                     try:
@@ -359,7 +363,7 @@ def form_to_json(form):
             else:
                 object_dict['whatsapp_list'] = []
             object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
-            if object_allowed != 'camera_fault':
+            if object_allowed != 'camera_fault' and object_allowed != 'loitering':
                 index_sensitivity = '%s_sensitivity' % object_allowed
                 object_dict["sensitivity"] = form.get(index_sensitivity)
 
@@ -379,6 +383,10 @@ def form_to_json(form):
                     half_days_dictionary[day] = 1 if form.getlist(form_key) else 0
                 object_dict['holiday_days_dict'] = holidays_dictionary
                 object_dict['half_day_days_dict'] = half_days_dictionary
+            elif object_allowed == 'loitering':
+                object_dict['start_time'] = form.get('loitering_start_time')
+                object_dict['end_time'] = form.get('loitering_end_time')
+                object_dict['loitering_time_limit'] = form.get('loitering_time_limit')
 
             if object_allowed == 'social_distancing':
                 object_dict['dimensions'] = form.get('social_distancing_dimensions')
