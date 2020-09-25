@@ -3,11 +3,12 @@ import re
 import json
 import logging
 import requests
+import time
 import configparser
 from functools import wraps
 from operator import itemgetter
 import collections  # for ordered dict
-
+import copy
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, session, flash, jsonify
 
 # Initiate Flask
@@ -18,7 +19,7 @@ GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Config file
 config = configparser.ConfigParser()
-config.readfp(open('/var/www/godeep/gui_settings.conf'))
+config.read_file(open('/var/www/godeep/gui_settings.conf'))
 
 # GoDeep backend server settings
 BACKEND_IP = config.get('global', 'BACKEND_IP')
@@ -63,20 +64,17 @@ def license_required(func):
                 if username:
                     return redirect('/list')
                 elif request.method == 'POST':
-                    login_info = get_login_info()
-                    if request.form['username'] in login_info.keys():
-                        password = login_info[request.form['username']]
-                        if password == request.form['password']:
-                            session['username'] = request.form['username']
-                            response = redirect('/list')
-                            return response
-                        else:
-                            error = 'Invalid Credentials. Please try again.'
+                    credential_dict = {'username': request.form['username'], 'password': request.form['password']}
+                    response = requests.post(url=BACKEND_URL + 'validateCredentials/', data=json.dumps(credential_dict))
+                    response_dict = json.loads(response.text)
+                    if response_dict['success']:
+                        session['username'] = request.form['username']
+                        response = redirect('/list')
+                        return response
                     else:
                         error = 'Invalid Credentials. Please try again.'
                 return render_template('login.html', message='Valid',
-                                           license_status=license_status, image='Landing.jpeg', error=error)
-
+                                       license_status=license_status, image='Landing.jpeg', error=error)
 
             elif license_status and func.__name__=='home_page':
                 return render_template('home.html', message='Valid',
@@ -114,7 +112,32 @@ def login_required(func):
     return valid_session
 
 
+def admin_rights_required(func):
+    """Check whether settings.conf allows access of user settings, and if current user is admin"""
+    @wraps(func)
+    def admin_rights_available(*args, **kwargs):
+        user_id = session.get('username')
+        user_page_allowed = requests.get(BACKEND_URL + 'isUserPageAllowed').json()['allowed']
+        if user_id == "admin" and user_page_allowed:
+            return func(*args, **kwargs)
+        else:
+            return redirect('/list')
+
+    return admin_rights_available
+
+
+def show_user_button():
+    """Check whether settings.conf allows user settings; to show user button gui navbar"""
+    user_id = session.get('username')
+    user_page_allowed = requests.get(BACKEND_URL + 'isUserPageAllowed').json()['allowed']
+    if user_id == "admin" and user_page_allowed:
+        return True
+    else:
+        return False
+
+
 def get_login_info():
+    """Not in use since implementation of updated login protocol"""
     login_info = requests.get(BACKEND_URL + 'getLoginInfo').json()
     return login_info
 
@@ -129,7 +152,7 @@ def get_background():
     return background_img
 
 def get_objects_list():
-    '''Get lsit of object from backend'''
+    '''Get list of object from backend'''
     objects_dict = requests.get(BACKEND_URL + 'getObjectsList').json()
     return natural_sort([str(i) for i in objects_dict['objects']], key=itemgetter(0))
 
@@ -168,6 +191,7 @@ def dimensions_to_string(data):
 def zip_data(data, objects_allowed, is_list_page=False):
     '''Appends all data to a list for Jinja templating'''
     # Mandatory parameters
+    whatsapp_enabled = check_whatsapp_enabled()
     camera_name = str(data['camera_name'])
     rtsp_url = str(data['rtsp_url'])
     priority = str(data['camera_priority'])
@@ -215,8 +239,33 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 details.append(("sms_list", list_for_this_alert))
                 list_for_this_alert = list_to_string(alert_dictionary['call_list'], is_list_page)
                 details.append(("call_list", list_for_this_alert))
+                if whatsapp_enabled:
+                    list_for_this_alert = list_to_string(alert_dictionary['whatsapp_list'], is_list_page)
+                    details.append(("whatsapp_list", list_for_this_alert))
                 list_for_this_alert = (alert_dictionary['sound_alarm'])
                 details.append(("sound_alarm", list_for_this_alert))
+                if (object_allowed != "camera_fault" and object_allowed !="loitering"):
+                    list_for_this_alert = (alert_dictionary['sensitivity'])
+                    details.append(("sensitivity", list_for_this_alert))
+                if object_allowed == 'intrusion':
+                    intrusion_data_dict = obj_alerts[object_allowed]
+                    details.append(("intrusion_all_details", intrusion_data_dict))
+                if object_allowed == 'loitering':
+                    loitering_data_dict = obj_alerts[object_allowed]
+                    details.append(("loitering_all_details", loitering_data_dict))
+
+                if object_allowed == 'social_distancing':
+                    calibration_box_coordinates = ''
+                    try:
+                        calibration_box_coordinates = alert_dictionary['calibration_box_coordinates']
+                    except KeyError as ex:
+                        logger.error(ex)
+                    details.append(("sd_calibration_box_coordinates", calibration_box_coordinates))
+                    details.append(("sd_person_sensitivity", alert_dictionary['person_sensitivity']))
+                    dimensions = alert_dictionary['dimensions']
+                    adjustment = alert_dictionary['adjustment']
+                    details.append(("sd_dimensions", dimensions))
+                    details.append(("sd_adjustment", adjustment))
                 obj_alerts_list.append((object_allowed, details))
 
     return [camera_name, rtsp_url, priority, floor, start_time, end_time,
@@ -224,6 +273,7 @@ def zip_data(data, objects_allowed, is_list_page=False):
 
 def form_to_json(form):
     '''Convert the requests.form data to JSON'''
+    whatsapp_enabled = check_whatsapp_enabled()
     camera_dict = {}
     objects_allowed = get_objects_list()
 
@@ -248,6 +298,9 @@ def form_to_json(form):
     objects_selected = form.getlist('object_detect')
     for object_allowed in objects_allowed:
         camera_dict['object_detect'][object_allowed] = 1 if (object_allowed in objects_selected) else 0
+
+    # template dictionary for holiday and half day mapping
+    days_dict = {'monday': 0, 'tuesday': 0, 'wednesday': 0, 'thursday': 0, 'friday': 0, 'saturday': 0, 'sunday': 0}
 
     # Notifications
     camera_dict['obj_alerts'] = {}
@@ -329,15 +382,67 @@ def form_to_json(form):
             index_email = '%s_email_list' % str(object_allowed)
             index_sms = '%s_sms_list' % str(object_allowed)
             index_call = '%s_call_list' % str(object_allowed)
+            index_whatsapp = '%s_whatsapp_list' % str(object_allowed)
             index_alarm = '%s_sound_alarm' % str(object_allowed)
             object_dict['email_list'] = [i.strip() for i in form[index_email].split(',')]
             object_dict['sms_list'] = [i.strip() for i in form[index_sms].split(',')]
             object_dict['call_list'] = [i.strip() for i in form[index_call].split(',')]
+            if whatsapp_enabled:
+                object_dict['whatsapp_list'] = [i.strip() for i in form[index_whatsapp].split(',')]
+            else:
+                object_dict['whatsapp_list'] = []
             object_dict['sound_alarm'] = 1 if form.getlist(str(index_alarm)) else 0
+            if object_allowed != 'camera_fault' and object_allowed != 'loitering':
+                index_sensitivity = '%s_sensitivity' % object_allowed
+                object_dict["sensitivity"] = form.get(index_sensitivity)
+
+            if object_allowed == 'intrusion':
+                object_dict['holiday_start_time'] = form.get('intrusion_holiday_start_time')
+                object_dict['holiday_end_time'] = form.get('intrusion_holiday_end_time')
+                object_dict['half_day_start_time'] = form.get('intrusion_half_day_start_time')
+                object_dict['half_day_end_time'] = form.get('intrusion_half_day_end_time')
+                object_dict['holiday_date_list'] = form.get('intrusion_holiday_list')
+                holidays_dictionary = copy.deepcopy(days_dict)
+                for day in holidays_dictionary.keys():
+                    form_key = day + "_holiday"
+                    holidays_dictionary[day] = 1 if form.getlist(form_key) else 0
+                half_days_dictionary = copy.deepcopy(days_dict)
+                for day in half_days_dictionary.keys():
+                    form_key = day + "_half_day"
+                    half_days_dictionary[day] = 1 if form.getlist(form_key) else 0
+                object_dict['holiday_days_dict'] = holidays_dictionary
+                object_dict['half_day_days_dict'] = half_days_dictionary
+            elif object_allowed == 'loitering':
+                object_dict['start_time'] = form.get('loitering_start_time')
+                object_dict['end_time'] = form.get('loitering_end_time')
+                object_dict['loitering_time_limit'] = form.get('loitering_time_limit')
+
+            if object_allowed == 'social_distancing':
+                object_dict['dimensions'] = form.get('social_distancing_dimensions')
+                object_dict['adjustment'] = form.get('social_distancing_adjustment')
+                object_dict['calibration_box_coordinates'] = form.get('social_distancing_calibration')
+                object_dict['person_sensitivity'] = form.get('social_distancing_person_sensitivity')
 
         camera_dict['obj_alerts'][object_allowed] = object_dict
 
     return json.dumps(camera_dict)
+
+
+def user_form_to_json(form):
+    """Convert data from user form to json format for sending to backend"""
+    print(form)
+    user_dict = {}
+    user_dict['username'] = form['username'].strip()
+    user_dict['pretty_name'] = form['pretty_name'].strip()
+    user_dict['email_address'] = form['email_address'].strip()
+    user_dict['phone_number'] = form['phone_number'].strip()
+    user_dict['role'] = form.get('user_role')
+    user_dict['use_custom_from_email'] = True if form.getlist("use_custom_from_email") else False
+    try:
+        user_dict['password'] = form['password']
+    except:
+        pass
+    return json.dumps(user_dict)
 
 
 def sanitise_input(form):
@@ -374,6 +479,16 @@ def sanitise_input(form):
 
     return True, "form is good"
 
+
+def get_default_sensitivities():
+    sensitivity_dict = requests.get(BACKEND_URL + 'getDefaultSensitivities').json()
+    return sensitivity_dict
+
+
+def check_whatsapp_enabled():
+    whatsapp_enabled = requests.get(BACKEND_URL + 'isWhatsappEnabled').json()
+    return whatsapp_enabled['enabled']
+
 #### Flask Routing
 
 
@@ -394,7 +509,7 @@ def backend_status():
         lic_status,lic_reason = get_license()
     except Exception as e:
         pass
-    print ("License Status: " + str(lic_status))
+    print("License Status: " + str(lic_status))
     return jsonify(result=lic_status)
 
 
@@ -427,7 +542,19 @@ def add_camera_page():
     check_response = requests.get(BACKEND_URL + 'maxCameraCheck').json()
     img = get_background()
     objects_allowed = get_objects_list()
-    return render_template('add.html', image=img, objects=objects_allowed, message=check_response)
+    # advanced intrusion timing
+    advanced_intrusion_timings = False
+    intrusion_timing_info = requests.get(BACKEND_URL + 'isAdvancedIntrusionTimingsAvailable').json()
+    if intrusion_timing_info:
+        if intrusion_timing_info['enabled']:
+            advanced_intrusion_timings = True
+    show_user = show_user_button()
+    default_sensitivity_dictionary = get_default_sensitivities()
+    whatsapp_enabled = check_whatsapp_enabled()
+    return render_template('add.html', image=img, objects=objects_allowed, message=check_response,
+                           show_user_button=show_user, advanced_intrusion_timings=advanced_intrusion_timings,
+                           default_sensitivity_dictionary=default_sensitivity_dictionary,
+                           whatsapp_enabled=whatsapp_enabled)
 
 
 @app.route('/edit/<camera_id>')
@@ -438,10 +565,17 @@ def edit_camera_page(camera_id):
     img = get_background()
     camera_payload = get_camera_info(camera_id)
     objects_allowed = get_objects_list()
-
+    # advanced intrusion timing
+    advanced_intrusion_timings = False
+    intrusion_timing_info = requests.get(BACKEND_URL + 'isAdvancedIntrusionTimingsAvailable').json()
+    if intrusion_timing_info:
+        if intrusion_timing_info['enabled']:
+            advanced_intrusion_timings = True
     # Match camera_id from camera_payload and load it's details
     data = [zip_data(camera_payload[str(camera_id)], objects_allowed)]
-    return render_template('edit.html', image=img, data=data, camera_id=camera_id)
+    show_user = show_user_button()
+    return render_template('edit.html', image=img, data=data, camera_id=camera_id,
+                           advanced_intrusion_timings=advanced_intrusion_timings, show_user_button=show_user)
 
 
 @app.route('/view')
@@ -470,6 +604,8 @@ def view_page():
                 object_wise_sound_dict[str(obj_pretty)] = 0
             elif obj == "alpr":
                 object_wise_sound_dict[str(obj_pretty)] = 0
+            elif obj == "social_distancing":
+                object_wise_sound_dict['Breach Of Social Distancing'] = obj_alerts[obj]['sound_alarm']
             else:
                 object_wise_sound_dict[str(obj_pretty)] = obj_alerts[obj]['sound_alarm']
 
@@ -482,13 +618,14 @@ def view_page():
     unique_floors = natural_sort(list(set(unique_floors)), key=itemgetter(0))
 
     # Save whitespace stripped version of floors for HTML ID tags
-    unique_floors = zip(unique_floors, ["".join(flr.split()) for flr in unique_floors])
+    unique_floors = list(zip(unique_floors, ["".join(flr.split()) for flr in unique_floors]))
 
     # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
+    show_user = show_user_button()
 
     return render_template('view.html', image=img, search_mode=False, sound_dict=sound_dict,
-        objects=objects_allowed, data=data_list, unique_floors=unique_floors)
+        objects=objects_allowed, data=data_list, unique_floors=unique_floors, show_user_button=show_user)
 
 
 @app.route('/home')
@@ -510,9 +647,29 @@ def list_page():
 
     # Sort data alphanumerically
     data_list = natural_sort(data_list, key=itemgetter(1))
+    show_user = show_user_button()
 
     return render_template('list.html', image=img, search_mode=False,
-        objects=objects_allowed, data=data_list)
+        objects=objects_allowed, data=data_list, show_user_button=show_user)
+
+
+@app.route('/user')
+@license_required
+@login_required
+@admin_rights_required
+#@admin_login_required
+def user_page():
+    """Route the user settings page"""
+    username = session.get('username')
+    user_data = {}
+    try:
+        r = requests.get(url=BACKEND_URL + 'getUserInfo/' + username)
+        user_data = json.loads(r.text)
+        if not user_data:
+            user_data['username'] = username
+    except Exception as ex:
+        print(ex)
+    return render_template('user.html', data=user_data)
 
 
 #### Data Handling from GUI
@@ -527,7 +684,7 @@ def get_alerts():
             alert_message='Failed to establish connection with server')
 
     # Convert objects to pretty format
-    for key, objects in alert_dict.iteritems():
+    for key, objects in alert_dict.items():
         alert_dict[key] = [' '.join(obj.split('_')).title() for obj in objects]
 
     return json.dumps(alert_dict)
@@ -537,6 +694,56 @@ def get_alerts():
 def send_alarm_file():
     '''Return alarm.mp3 file'''
     return send_file('alarm.mp3')
+
+
+@app.route('/updateFrame', methods=['POST', 'GET'])
+def update_frame():
+    """Takes post request from add/edit page with rtsp link and updates the camera frame image"""
+    data = request.get_json()
+    rtsp = data['rtsp']
+    height = 0
+    widht = 0
+    path = ''
+    if rtsp == "":
+        # Update with a placeholder image
+        path = 'static/img/invalid_rtsp.jpg'
+        return_response = {'success': False, 'path': '/static/img/invalid_rtsp.jpg'}
+
+    else:
+        # Update with frame from camera rtsp link (if can't get frame, update with placeholder)
+        response = requests.get(BACKEND_URL + 'getFrameFromRTSP/' + "rtsp=" + rtsp)
+        frame = response.content
+        if frame is not None:
+            temp_dir = 'static/img/temp'
+            filelist = [f for f in os.listdir(temp_dir) if f.endswith(".jpg")]
+            for f in filelist:
+                os.remove(os.path.join(temp_dir, f))
+            unique_filename = 'static/img/temp/%d.jpg' % int(time.time())  # workaround for the browser caching older images
+            fh = open(unique_filename, "wb")
+            fh.write(frame)
+            fh.close()
+            unique_filename_with_leading_backslash = "/" + unique_filename
+            return_response = {'success': True, 'path': unique_filename_with_leading_backslash}
+            path = unique_filename
+        else:
+            return_response = {'success': False, 'path': '/static/img/invalid_rtsp.jpg'}
+            path = 'static/img/invalid_rtsp.jpg'
+
+    # open image for reading in binary mode
+    with open(path, 'rb') as img_file:
+        # height of image (in 2 bytes) is at 164th position
+        img_file.seek(163)
+        # read the 2 bytes
+        a = img_file.read(2)
+        # calculate height
+        height = (a[0] << 8) + a[1]
+        # next 2 bytes is width
+        a = img_file.read(2)
+        # calculate width
+        width = (a[0] << 8) + a[1]
+        return_response['width'] = width
+        return_response['height'] = height
+    return json.dumps(return_response)
 
 
 @app.route('/deleteCamera/<camera_id>')
@@ -581,7 +788,7 @@ def search_view_page():
         sound_dict = {}
 
         # Get searched name from form
-        searched_name = str(request.form.values()[0])
+        searched_name = str(list(request.form.values())[0])
 
         # Parse all camera info and zip data
         data_list = []
@@ -624,7 +831,7 @@ def search_list_page():
         objects_allowed = get_objects_list()
     
         # Get searched name from form
-        searched_name = str(request.form.values()[0])
+        searched_name = str(list(request.form.values())[0])
 
         # Parse all camera info and zip data
         data_list = []
@@ -711,9 +918,66 @@ def edit_camera(camera_id):
             return redirect(url_for('edit_camera_page', camera_id=camera_id))
     return redirect(url_for('list_page'))
 
-### Error handlers
+
+@app.route('/updatePassword', methods=['GET', 'POST'])
+@license_required
+@login_required
+def update_password():
+    """Update the user password, called from user.html password change modal"""
+    data = request.get_json()
+    print(data)
+    if data and data['new_password']:
+        r = requests.post(url=BACKEND_URL + 'updatePassword', data=json.dumps(data))
+        return_response = json.loads(r.text)
+    else:
+        return_response = {'success': False, 'message': "Password Not Updated"}
+    return json.dumps(return_response)
 
 
+@app.route('/updateFromEmail', methods=['GET', 'POST'])
+@license_required
+@login_required
+def update_from_email():
+    """Update from email from user.html update from email modal"""
+    return_response = {'success': False, 'message': "Sender Email Not Updated."}
+    data = request.get_json()
+    print(data)
+    checked = check_update_from_email(data)
+    if data and checked:
+        r = requests.post(url=BACKEND_URL + 'updateFromEmail', data=json.dumps(data))
+        response = json.loads(r.text)
+        if response['success']:
+            return_response = {'success': True, 'message': "Sender Email Updated. Test mail sent to recipients"}
+    elif not checked:
+        return_response = {'success': False, 'message': "Invalid Input"}
+    else:
+        return_response = {'success': False, 'message': "Sender Email Not Updated."}
+    return json.dumps(return_response)
+
+
+@app.route('/updateUser', methods=['GET', 'POST'])
+@license_required
+@login_required
+def update_user():
+    """"Update user details (except for password and from email, they are controlled by modals)"""
+    data = user_form_to_json(request.form)
+    r = requests.post(url=BACKEND_URL + 'updateUser', data=data)
+    return redirect(url_for('list_page'))
+
+
+def check_update_from_email(data):
+    """Do a formatting check on from email info submitted by user"""
+    regex_email_list = "^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$"
+    regex_email = "[^@]+@[^@]+\.[a-zA-Z]{2,}"
+    result_list = re.match(regex_email_list, data['recipients_list'])
+    result_email = re.match(regex_email, data['email'])
+    if result_email and result_list and data['email'] and data['recipients_list']:
+        if result_email.group() == data['email'] and result_list.group() == data['recipients_list'] and len(data['password']) > 0:
+            return True
+    return False
+
+
+#### Error handlers
 @app.errorhandler(404)
 def page_not_found(e):
     '''Handle 404 page not found'''

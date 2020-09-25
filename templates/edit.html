@@ -15,8 +15,13 @@
     <!-- CSS Files -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/static/css/main.css" rel="stylesheet" />
+    <script src="/static/js/jquery.3.2.1.min.js" type="text/javascript"></script>
 
     <script type="text/javascript">
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
         function objectSelectOnChange() {
             if ($("#object_detect option[value=intrusion]:selected").length > 0) {
                 $("#intrusion_start_time").attr('required', '');
@@ -25,6 +30,22 @@
             else {
                 $("#intrusion_start_time").removeAttr('required');
                 $("#intrusion_end_time").removeAttr('required');
+            }
+
+            if ($("#object_detect option[value=loitering]:selected").length > 0) {
+                $("#loitering_start_time").attr('required', '');
+                $("#loitering_end_time").attr('required', '');
+            }
+            else {
+                $("#loitering_start_time").removeAttr('required');
+                $("#loitering_end_time").removeAttr('required');
+            }
+            if ($("#object_detect option[value=social_distancing]:selected").length > 0) {
+                $("#social_distancing_calibration").attr('required', '');
+            }
+            else {
+                $("#social_distancing_calibration").removeAttr('required');
+
             }
         }
 
@@ -96,6 +117,10 @@
                         f[objects[key][0].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
                         f[objects[key][0].concat("_call_list")].value = f[currentObject.concat("_call_list")].value;
                         f[objects[key][0].concat("_sound_alarm")].checked = f[currentObject.concat("_sound_alarm")].checked;
+                        try {
+                        f[objects[key][0].concat("_whatsapp_list")].checked = f[currentObject.concat("_whatsapp_list")].value;
+                        }
+                        catch(err) {console.log(err)}
                     }
                 }
             }
@@ -107,6 +132,10 @@
                         f[objects[key][0].concat("_sms_list")].value = "";
                         f[objects[key][0].concat("_call_list")].value = "";
                         f[objects[key][0].concat("_sound_alarm")].checked = "";
+                        try{
+                        f[objects[key][0].concat("_whatsapp_list")].checked = "";
+                        }
+                        catch(err) {console.log(err)}
                     }
                 }
             }
@@ -114,6 +143,113 @@
 
         function intrusion_tab_show(){
           $('[href="#intrusion_tab"]').tab('show');
+        }
+
+        function copyRegionCoordinates(f, region_num) {
+            var region_num_string = region_num.toString();
+            f["crowd_region_".concat(region_num_string)].value = f["coordinates".concat(region_num_string)].value;
+            f["crowd_region_".concat(region_num_string)].value = f["coordinates".concat(region_num_string)].value;
+            f["crowd_region_".concat(region_num_string)].value = f["coordinates".concat(region_num_string)].value;
+        }
+
+        function copySocialDistancingCoordinates(f, region_num) {
+            var region_num_string = region_num.toString();
+            f["social_distancing_calibration"].value = f["coordinates".concat(region_num_string)].value;
+        }
+
+        function holidaySelector(f, type, day) {
+            if (f[day.concat(type)].checked == true) {
+                if (type == "_holiday") {
+                    elementID = day.concat("_half_day");
+                }
+                else {
+                    elementID = day.concat("_holiday");
+                }
+                elm = document.getElementById(elementID);
+                elm.checked = false;
+                elm.dispatchEvent(new Event('change'));
+            }
+
+            if (type == "_holiday") {
+                startTimeID = "#intrusion_holiday_start_time";
+                endTimeID = "#intrusion_holiday_end_time";
+            }
+            else {
+                startTimeID = "#intrusion_half_day_start_time";
+                endTimeID = "#intrusion_half_day_end_time"
+            }
+
+            dayList = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+            var flag = 0;
+            for (var i = 0, size = dayList.length; i < size ; i++) {
+                listDay = dayList[i];
+                if (f[listDay.concat(type)].checked == true) {
+                    flag = 1;
+                    break;
+                }
+            }
+            if (flag) {
+                $(startTimeID).attr('required', '');
+                $(endTimeID).attr('required', '');
+            }
+            else {
+                $(startTimeID).removeAttr('required');
+                $(endTimeID).removeAttr('required');
+            }
+
+        }
+
+
+
+        function request_frame(region_num){
+            var rtsp_field = document.getElementById('rtsp_url');
+            var canvas_name_common = "jPolygon";
+            var canvas_id = canvas_name_common.concat(region_num.toString());
+            var canvas = document.getElementById(canvas_id);
+            var request_data = rtsp_field.value;
+            $.ajax({
+                type: "POST",
+                url: "/updateFrame",
+                contentType: "application/json",
+                data: JSON.stringify({rtsp: request_data}),
+                dataType: "json",
+                success: function(response) {
+                    console.log(response);
+                    if (response.success){
+                        var image = new Image(response.path);
+                        canvas.setAttribute('data-imgsrc', response.path);
+                        canvas.setAttribute('height', response.height);
+                        canvas.setAttribute('width', response.width);
+                        var context = canvas.getContext("2d");
+                        var img = new Image();
+                        img.src = response.path;
+                        img.onload = function() {
+                            context.drawImage(img, 0, 0);
+                        };
+                    }
+                    else{
+                        var image = new Image(response);
+                        canvas.setAttribute('data-imgsrc', response.path);
+                        canvas.width = canvas.width;
+                        var context = canvas.getContext("2d");
+                        var img = new Image();
+                        img.src = response.path;
+                        img.onload = function() {
+                            context.drawImage(img, 0, 0);
+                        };
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        // this function will put the value of the current slider in the log. Helpful for devs to adjust threshold
+        function sliderOnChange(item){
+            id = $(item).attr("id")
+            text_id = id.concat("_text")
+            document.getElementById(text_id).innerHTML=document.getElementById(id).value;
         }
     </script>
 
@@ -187,11 +323,23 @@
     .selected {
         background-color: #ebebeb;
     }
+
+    .modal-backdrop {
+        z-index: 100000 !important;
+    }
+
+    .modal {
+        z-index: 100001 !important;
+    }
+
+    .modal-lg {
+        max-width: 80% !important;
+    }
     </style>
 
 </head>
 
-<body class="signup-page">
+<body class="signup-page" onload="clear_canvas(0)">
     <nav class="navbar navbar-expand-sm fixed-top bg-white">
         <div class="navbar-translate" style="height: 80px;">
             <a class="navbar-brand" href="http://www.deepsightlabs.com" target="_blank" title="DeepSight AI Labs" data-placement="bottom">
@@ -225,27 +373,35 @@
                             <p>Add Camera</p>
                         </a>
                     </li>
-                </ul>
-                <ul class="navbar-nav mr-auto">
+                    {% if show_user_button %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/home">
-                            <i class="fa fa-file-alt"></i>
-                            <p>License Status</p>
+                        <a class="nav-link top-bar-link" href="/user">
+                            <i class="fa fa-users"></i>
+                            <p>User</p>
                         </a>
                     </li>
-                    <!--<li class="nav-item dropdown">-->
-                        <!--<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">-->
-                            <!--<p>Background</p>-->
-                        <!--</a>-->
-                        <!--<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">-->
-                            <!--<a class="dropdown-item" href="/background/bank/add_camera">Bank</a>-->
-                            <!--<a class="dropdown-item" href="/background/hospital/add_camera">Hospital</a>-->
-                            <!--<a class="dropdown-item" href="/background/insurance/add_camera">Insurance</a>-->
-                            <!--<a class="dropdown-item" href="/background/pixel/add_camera">Pixel</a>-->
-                            <!--<a class="dropdown-item" href="/background/retail/add_camera">Retail</a>-->
-                        <!--</div>-->
-                    <!--</li>-->
+                    {% endif %}
                 </ul>
+<!--                <ul class="navbar-nav mr-auto">-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link" href="/home">-->
+<!--                            <i class="fa fa-file-alt"></i>-->
+<!--                            <p>License Status</p>-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                    &lt;!&ndash;<li class="nav-item dropdown">&ndash;&gt;-->
+<!--                        &lt;!&ndash;<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown">&ndash;&gt;-->
+<!--                            &lt;!&ndash;<p>Background</p>&ndash;&gt;-->
+<!--                        &lt;!&ndash;</a>&ndash;&gt;-->
+<!--                        &lt;!&ndash;<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/bank/add_camera">Bank</a>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/hospital/add_camera">Hospital</a>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/insurance/add_camera">Insurance</a>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/pixel/add_camera">Pixel</a>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<a class="dropdown-item" href="/background/retail/add_camera">Retail</a>&ndash;&gt;-->
+<!--                        &lt;!&ndash;</div>&ndash;&gt;-->
+<!--                    &lt;!&ndash;</li>&ndash;&gt;-->
+<!--                </ul>-->
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <form class="form" action="/logout">
@@ -303,6 +459,128 @@
                                                 <div class="col-md-12 form-group">
                                                     <input value="{{ rtsp_url }}" id="rtsp_url" name="rtsp_url" type="text" class="form-control" placeholder="Enter Camera Stream URL"
                                                         required>
+                                                </div>
+                                            </div>
+
+                                            <div id="regionModal1" class="modal fade" role="dialog">
+                                                <div class="modal-dialog modal-lg">
+                                                <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-body">
+                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                            <div style="float:left">
+                                                                <canvas id="jPolygon1" name="jPolygon1" width="740" height="416" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, 1)" oncontextmenu="return false;">
+                                                                    Your browser does not support the HTML5 canvas tag.
+                                                                </canvas>
+                                                            </div>
+                                                            <div style="float:left;">
+                                                                <div>
+                                                                    <button type="button" onclick="clear_canvas(1)" >Clear</button>
+                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, 1)" data-dismiss="modal">Copy</button>
+                                                                    <p>Press <strong>Left Click</strong> to draw a point.</p>
+                                                                    <p><strong>CTRL+Click</strong> or <strong>Right Click</strong> to close the polygon.</p>
+                                                                    <p>Click <strong>Copy</strong> to copy the obtained coordinates to the form</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p><strong>Coordinates:</strong></p>
+                                                                    <textarea id="coordinates1" disabled="disabled" style="width:300px; height:100px;"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="regionModal2" class="modal fade" role="dialog">
+                                                <div class="modal-dialog modal-lg">
+                                                <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-body">
+                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                            <div style="float:left">
+                                                                <canvas id="jPolygon2" name="jPolygon2" width="740" height="416" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, 2)" oncontextmenu="return false;">
+                                                                    Your browser does not support the HTML5 canvas tag.
+                                                                </canvas>
+                                                            </div>
+                                                            <div style="float:left;">
+                                                                <div>
+                                                                    <button type="button" onclick="clear_canvas(2)" >Clear</button>
+                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, 2)" data-dismiss="modal">Copy</button>
+                                                                    <p>Press <strong>Left Click</strong> to draw a point.</p>
+                                                                    <p><strong>CTRL+Click</strong> or <strong>Right Click</strong> to close the polygon.</p>
+                                                                    <p>Click <strong>Copy</strong> to copy the obtained coordinates to the form</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p><strong>Coordinates:</strong></p>
+                                                                    <textarea id="coordinates2" disabled="disabled" style="width:300px; height:100px;"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="regionModal3" class="modal fade" role="dialog">
+                                                <div class="modal-dialog modal-lg">
+                                                <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-body">
+                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                            <div style="float:left">
+                                                                <canvas id="jPolygon3" name="jPolygon3" width="740" height="416" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, 3)" oncontextmenu="return false;">
+                                                                    Your browser does not support the HTML5 canvas tag.
+                                                                </canvas>
+                                                            </div>
+                                                            <div style="float:left;">
+                                                                <div>
+                                                                    <button type="button" onclick="clear_canvas(3)" >Clear</button>
+                                                                    <button type="button" onclick="copyRegionCoordinates(this.form, 3)" data-dismiss="modal">Copy</button>
+                                                                    <p>Press <strong>Left Click</strong> to draw a point.</p>
+                                                                    <p><strong>CTRL+Click</strong> or <strong>Right Click</strong> to close the polygon.</p>
+                                                                    <p>Click <strong>Copy</strong> to copy the obtained coordinates to the form</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p><strong>Coordinates:</strong></p>
+                                                                    <textarea id="coordinates3" disabled="disabled" style="width:300px; height:100px;"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="regionModal4" class="modal fade" role="dialog">
+                                                <div class="modal-dialog modal-lg">
+                                                <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-body">
+                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                            <div style="float:left">
+                                                                <canvas id="jPolygon4" name="jPolygon4" width="740" height="416" style="cursor:crosshair" data-imgsrc="/static/img/invalid_rtsp.jpg" onmousedown="point_it(event, 4)" oncontextmenu="return false;">
+                                                                    Your browser does not support the HTML5 canvas tag.
+                                                                </canvas>
+                                                            </div>
+                                                            <div style="float:left;">
+                                                                <div>
+                                                                    <button type="button" onclick="clear_canvas(4)" >Clear</button>
+                                                                    <button type="button" onclick="copySocialDistancingCoordinates(this.form, 4)" data-dismiss="modal">Copy</button>
+                                                                    <p>Press <strong>Left Click</strong> to draw a point.</p>
+                                                                    <p>Please select 4 points of the calibration object.
+                                                                        If the object is rectangular, select the points in this order:
+                                                                        <ol>
+                                                                            <li>Select any 1 corner point</li>
+                                                                            <li>Next, select a point adjacent to the first point on the longer edge of the rectangle</li>
+                                                                            <li>Select a point adjacent to the 2nd point</li>
+                                                                            <li>Select the final remaining point</li>
+                                                                        </ol>
+                                                                    </p>
+                                                                    <p><strong>CTRL+Click</strong> or <strong>Right Click</strong> to close the rectangle.</p>
+                                                                    <p>Click <strong>Copy</strong> to copy the obtained coordinates to the form</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p><strong>Coordinates:</strong></p>
+                                                                    <textarea id="coordinates4" disabled="disabled" style="width:300px; height:100px;"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -608,18 +886,27 @@
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row">
-                                                                                    <div class = "col-md-12 form-group">
+                                                                                    <div class = "col-md-10 form-group">
                                                                                         <input value="{{ details.regions_list[0] }}" id = "crowd_region_1" name="crowd_region_1" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
                                                                                     </div>
-                                                                                </div>
-                                                                                <div class="row">
-                                                                                    <div class = "col-md-12 form-group">
-                                                                                        <input value="{{ details.regions_list[1] }}" id = "crowd_region_2" name="crowd_region_2" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    <div class="col-md-2 form-group">
+                                                                                        <button id="modalBtn1" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal1" onclick="request_frame(1); clear_canvas(1);">Select Region</button>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row">
-                                                                                    <div class = "col-md-12 form-group">
+                                                                                    <div class = "col-md-10 form-group">
+                                                                                        <input value="{{ details.regions_list[1] }}" id = "crowd_region_2" name="crowd_region_2" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    </div>
+                                                                                    <div class="col-md-2 form-group">
+                                                                                        <button id="modalBtn2" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal2" onclick="request_frame(2); clear_canvas(2);">Select Region</button>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-10 form-group">
                                                                                         <input value="{{ details.regions_list[2] }}" id = "crowd_region_3" name="crowd_region_3" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    </div>
+                                                                                    <div class="col-md-2 form-group">
+                                                                                        <button id="modalBtn3" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal3" onclick="request_frame(3); clear_canvas(3);">Select Region</button>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row">
@@ -735,7 +1022,9 @@
                                                             <div class="tab-pane active" id="{{ object }}_tab" role="tabpanel">
                                                                 <div class="row">
                                                                     {% for alert, list in details %}
-                                                                        {% if alert == "sound_alarm" %}
+                                                                        {% if alert == "sound_alarm" or alert == "intrusion_all_details" %}
+
+                                                                        {% elif alert == "sensitivity" %}
 
                                                                         {% elif alert == "email_list" %}
                                                                             <div class="col-md-12 form-group">
@@ -743,19 +1032,104 @@
                                                                             </div>
                                                                         {% else %}
                                                                             <div class="col-md-12 form-group">
-                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]{10})(,(\+[0-9]{1,3}-[0-9]{10}))*$">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
                                                                             </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sensitivity" %}
+                                                                                <div class = "col-md-2 form-group">
+                                                                                    <b>Sensitivity:</b>
+                                                                                    <span id="{{ object }}_sensitivity_text">
+                                                                                     {{ list }}
+                                                                                     </span>
+                                                                                </div>
+                                                                                <div class = "col-md-10 form-group">
+                                                                                     <div class="slidecontainer">
+                                                                                         High&nbsp;&nbsp;
+                                                                                        <input type="range" min="0" max="100" value="{{ list }}" class="slider" id="{{ object }}_sensitivity" name="{{ object }}_sensitivity" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                                         &nbsp;&nbsp;Low
+                                                                                     </div>
+
+                                                                                </div>
                                                                         {% endif %}
                                                                     {% endfor %}
 
                                                                     <div class="col-md-6 form-group">
                                                                         <input value="{{ start_time }}" id="intrusion_start_time" name="intrusion_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-                                                                            type="text" class="form-control" placeholder="Enter Intrusion Start Time (24hrs HH:MM)">
+                                                                            type="text" class="form-control" placeholder="Default Start Time (24hrs HH:MM)">
                                                                     </div>
                                                                     <div class="col-md-6 form-group">
                                                                         <input value="{{ end_time }}" id="intrusion_end_time" name="intrusion_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-                                                                            type="text" class="form-control" placeholder="Enter Intrusion End Time (24hrs HH:MM)">
+                                                                            type="text" class="form-control" placeholder="Default End Time (24hrs HH:MM)">
                                                                     </div>
+                                                                    {% if advanced_intrusion_timings %}
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "intrusion_all_details" %}
+                                                                            <div class="col-md-6 form-group">
+                                                                                <label for="intrusion_holiday_start_time">Holiday Timings: Start Time</label>
+                                                                                <input value="{{ list['holiday_start_time'] }}" id="intrusion_holiday_start_time" name="intrusion_holiday_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                                    class="form-control" placeholder="Holiday Start Time (24hrs HH:MM)">
+                                                                            </div>
+                                                                            <div class="col-md-6 form-group">
+                                                                                <label for="intrusion_holiday_end_time">End Time</label>
+                                                                                <input value="{{ list.holiday_end_time }}" id="intrusion_holiday_end_time" name="intrusion_holiday_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                                    class="form-control" placeholder="Holiday End Time (24hrs HH:MM)">
+                                                                            </div>
+                                                                            <div class="col-md-6 form-group">
+                                                                                <label for="intrusion_half_day_start_time">Half Day Timings: Start Time</label>
+                                                                                <input value="{{ list.half_day_start_time }}" id="intrusion_half_day_start_time" name="intrusion_half_day_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                                    class="form-control" placeholder="Half Day Start Time (24hrs HH:MM)">
+                                                                            </div>
+                                                                            <div class="col-md-6 form-group">
+                                                                                <label for="intrusion_half_day_end_time">End Time</label>
+                                                                                <input value="{{ list.half_day_end_time }}" id="intrusion_half_day_end_time" name="intrusion_half_day_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                                    class="form-control" placeholder="Half Day End Time (24hrs HH:MM)">
+                                                                            </div>
+                                                                            <div class="col-md-12 form-group">
+                                                                                <label>
+                                                                                    Holidays
+                                                                                </label>
+                                                                                <div class="row">
+                                                                                    {% for day in ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] %}
+                                                                                    <div class="form-check">
+                                                                                        <label class="form-check-label">
+                                                                                            <input id="{{ day }}_holiday" name="{{ day }}_holiday" class="form-check-input" type="checkbox" onclick="holidaySelector(this.form, '_holiday', '{{ day }}')" {{ 'checked' if list['holiday_days_dict'][day] == 1 }} >
+                                                                                            <span class="form-check-sign"></span>
+                                                                                            {{ day|capitalize }}
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    {% endfor %}
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-12 form-group">
+                                                                                <label>
+                                                                                    Half Days
+                                                                                </label>
+                                                                                <div class="row">
+                                                                                    {% for day in ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] %}
+                                                                                    <div class="form-check">
+                                                                                        <label class="form-check-label">
+                                                                                            <input id="{{ day }}_half_day" name="{{ day }}_half_day" class="form-check-input" type="checkbox" onclick="holidaySelector(this.form, '_half_day', '{{ day }}')" {{ 'checked' if list['half_day_days_dict'][day] == 1 }} >
+                                                                                            <span class="form-check-sign"></span>
+                                                                                            {{ day|capitalize }}
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    {% endfor %}
+                                                                                </div>
+                                                                                <div class="form-group" style="padding-top:15px;">
+                                                                                    <label for="holiday_list">
+                                                                                        <a data-toggle="tooltip" data-placement="right" title="Format:DD/MM,DD/MM,DD/MM">
+                                                                                            Holiday List
+                                                                                        </a>
+                                                                                    </label>
+                                                                                    <textarea id="intrusion_holiday_list" name="intrusion_holiday_list" class="form-control" rows="5">{{ list.holiday_date_list }}</textarea>
+                                                                                </div>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    {% endif %}
                                                                     {% for alert, list in details %}
                                                                         {% if alert == "sound_alarm" %}
                                                                             <div class="form-check">
@@ -776,11 +1150,14 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            {% else %}
+
+                                                            {% elif object == "loitering" %}
                                                             <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
                                                                 <div class="row">
                                                                     {% for alert, list in details %}
-                                                                        {% if alert == "sound_alarm" %}
+                                                                        {% if alert == "sound_alarm" or alert == "intrusion_all_details"  or alert == 'loitering_all_details' %}
+
+                                                                        {% elif alert == "sensitivity" %}
 
                                                                         {% elif alert == "email_list" %}
                                                                             <div class="col-md-12 form-group">
@@ -788,19 +1165,94 @@
                                                                             </div>
                                                                         {% else %}
                                                                             <div class="col-md-12 form-group">
-                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]{10})(,(\+[0-9]{1,3}-[0-9]{10}))*$">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
                                                                             </div>
                                                                         {% endif %}
                                                                     {% endfor %}
 
-                                                                    <div class="col-md-6 form-group">
-                                                                        <input value="{{ start_time }}" id="{{ object }}_start_time" name="{{ object }}_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-                                                                            type="text" class="form-control" placeholder="Enter Intrusion Start Time (24hrs HH:MM)"  style="visibility: hidden;">
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "loitering_all_details" %}
+                                                                        <div class = "col-md-2 form-group">
+                                                                            <b>Loitering Time Limit (Minutes):</b>
+                                                                            <span id="{{ object }}_time_limit_text">
+                                                                                {{ list.loitering_time_limit }}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class = "col-md-10 form-group">
+                                                                                <input type="range" id="{{ object }}_time_limit" name="{{ object }}_time_limit" min="1" max="10" value='{{ list.loitering_time_limit }}' class="slider" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                        </div>
+                                                                        <div class="col-md-6 form-group">
+                                                                            <input value="{{ list.start_time }}" id="loitering_start_time" name="loitering_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                                class="form-control" placeholder="Default Start Time (24hrs HH:MM)">
+                                                                        </div>
+
+                                                                        <div class="col-md-6 form-group">
+                                                                            <input value="{{ list.end_time }}" id="loitering_end_time" name="loitering_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" type="text"
+                                                                                class="form-control" placeholder="Default End Time (24hrs HH:MM)">
+                                                                        </div>
+
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label">
+                                                                                    <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
+                                                                                    <span class="form-check-sign"></span>
+                                                                                        {{ object.split('_') | join(' ') | title }} Sound Alarm
+                                                                                </label>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                            Copy data to all objects
+                                                                        </label>
                                                                     </div>
-                                                                    <div class="col-md-6 form-group">
-                                                                        <input value="{{ end_time }}" id="{{ object }}_end_time" name="{{ object }}_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-                                                                            type="text" class="form-control" placeholder="Enter Intrusion End Time (24hrs HH:MM)"  style="visibility: hidden;">
-                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {% elif object == "tamper" %}
+                                                            <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                                <div class="row">
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+
+                                                                        {% elif alert == "sensitivity" %}
+
+                                                                        {% elif alert == "email_list" %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sensitivity" %}
+                                                                        <div class = "col-md-12 form-group">
+                                                                            <label class="radio-inline radio-label-text">
+                                                                                <b>Sensitivity:</b>
+                                                                            </label>
+                                                                            <label class="radio-inline radio-label-text">
+                                                                                <input type="radio" name="tamper_sensitivity" id="radio_tamper_low" value=0  {{ 'checked' if list == "0" }}>
+                                                                                Low
+                                                                            </label>
+                                                                            <label class="radio-inline radio-label-text">
+                                                                                <input type="radio" name="tamper_sensitivity" id="radio_tamper_normal" value=1 {{ 'checked' if list == "1" }}>
+                                                                                Normal
+                                                                            </label>
+                                                                            <label class="radio-inline radio-label-text">
+                                                                                <input type="radio" name="tamper_sensitivity" id="radio_tamper_high" value=2  {{ 'checked' if list == "2" }}>
+                                                                                High
+                                                                            </label>
+                                                                        </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
 
                                                                     {% for alert, list in details %}
                                                                         {% if alert == "sound_alarm" %}
@@ -809,7 +1261,165 @@
                                                                                     <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
                                                                                     <span class="form-check-sign"></span>
                                                                                     {{ object.split('_') | join(' ') | title }}  Sound Alarm
-                                                                                </label>    
+                                                                                </label>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                            Copy data to all objects
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {% elif object == "social_distancing" %}
+                                                            <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                                <div class="row">
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+
+                                                                        {% elif alert == "sensitivity" %}
+
+                                                                        {% elif alert == "sd_calibration_box_coordinates" or alert == "sd_adjustment" or alert == "sd_dimensions" or alert == "sd_person_sensitivity" %}
+
+                                                                        {% elif alert == "email_list" %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sensitivity" %}
+                                                                            {% if object != 'camera_fault' %}
+                                                                                <div class = "col-md-2 form-group">
+                                                                                    <b>Minimum Distance (in cm):</b>
+                                                                                    <span id="{{ object }}_sensitivity_text">
+                                                                                     {{ list }}
+                                                                                     </span>
+                                                                                </div>
+                                                                                <div class = "col-md-10 form-group">
+                                                                                     <div class="slidecontainer">
+                                                                                        <input type="range" min="0" max="500" value="{{ list }}" step="50" class="slider" id="{{ object }}_sensitivity" name="{{ object }}_sensitivity" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                                     </div>
+                                                                                </div>
+                                                                            {% endif %}
+                                                                        {% elif alert == "sd_person_sensitivity" %}
+                                                                        <div class = "col-md-2 form-group">
+                                                                            <b>Sensitivity:</b>
+                                                                            <span id="{{ object }}_person_sensitivity_text">
+                                                                                {{ list }}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class = "col-md-10 form-group">
+                                                                                <input value = "{{ list }}" type="range" id="{{ object }}_person_sensitivity" name="{{ object }}_person_sensitivity" step="1" min="0" max="100" class="slider" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                        </div>
+                                                                        {% elif alert == "sd_dimensions" %}
+                                                                        <div class = "col-md-6 form-group">
+                                                                            <input value = "{{ list }}" id = "social_distancing_dimensions" name="social_distancing_dimensions" type="text" class="form-control" placeholder="Calibration Object Dimensions in cm length,breadth">
+                                                                        </div>
+                                                                        {% elif alert == "sd_adjustment" %}
+                                                                        <div class = "col-md-6 form-group">
+                                                                            <input value = "{{ list }}" id = "social_distancing_adjustment" name="social_distancing_adjustment" type="text" class="form-control" placeholder="Calibration Adjustment Factor">
+                                                                        </div>
+                                                                        {% elif alert == "sd_calibration_box_coordinates" %}
+                                                                        <div class = "col-md-10 form-group">
+                                                                            <input value="{{ list }}" id = "social_distancing_calibration" name="social_distancing_calibration" type="text" class="form-control" placeholder="Enter Calibration Coordinates a,b;c,d;e,f;g,h">
+                                                                        </div>
+                                                                        <div class="col-md-2 form-group">
+                                                                            <button id="modalBtn4" style="margin-top:0px;" type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#regionModal4" onclick="request_frame(4); clear_canvas(4);">Calibrate</button>
+                                                                        </div>
+
+
+                                                                        {% endif %}
+
+                                                                    {% endfor %}
+
+<!--                                                                    <div class="col-md-6 form-group">-->
+<!--                                                                        <input value="{{ start_time }}" id="{{ object }}_start_time" name="{{ object }}_start_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"-->
+<!--                                                                            type="text" class="form-control" placeholder="Enter Intrusion Start Time (24hrs HH:MM)"  style="visibility: hidden;">-->
+<!--                                                                    </div>-->
+<!--                                                                    <div class="col-md-6 form-group">-->
+<!--                                                                        <input value="{{ end_time }}" id="{{ object }}_end_time" name="{{ object }}_end_time" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"-->
+<!--                                                                            type="text" class="form-control" placeholder="Enter Intrusion End Time (24hrs HH:MM)"  style="visibility: hidden;">-->
+<!--                                                                    </div>-->
+
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label">
+                                                                                    <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
+                                                                                    <span class="form-check-sign"></span>
+                                                                                    {{ object.split('_') | join(' ') | title }}  Sound Alarm
+                                                                                </label>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input id="{{ object }}_copy" name="{{ object }}_copy" class="form-check-input" type="checkbox" onclick="FillAllLists(this.form, '{{ object }}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                            Copy data to all objects
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            {% else %}
+                                                            <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                                <div class="row">
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+
+                                                                        {% elif alert == "sensitivity" %}
+
+                                                                        {% elif alert == "email_list" %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <div class="col-md-12 form-group">
+                                                                                <input value="{{ list }}" id="{{ object }}_{{ alert }}" name="{{ object }}_{{ alert }}" type="text" class="form-control" placeholder="Enter {{ object.split('_') | join(' ') | title }} {{ alert.split('_') | join(' ') | title }}" pattern="^(\+[0-9]{1,3}-[0-9]+)(,(\+[0-9]{1,3}-[0-9]+))*$">
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sensitivity" %}
+                                                                            {% if object != 'camera_fault' %}
+                                                                                <div class = "col-md-2 form-group">
+                                                                                    <b>Sensitivity:</b>
+                                                                                    <span id="{{ object }}_sensitivity_text">
+                                                                                     {{ list }}
+                                                                                     </span>
+                                                                                </div>
+                                                                                <div class = "col-md-10 form-group">
+                                                                                     <div class="slidecontainer">
+                                                                                        High&nbsp;&nbsp;
+                                                                                        <input type="range" min="0" max="100" value="{{ list }}" class="slider" id="{{ object }}_sensitivity" name="{{ object }}_sensitivity" style="width:50%;" onchange="sliderOnChange(this)">
+                                                                                         &nbsp;&nbsp;Low
+                                                                                     </div>
+                                                                                </div>
+                                                                            {% endif %}
+                                                                        {% endif %}
+                                                                    {% endfor %}
+
+                                                                    {% for alert, list in details %}
+                                                                        {% if alert == "sound_alarm" %}
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label">
+                                                                                    <input id="{{ object }}_sound_alarm" name="{{ object }}_sound_alarm" class="form-check-input" type="checkbox" {{ 'checked' if list == 1 }}>
+                                                                                    <span class="form-check-sign"></span>
+                                                                                    {{ object.split('_') | join(' ') | title }}  Sound Alarm
+                                                                                </label>
                                                                             </div>
                                                                         {% endif %}
                                                                     {% endfor %}
@@ -875,5 +1485,6 @@
 <script src="/static/js/bootstrap-selectpicker.js" type="text/javascript"></script>
 <script src="/static/js/jasny-bootstrap.min.js"></script>
 <script src="/static/js/main.js"></script>
+<script type="text/javascript" src="/static/js/jPolygon.js"></script>
 
 </html>
