@@ -103,10 +103,20 @@
 
         }
 
+        function alprEnableOnChange() {
+            if ($("#alpr_dimension_enable").is(':checked')) {
+                $("#alpr_region_1").attr('required', '');
+            }
+            else {
+                $("#alpr_region_1").removeAttr('required');
+            }
+        }
+
+
         function FillAllLists(f, currentObject, objects) {
             if (f[currentObject.concat("_copy")].checked == true) {
                 for (key in objects) {
-                    if (objects[key] == currentObject || objects[key] == "crowd_counting" && objects[key][0] != "crowd_counting") {}
+                    if (objects[key] == currentObject || objects[key] == "crowd_counting" && objects[key][0] != "crowd_counting" || objects[key] == "alpr") {}
                     else {
                         f[objects[key].concat("_email_list")].value = f[currentObject.concat("_email_list")].value;
                         f[objects[key].concat("_sms_list")].value = f[currentObject.concat("_sms_list")].value;
@@ -121,7 +131,7 @@
             }
             else {
                 for (key in objects) {
-                    if (objects[key] == currentObject || objects[key] == "crowd_counting" && objects[key][0] != "crowd_counting") {}
+                    if (objects[key] == currentObject || objects[key] == "crowd_counting" && objects[key][0] != "crowd_counting" || objects[key] == "alpr") {}
                     else {
                         f[objects[key].concat("_email_list")].value = "";
                         f[objects[key].concat("_sms_list")].value = "";
@@ -589,7 +599,11 @@
                                                     <select class="selectpicker show-tick" name="object_detect" id="object_detect" data-style="btn btn-default btn-round"
                                                         multiple="" title="Object Detection" onchange="objectSelectOnChange()" >
                                                         {% for object in objects %}
+                                                        {% if object == 'alpr' %}
+                                                        <option value="{{ object }}" style="font-size:18px; font-weight: bold;">ANPR</option>
+                                                        {% else %}
                                                         <option value="{{ object }}" style="font-size:18px; font-weight: bold;">{{ object.split('_') | join(' ') | title }}</option>
+                                                        {% endif %}
                                                         {% endfor %}
                                                     </select>
                                                 </div>
@@ -616,6 +630,12 @@
                                                             <li class="nav-item" style="padding-bottom: 1vh">
                                                                 <a class="nav-link active nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist" onclick="Validate(this.form)">
                                                                     {{ object.split('_') | join(' ') | title }}
+                                                                </a>
+                                                            </li>
+                                                            {% elif object == "alpr" %}
+                                                            <li class="nav-item" style="padding-bottom: 1vh">
+                                                                <a class="nav-link nav-pill-text" data-toggle="tab" href="#{{ object }}_tab" role="tablist" onclick="Validate(this.form)">
+                                                                    ANPR
                                                                 </a>
                                                             </li>
                                                             {% else %}
@@ -1000,6 +1020,106 @@
                                                              </div>
                                                         </div>
 
+                                                        {% elif object == "alpr" %}
+                                                        <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
+                                                             <div class="container">
+                                                                <div class="row">
+                                                                    <div class="col-md-2">
+                                                                        <ul class="nav nav-tabs nav-stacked" role="tablist">
+                                                                            <li class="nav-item active">
+                                                                                <a class="nav-link active nav-pill-text" data-toggle="pill" href="#alpr_main_tab" role="tablist">
+                                                                                    ANPR
+                                                                                </a>
+                                                                            </li>
+                                                                             <li class="nav-item">
+                                                                                <a class="nav-link nav-pill-text" data-toggle="pill" href="#alpr_dimensions_tab" role="tablist">
+                                                                                    Region Dimensions
+                                                                                </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                    <div class="col-md-10">
+                                                                        <div class="tab-content gallery">
+                                                                            <div class="tab-pane active" id="alpr_main_tab" role="tabpanel">
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input id = "alpr_time" name="alpr_time" type="text" class="form-control" placeholder="Report Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input id = "alpr_out_time" name="alpr_out_time" type="text" class="form-control" placeholder="Report Frequency (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" style="visibility: hidden;">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input id = "alpr_email_list" name="alpr_email_list" type="text" class="form-control" placeholder="Enter Email List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <b>Camera Role</b>
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="alpr_camera_role" id="radio_entry" value="entry" checked>
+                                                                                            Entry
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="alpr_camera_role" id="radio_exit" value="exit">
+                                                                                            Exit
+                                                                                        </label>
+                                                                                        <label class="radio-inline radio-label-text">
+                                                                                            <input type="radio" name="alpr_camera_role" id="radio_entry_exit" value="entryexit">
+                                                                                            Both Entry and Exit
+                                                                                        </label>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                            </div>
+                                                                            <div class="tab-pane" id="alpr_dimensions_tab" role="tabpanel">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-2 form-group">
+                                                                                        <label class="btn btn-warning form-control" style="margin-top:0px; font-size: 15px;">
+                                                                                            <input id="alpr_dimension_enable" name="alpr_dimension_enable" class="form-check-input" type="checkbox" onchange="alprEnableOnChange()">
+                                                                                            <span class="form-check-sign"></span>
+                                                                                            Enabled
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class = "col-md-4 form-group">
+                                                                                        <input type="text" class="form-control" placeholder="Report Time (24hrs HH:MM)" pattern="^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" style="visibility: hidden;">
+                                                                                    </div>
+                                                                                    <div class = "col-md-6 form-group">
+                                                                                        <input type="text" class="form-control" placeholder="Enter Email List" pattern="^(\s?[^\s,]+@[^\s,]+\.[^\s,]+\s?,)*(\s?[^\s,]+@[^\s,]+\.[^\s,]+)$" style="visibility: hidden;">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input id = "alpr_region_1" name="alpr_region_1" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input id = "alpr_region_2" name="alpr_region_2" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input id = "alpr_region_3" name="alpr_region_3" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class = "col-md-12 form-group">
+                                                                                        <input id = "alpr_region_4" name="alpr_region_4" type="text" class="form-control" placeholder="Enter Region Coordinates a,b;c,d;e,f;g,h" style="visibility: hidden;">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                             </div>
+                                                        </div>
+
                                                         {% elif object == "tamper" %}
                                                         <div class="tab-pane" id="{{ object }}_tab" role="tabpanel">
                                                             <div class="row">
@@ -1077,7 +1197,7 @@
                                                                 <div class = "col-md-2 form-group">
                                                                     <b>Loitering Time Limit (Minutes):</b>
                                                                     <span id="{{ object }}_time_limit_text">
-                                                                        5                                 
+                                                                        5
                                                                     </span>
                                                                 </div>
                                                                 <div class = "col-md-10 form-group">
@@ -1193,7 +1313,7 @@
                                                                 <div class = "col-md-2 form-group">
                                                                     <b>Sensitivity:</b>
                                                                     <span id="{{ object }}_sensitivity_text">
-                                                                        {{ default_sensitivity_dictionary[object] }}                                                                                     
+                                                                        {{ default_sensitivity_dictionary[object] }}
                                                                     </span>
                                                                 </div>
                                                                 <div class = "col-md-10 form-group">

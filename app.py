@@ -226,7 +226,11 @@ def zip_data(data, objects_allowed, is_list_page=False):
                 for i in range(len(alert_dictionary['regions_list'])):
                     alert_dictionary['regions_list'][i] = dimensions_to_string(alert_dictionary['regions_list'][i])
                 obj_alerts_list.append((object_allowed, alert_dictionary))
-                pass
+            elif object_allowed == "alpr":
+                alert_dictionary['email_list'] = list_to_string(alert_dictionary['email_list'], is_list_page)
+                for i in range(len(alert_dictionary['regions_list'])):
+                    alert_dictionary['regions_list'][i] = dimensions_to_string(alert_dictionary['regions_list'][i])
+                obj_alerts_list.append((object_allowed, alert_dictionary))
             else:
                 details = []
                 list_for_this_alert = list_to_string(alert_dictionary['email_list'], is_list_page)
@@ -347,6 +351,31 @@ def form_to_json(form):
             if form.getlist('crowd_dimension_enable'):
                 region_enable['status'] = 'True'
             object_dict['region_enable'] = region_enable
+
+        elif object_allowed == "alpr":
+            object_dict = collections.OrderedDict()
+
+            alert_time = form['alpr_time']
+            object_dict['alert_time'] = alert_time
+
+            object_dict['out_time'] = form['alpr_out_time']
+
+            email_list = [i.strip() for i in form['alpr_email_list'].split(',')]
+            object_dict['email_list'] = email_list
+
+            regions_list = [[i.strip() for i in form['alpr_region_1'].split(';')],
+                            [i.strip() for i in form['alpr_region_2'].split(';')],
+                            [i.strip() for i in form['alpr_region_3'].split(';')]]
+            for i in range(len(regions_list)):
+                for j in range(len(regions_list[i])):
+                    regions_list[i][j] = (regions_list[i][j].split(','))
+            object_dict['regions_list'] = regions_list
+
+            region_enable = {'status': 'False'}
+            if form.getlist('alpr_dimension_enable'):
+                region_enable['status'] = 'True'
+            object_dict['region_enable'] = region_enable
+            object_dict['camera_role'] = form.get('alpr_camera_role')
 
         else:
             object_dict = collections.OrderedDict()
@@ -573,6 +602,8 @@ def view_page():
             obj_pretty = " ".join(obj_list)
             if obj == "crowd_counting":
                 object_wise_sound_dict[str(obj_pretty)] = 0
+            elif obj == "alpr":
+                object_wise_sound_dict[str(obj_pretty)] = 0
             elif obj == "social_distancing":
                 object_wise_sound_dict['Breach Of Social Distancing'] = obj_alerts[obj]['sound_alarm']
             else:
@@ -664,7 +695,7 @@ def send_alarm_file():
     '''Return alarm.mp3 file'''
     return send_file('alarm.mp3')
 
-  
+
 @app.route('/updateFrame', methods=['POST', 'GET'])
 def update_frame():
     """Takes post request from add/edit page with rtsp link and updates the camera frame image"""
@@ -714,7 +745,7 @@ def update_frame():
         return_response['height'] = height
     return json.dumps(return_response)
 
-  
+
 @app.route('/deleteCamera/<camera_id>')
 @license_required
 @login_required
