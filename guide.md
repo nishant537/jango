@@ -8,6 +8,7 @@
 - If you do not see a login screen at `http://godeep/`, and see some other page indicating an error, contact the system admininstrator
 
 ## Home Page
+
 - After login you will be redirected to the default home page, which contains a reference table for cameras provisioned in the Supersecure Platform with their names and the arming status of the features. In a fresh install the page will be empty
 - The navigation bar at the top allows use of the add camera and view camera pages, explained in the next sections.
 
