@@ -5,17 +5,24 @@
 
 ## Login
 ![image](https://user-images.githubusercontent.com/28618452/104735253-686aa680-5767-11eb-9681-0dcebe6e2e87.png)
+
 - Login to the GUI using the provided username password, the default username is `admin` and the default password is `adminpass`
+
 - If you do not see a login screen at `http://godeep/`, and see some other page indicating an error, contact the system admininstrator
 
 ## Home Page
 ![image](https://user-images.githubusercontent.com/28618452/104733590-ec6f5f00-5764-11eb-869d-ddc7d7bbce8a.png)
+
 - After login you will be redirected to the default home page, which contains a reference table for cameras provisioned in the Supersecure Platform with their names and the arming status of the features. In a fresh install the page will be empty
+
 - The navigation bar at the top allows use of the add camera and view camera pages, explained in the next sections.
 
 ## Add Camera Page
-![image](https://user-images.githubusercontent.com/28618452/104733764-30626400-5765-11eb-8d38-11d0d99219ce.png)
+
+![image](https://user-images.githubusercontent.com/28618452/104733764-30626400-5765-11eb-8d38-11d0d99219ce.png
+
 - Click on the `Add` button on the navigation bar to start adding cameras.
+
 - Add Camea Page consists of a form, where specific details are required for the camera itself, the status of the different features, and the specific details for each of those features
 
   * ### Components of add camera page:
@@ -84,17 +91,29 @@
     * To cancel the addition of camera at any point, click cancel. The values filled in the form will be lost. You will be redirected to the Home page
     
 ## Edit Page/Delete - Actions column
+
 ![image](https://user-images.githubusercontent.com/28618452/104735138-3e18e900-5767-11eb-852a-f9674783f6fd.png)
+
 - On the home page, click on the pencil button on the respective row to edit a camera. The edit form is similar to the add page, see Add Page section for more details.
+
 - On the home page, click on the red cross button on the respective row to delete a camera. WARNING: This will delete all camera details irrevocably
 
 ## View Page
+
 ![image](https://user-images.githubusercontent.com/28618452/104735041-1c1f6680-5767-11eb-9d53-af8817b562c6.png)
+
 - This page is best used with Google Chrome
+
 - This page can be used to monitor all the provisioned cameras for alerts and live feed. 
+
 - The individual cards will show text in red highlight when any alert is triggered for that camera.
+
 - On the top, you can All to see all cameras, or select a floor to see the cameras only from that floor.
+
 - Click on the play button on the bottom of each card to play the live video feed. NOTE: VXG media player extension must be installed first. [Get the extension here](https://chrome.google.com/webstore/detail/vxg-media-player/hncknjnnbahamgpjoafdebabmoamcnni?hl=en)
+
 - This page needs to be kept open in a web browser to received sound alarm.
+
 - It is recommended that you keep this page open in only one tab/window and keep live video off unless required to conserve system resources and bandwidth
+
   
