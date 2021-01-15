@@ -68,7 +68,7 @@
     ![Screenshot from 2021-01-15 19-13-19](https://user-images.githubusercontent.com/28618452/104734212-e8900c80-5765-11eb-803b-e11b96bb4eda.png)
       * Minimum Distance: Minimum distance between two persons in centimeters. Alert will be raised for distancing below this limit
       * Calibration object dimensions: Length,Breadth in centimeters. Values for an A4 sheet are pre-filled
-      * Calibration Adjustment Factor: Factor to compensate for slight overestimation/underestimation in distances between persons. If distance betweeen persons is being overestimated, keep this factor below 1 and if it is being overestimated, keep it above 1. As a general rule, this factor should be used for quick fine tuning and as such the factor should be kept between 0.8 and 1.2. 
+      * Calibration Adjustment Factor: Factor to compensate for slight overestimation/underestimation in distances between persons. If distance betweeen persons is being overestimated, keep this factor below 1 and if it is being unerestimated, keep it above 1. As a general rule, this factor should be used for quick fine tuning and as such the factor should be kept between 0.8 and 1.2. 
       * Calibration coordinates: These are filled automatically using the blue "calibrate" button.
       ![calib](https://user-images.githubusercontent.com/28618452/104734963-feea9800-5766-11eb-8ae3-0867012a5a1f.png)
       * First make sure that the Camera streaming URL field is filled, then click on the calibrate button and follow the steps provided in the window that pops up (summarised in the following points)
