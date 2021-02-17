@@ -1,5 +1,5 @@
 # Flask GUI
-Flask implementation of our frontend.
+Flask implementation of our frontend. Serves a GUI to provision and monitor cameras, send http requests to the backend for camera operations and alerts
 
 ## Setup
 To install the dependencies, run the following command, only required once.
