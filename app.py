@@ -11,6 +11,8 @@ import collections  # for ordered dict
 import copy
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, session, flash, jsonify
 
+NO_LOGIN = True
+
 # Initiate Flask
 app = Flask(__name__)
 app.secret_key = 'BhySSMlymg'
@@ -106,6 +108,9 @@ def login_required(func):
         user_id = session.get('username')
         if user_id:
             return func(*args, **kwargs)
+        elif NO_LOGIN:
+        	user_id = 'admin'
+        	return func(*args, **kwargs)
         else:
             return redirect('/login')
 
@@ -516,7 +521,10 @@ def backend_status():
 # Route for handling the login page logic
 @app.route('/')
 def root():
-    return redirect('/login')
+    if NO_LOGIN:
+        return redirect('/view')
+    else:
+        return redirect('/login')
 
 
 @app.route('/login', methods=['GET', 'POST'])
