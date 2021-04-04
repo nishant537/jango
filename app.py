@@ -11,7 +11,6 @@ import collections  # for ordered dict
 import copy
 from flask import Flask, render_template, request, redirect, url_for, Response, send_file, abort, session, flash, jsonify
 
-NO_LOGIN = True
 
 # Initiate Flask
 app = Flask(__name__)
@@ -21,7 +20,12 @@ GUI_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Config file
 config = configparser.ConfigParser()
-config.read_file(open('/var/www/godeep/gui_settings.conf'))
+config.read_file(open('gui_settings.conf'))
+
+# getting NO_LOGIN varaible from guisettings.conf ( to auto open godeep/view page on system reboot without asking for user credentials.)
+NO_LOGIN = config.get('global', 'BACKEND_IP')
+NO_LOGIN == 'True'
+
 
 # GoDeep backend server settings
 BACKEND_IP = config.get('global', 'BACKEND_IP')
@@ -522,7 +526,7 @@ def backend_status():
 @app.route('/')
 def root():
     if NO_LOGIN:
-        return redirect('/view')
+        return redirect('/home')
     else:
         return redirect('/login')
 
